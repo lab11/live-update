@@ -11,7 +11,6 @@
 
 #include "tfm_api.h"
 #include "cmsis_os2.h"
-#include "tfm_integ_test.h"
 #include "tfm_ns_svc.h"
 #include "tfm_ns_lock.h"
 #include "blink.h"
