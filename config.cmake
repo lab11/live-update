@@ -1,123 +1,388 @@
-set(CMAKE_BUILD_TYPE "Debug")
-set(TARGET_PLATFORM "MUSCA_A")
+#-------------------------------------------------------------------------------
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
 
-set(CMSIS_5_DIR "${TFM_ROOT_DIR}/../CMSIS_5")
+# Manually add app build vars
+set(CMAKE_BUILD_TYPE "Debug")
+set(COMPILER GNUARM)
+
+set(TARGET_PLATFORM "MUSCA_A")
 set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/musca_a.cmake")
 
-# Set ARM TF-M options
-set(REGRESSION False)
-set(CORE_TEST False)
-set(PSA_API_TEST False)
+#This file holds information of a specific build configuration of this project.
 
-set(TFM_LVL 1)
+##These variables select how the projects are built. Each project will set
+#various project specific settings (e.g. what files to build, macro
+#definitions) based on these.
+set (REGRESSION False)
+set (CORE_TEST False)
+set (CORE_IPC False)
+set (PSA_API_TEST False)
 
-# Set correct options for Musca-A TFM
-set(BL2 True)
-set(MCUBOOT_NO_SWAP False)
-set(MCUBOOT_RAM_LOADING True)
+# TF-M isolation level: 1..3
+set (TFM_LVL 1)
 
-set(COMPILER "GNUARM")
-
-# Common configuration options (ARM TF-M)
-set(BUILD_CMSIS_CORE OFF)
-set(BUILD_RETARGET OFF)
-set(BUILD_NATIVE_DRIVERS OFF)
-set(BUILD_TIME OFF)
-set(BUILD_STARTUP OFF)
-set(BUILD_TARGET_CFG OFF)
-set(BUILD_TARGET_HARDWARE_KEYS OFF)
-set(BUILD_TARGET_NV_COUNTERS OFF)
-set(BUILD_CMSIS_DRIVERS OFF)
-set(BUILD_UART_STDOUT OFF)
-set(BUILD_FLASH OFF)
-set(BUILD_BOOT_SEED OFF)
-set(BUILD_DEVICE_ID OFF)
-
-# might need to copy and edit this file
-# include to resolve circular dependencies
-include(${PLATFORM_CMAKE_FILE})
-
-include("Common/FindGNUARM")
-include("Common/${GNUARM_MODULE}")
-
-if(NOT DEFINED IMAGE_VERSION)
-    set(IMAGE_VERSION 0.0.0+0)
+if(NOT DEFINED REGRESSION)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: REGRESSION not defined, Include this file from a Config*.cmake")
+elseif(NOT DEFINED CORE_TEST)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: CORE_TEST not defined, Include this file from a Config*.cmake")
+elseif(NOT DEFINED TFM_LVL)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_LVL not defined, Include this file from a Config*.cmake")
 endif()
 
-set(SHARED_FLAGS
-    -fshort-enums
-    -fshort-wchar
-    -funsigned-char 
-    -msoft-float
-    -mcmse
-    --specs=nano.specs
-)
+if(NOT DEFINED COMPILER)
+	message(FATAL_ERROR "ERROR: COMPILER is not set in command line")
+elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUARM"))
+	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
+endif()
+
+#BL2 bootloader (MCUBoot) related settings
+if(NOT DEFINED BL2)
+	set(BL2 True CACHE BOOL "Configure TF-M to use BL2 and enable building BL2")
+endif()
+if (BL2)
+	if (NOT DEFINED MCUBOOT_UPGRADE_STRATEGY)
+        set (MCUBOOT_UPGRADE_STRATEGY "RAM_LOADING" CACHE STRING "Configure BL2 which upgrade strategy to use")
+		set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;NO_SWAP;RAM_LOADING")
+	endif()
+endif()
+
+set(BUILD_CMSIS_CORE Off)
+set(BUILD_RETARGET Off)
+set(BUILD_NATIVE_DRIVERS Off)
+set(BUILD_TIME Off)
+set(BUILD_STARTUP Off)
+set(BUILD_TARGET_CFG Off)
+set(BUILD_TARGET_HARDWARE_KEYS Off)
+set(BUILD_TARGET_NV_COUNTERS Off)
+set(BUILD_CMSIS_DRIVERS Off)
+set(BUILD_UART_STDOUT Off)
+set(BUILD_FLASH Off)
+set(BUILD_BOOT_SEED Off)
+set(BUILD_DEVICE_ID Off)
+if(NOT DEFINED PLATFORM_CMAKE_FILE)
+	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+	message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+else()
+	include(${PLATFORM_CMAKE_FILE})
+endif()
+
+if (NOT DEFINED IMAGE_VERSION)
+	set(IMAGE_VERSION 0.0.0+0)
+endif()
+
+if(${COMPILER} STREQUAL "ARMCLANG")
+	#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
+	#build system will work. A file cmake/Common/CompilerArmClangXY.cmake
+	#must be present with a matching version.
+	include("Common/FindArmClang")
+	include("Common/${ARMCLANG_MODULE}")
+
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -mcmse)
+	##Shared compiler settings.
+	function(config_setting_shared_compiler_flags tgt)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
+	endfunction()
+
+	##Shared linker settings.
+	function(config_setting_shared_linker_flags tgt)
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS --strict --map --symbols --xref --entry=Reset_Handler --info=summarysizes,sizes,totals,unused,veneers)
+	endfunction()
+elseif(${COMPILER} STREQUAL "GNUARM")
+	#Use any GNUARM version found on PATH. Note: Only versions supported by the
+	#build system will work. A file cmake/Common/CompilerGNUARMXY.cmake
+	#must be present with a matching version.
+	include("Common/FindGNUARM")
+	include("Common/${GNUARM_MODULE}")
+
+    set(SHARED_FLAGS
+        -fshort-enums
+        -fshort-wchar
+        -funsigned-char
+        -msoft-float
+        -mcmse
+        --specs=nano.specs
+    )
+
+    set(CFLAGS
+        ${SHARED_FLAGS}
+        -xc
+        -std=c99
+        -Wall -Werror
+        -Wno-format
+        -Wno-return-type
+        -Wno-unused-but-set-variable
+        -ffunction-sections
+        -fdata-sections
+        -fno-strict-aliasing
+        -fno-builtin
+        -ffreestanding
+        -nodefaultlibs
+        -nostdlib
+    )
+
+    set(PIC_CFLAGS
+        -fPIE
+        -msingle-pic-base
+        -mpic-register=r9
+        -mno-pic-data-is-text-relative
+    )
+
+    #--no-wchar-size-warning flag is added because TF-M sources are compiled
+    #with short wchars, however the standard library is compiled with normal
+    #wchar, and this generates linker time warnings. TF-M code does not use
+    #wchar, so the warning can be suppressed.
+    set(LDFLAGS
+        -Xlinker -check-sections
+        -Xlinker -fatal-warnings
+        -Wl,--no-wchar-size-warning
+        --specs=nano.specs
+        -Wl,--print-memory-usage
+        --entry=Reset_Handler
+    )
+
+    set(PIC_LDFLAGS
+        -nostartfiles
+        -pie
+        -Wl,-gc-sections
+    )
+
+	##Shared compiler and linker settings.
+	function(config_setting_shared_compiler_flags tgt)
+        embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS ${CFLAGS})
+	endfunction()
+
+	##Shared linker settings.
+	function(config_setting_shared_linker_flags tgt)
+        embedded_set_target_link_flags(TARGET ${tgt} FLAGS ${LDFLAGS})
+	endfunction()
+endif()
+
+#Create a string from the compile flags list, so that it can be used later
+#in this file to set mbedtls and BL2 flags
 list_to_string(SHARED_FLAGS_STR ${SHARED_FLAGS})
 
-set(CFLAGS
-    ${SHARED_FLAGS}
-    -xc
-    -std=c99
-    -Wall -Werror
-    -Wno-format
-    -Wno-return-type
-    -Wno-unused-but-set-variable
-)
+#Settings which shall be set for all projects the same way based
+# on the variables above.
+set (TFM_PARTITION_TEST_CORE OFF)
+set (TFM_PARTITION_TEST_CORE_IPC OFF)
+set (CORE_TEST_POSITIVE OFF)
+set (CORE_TEST_INTERACTIVE OFF)
+set (REFERENCE_PLATFORM OFF)
+set (TFM_PARTITION_TEST_SECURE_SERVICES OFF)
+set (SERVICES_TEST_ENABLED OFF)
+set (TEST_FRAMEWORK_S  OFF)
+set (TEST_FRAMEWORK_NS OFF)
+set (TFM_PSA_API OFF)
+set (TFM_LEGACY_API ON)
+set (CORE_TEST_IPC OFF)
 
-# --no-wchar-size-warning flag is added because TF-M sources are compiled with
-# short wchars, however the standard library is compiled with normal wchar, and
-# this generates linker time warnings. TF-M code does not use wchar, so the
-# warning can be suppressed.
-set(LDFLAGS
-    -Xlinker
-    -check-sections
-    -Xlinker -fatal-warnings
-    --entry=Reset_Handler
-    -Wl,--no-wchar-size-warning
-    --specs=nano.specs
-    -Wl,--print-memory-usage
-)
+option(TFM_PARTITION_AUDIT_LOG "Enable the TF-M Audit Log partition" ON)
+option(TFM_PARTITION_PLATFORM "Enable the TF-M Platform partition" ON)
 
-function(config_setting_shared_compiler_flags tgt)
-    embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS ${CFLAGS})
-endfunction()
+if(${TARGET_PLATFORM} STREQUAL "AN521" OR ${TARGET_PLATFORM} STREQUAL "AN519")
+	set (REFERENCE_PLATFORM ON)
+endif()
 
-function(config_setting_shared_linker_flags tgt)
-    embedded_set_target_link_flags(TARGET ${tgt} FLAGS ${LDFLAGS})
-endfunction()
+# Option to demonstrate usage of secure-only peripheral
+set (SECURE_UART1 OFF)
 
-set(TFM_PARTITION_TEST_CORE OFF)
-set(CORE_TEST_POSITIVE OFF)
-set(CORE_TEST_INTERACTIVE OFF)
-set(TEST_FRAMEWORK_S OFF)
-set(REFERENCE_PLATFORM OFF)
-set(TFM_PARTITION_TEST_SECURE_SERVICES OFF)
-set(SERVICES_TEST_ENABLED OFF)
-set(TEST_FRAMEWORK_S  OFF)
-set(TEST_FRAMEWORK_NS OFF)
-set(TFM_PSA_API OFF)
-set(TFM_LEGACY_API ON)
-set(CORE_TEST_IPC OFF)
+if (REGRESSION)
+	set(SERVICES_TEST_ENABLED ON)
+endif()
 
-set(TFM_NS_CLIENT_IDENTIFICATION OFF)
-set(SECURE_UART1 OFF)
+if (CORE_IPC)
+	set(TFM_PSA_API ON)
+endif()
 
-# TFM feature configuration
-add_definitions(-DTFM_LEGACY_API)
-add_definitions(-DBL2)
+if (TFM_PSA_API)
+	add_definitions(-DTFM_PSA_API)
+endif()
 
-# Set mbedTLS compiler flags for TFM services
-set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${SHARED_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"tfm_mbedtls_config.h\\\\\\\" -I${TFM_ROOT_DIR}/platform/ext/common")
+if (TFM_LEGACY_API)
+	add_definitions(-DTFM_LEGACY_API)
+endif()
 
-# Secure storage flags
-set(SST_ENCRYPTION ON)
-set(SST_ROLLBACK_PROTECTION OFF)
-set(SST_CREATE_FLASH_LAYOUT OFF)
-set(SST_VALIDATE_METADATA_FROM_FLASH ON)
-set(SST_RAM_FS OFF)
-set(SST_TEST_NV_COUNTERS OFF)
+if (SERVICES_TEST_ENABLED)
+	set(SERVICE_TEST_S ON)
+	set(SERVICE_TEST_NS ON)
+	if (CORE_IPC)
+		set(CORE_TEST_IPC ON)
+	elseif (REFERENCE_PLATFORM)
+		set(CORE_TEST_POSITIVE ON)
+	endif()
+endif()
 
-set(MBEDTLS_DEBUG OFF)
+if (CORE_TEST)
+	if (CORE_IPC)
+		set(CORE_TEST_IPC ON)
+	elseif (REFERENCE_PLATFORM)
+		set(CORE_TEST_POSITIVE ON)
+		set(CORE_TEST_INTERACTIVE OFF)
+	endif()
+endif()
 
-# Set mbedTLS compiler flags for BL2 bootloader
-set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${SHARED_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${TFM_ROOT_DIR}/bl2/ext/mcuboot/include")
+if (CORE_TEST_INTERACTIVE)
+	add_definitions(-DCORE_TEST_INTERACTIVE)
+	set(TEST_FRAMEWORK_NS ON)
+	set(TFM_PARTITION_TEST_CORE ON)
+endif()
+
+if (CORE_TEST_POSITIVE)
+	add_definitions(-DCORE_TEST_POSITIVE)
+	set(TEST_FRAMEWORK_NS ON)
+	set(TFM_PARTITION_TEST_CORE ON)
+endif()
+
+if (CORE_TEST_IPC)
+	add_definitions(-DCORE_TEST_IPC)
+	set(TEST_FRAMEWORK_NS ON)
+	set(TFM_PARTITION_TEST_CORE_IPC ON)
+elseif (CORE_IPC AND (NOT PSA_API_TEST) AND (TFM_LVL EQUAL 1))
+	# FIXME: Running the Core IPC tests in this config is deprecated and will
+	# be removed in the future.
+	set(CORE_TEST_IPC ON)
+	add_definitions(-DCORE_TEST_IPC)
+	set(TEST_FRAMEWORK_NS ON)
+endif()
+
+if (SERVICE_TEST_S)
+	add_definitions(-DSERVICES_TEST_S)
+	set(TEST_FRAMEWORK_S ON)
+endif()
+
+if (SERVICE_TEST_NS)
+	add_definitions(-DSERVICES_TEST_NS)
+	set(TEST_FRAMEWORK_NS ON)
+endif()
+
+if (TEST_FRAMEWORK_S)
+	add_definitions(-DTEST_FRAMEWORK_S)
+	# The secure client partition is required to run secure tests
+	set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
+endif()
+
+if (TEST_FRAMEWORK_NS)
+	add_definitions(-DTEST_FRAMEWORK_NS)
+endif()
+
+if (CORE_IPC)
+	set(TFM_PARTITION_AUDIT_LOG OFF)
+	set(TFM_PARTITION_PLATFORM OFF)
+endif()
+
+if (TFM_PARTITION_AUDIT_LOG)
+	add_definitions(-DTFM_PARTITION_AUDIT_LOG)
+endif()
+
+if (TFM_PARTITION_PLATFORM)
+	add_definitions(-DTFM_PARTITION_PLATFORM)
+endif()
+
+if (TFM_PARTITION_TEST_CORE)
+	add_definitions(-DTFM_PARTITION_TEST_CORE)
+endif()
+
+if (TFM_PARTITION_TEST_CORE_IPC)
+	add_definitions(-DTFM_PARTITION_TEST_CORE_IPC)
+endif()
+
+if (TFM_PARTITION_TEST_SECURE_SERVICES)
+	add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
+endif()
+
+if (PSA_API_TEST)
+	add_definitions(-DPSA_API_TEST_NS)
+	set(PSA_API_TEST_NS ON)
+	if (NOT DEFINED PSA_API_TEST_CRYPTO)
+		set(PSA_API_TEST_CRYPTO OFF)
+	endif()
+	if (NOT DEFINED PSA_API_TEST_SECURE_STORAGE)
+		set(PSA_API_TEST_SECURE_STORAGE OFF)
+	endif()
+	if (NOT DEFINED PSA_API_TEST_ATTESTATION)
+		set(PSA_API_TEST_ATTESTATION OFF)
+	endif()
+endif()
+
+# This flag indicates if the non-secure OS is capable of identify the non-secure clients
+# which call the secure services
+if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+	set (TFM_NS_CLIENT_IDENTIFICATION ON)
+endif()
+
+if (BL2)
+	add_definitions(-DBL2)
+	if (NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "RSA-2048" AND NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "RSA-3072")
+		message(FATAL_ERROR "MCUBoot only supports RSA-2048 and RSA-3072 signature")
+	endif()
+	if (NOT DEFINED MCUBOOT_SIGNATURE_TYPE)
+		set(MCUBOOT_SIGNATURE_TYPE "RSA-3072")
+	endif()
+	if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "OVERWRITE_ONLY" AND
+		NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP" AND
+		NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP" AND
+		NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
+		message(FATAL_ERROR "ERROR: MCUBoot supports OVERWRITE_ONLY, SWAP, NO_SWAP and RAM_LOADING upgrade strategies only.")
+	endif()
+	if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
+		set(LINK_TO_BOTH_MEMORY_REGION ON)
+	endif()
+else() #BL2 is turned off
+	if (DEFINED MCUBOOT_UPGRADE_STRATEGY)
+		message (WARNING "Ignoring value of MCUBOOT_UPGRADE_STRATEGY as BL2 option is set to False.")
+		unset (MCUBOOT_UPGRADE_STRATEGY)
+	endif()
+endif()
+
+##Set Mbed TLS compiler flags and variables for audit log and crypto
+set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${SHARED_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+
+#Default TF-M secure storage flags.
+#These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
+#Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.md
+if (NOT DEFINED SST_ENCRYPTION)
+	set (SST_ENCRYPTION ON)
+endif()
+
+if (NOT DEFINED SST_ROLLBACK_PROTECTION)
+	set (SST_ROLLBACK_PROTECTION OFF)
+endif()
+
+if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
+	set (SST_CREATE_FLASH_LAYOUT OFF)
+endif()
+
+if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
+	set (SST_VALIDATE_METADATA_FROM_FLASH ON)
+endif()
+
+if (NOT DEFINED SST_RAM_FS)
+	if (REGRESSION)
+		set (SST_RAM_FS ON)
+	else()
+		set (SST_RAM_FS OFF)
+	endif()
+endif()
+
+if (NOT DEFINED SST_TEST_NV_COUNTERS)
+	if (REGRESSION AND (TFM_LVL EQUAL 1))
+		set(SST_TEST_NV_COUNTERS ON)
+	else()
+		set(SST_TEST_NV_COUNTERS OFF)
+	endif()
+endif()
+
+if (NOT DEFINED MBEDTLS_DEBUG)
+	set(MBEDTLS_DEBUG OFF)
+endif()
+
+##Set mbedTLS compiler flags for BL2 bootloader
+set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${SHARED_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
+if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
+	string(APPEND MBEDTLS_C_FLAGS_BL2 " -DMCUBOOT_SIGN_RSA_LEN=3072")
+endif()

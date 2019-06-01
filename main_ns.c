@@ -13,7 +13,7 @@
 #include "cmsis_os2.h"
 #include "tfm_ns_svc.h"
 #include "tfm_ns_lock.h"
-#include "blink.h"
+// #include "blink.h"
 #include "update.h"
 #include "target_cfg.h"
 #include "Driver_USART.h"
@@ -103,6 +103,11 @@ struct update_args {
     uint64_t *blink_stack;
 } ua;
 
+__attribute__((noreturn))
+void derp() {
+    while(1);
+}
+
 #ifndef __GNUC__
 __attribute__((noreturn))
 #endif
@@ -115,7 +120,8 @@ int main(void)
 
     /* Initialize the TFM NS lock */
     tfm_ns_lock_init();
-    thread_id = osThreadNew(blink, NULL, &blink_attr);
+    // thread_id = osThreadNew(blink, NULL, &blink_attr);
+    thread_id = osThreadNew(derp, NULL, &blink_attr);
     ua.blink_id = thread_id;
     ua.blink_stack = (uint64_t *) &blink_stack;
     osThreadNew(update_low_priority, &ua, &update_lp_attr);

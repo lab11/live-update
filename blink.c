@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "blink.h"
 #include "cmsis_os2.h"
 #include "tfm_gpio_veneers.h"
 
@@ -11,9 +10,7 @@ void blink_init() {
     tfm_gpio_enable_output(PIN); 
 }
 
-__attribute__((noreturn))
-void blink(void *arg)
-{
+int main() {
     blink_init();
 
     for (;;) {
