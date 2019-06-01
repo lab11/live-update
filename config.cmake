@@ -142,7 +142,7 @@ elseif(${COMPILER} STREQUAL "GNUARM")
         -Wl,--no-wchar-size-warning
         --specs=nano.specs
         -Wl,--print-memory-usage
-        --entry=Reset_Handler
+        #--entry=Reset_Handler
     )
 
     set(PIC_LDFLAGS
@@ -150,16 +150,6 @@ elseif(${COMPILER} STREQUAL "GNUARM")
         -pie
         -Wl,-gc-sections
     )
-
-	##Shared compiler and linker settings.
-	function(config_setting_shared_compiler_flags tgt)
-        embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS ${CFLAGS})
-	endfunction()
-
-	##Shared linker settings.
-	function(config_setting_shared_linker_flags tgt)
-        embedded_set_target_link_flags(TARGET ${tgt} FLAGS ${LDFLAGS})
-	endfunction()
 endif()
 
 #Create a string from the compile flags list, so that it can be used later

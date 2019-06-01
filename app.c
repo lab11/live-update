@@ -9,14 +9,53 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "tfm_api.h"
+//#include "blink.h"
 #include "cmsis_os2.h"
+#include "Driver_USART.h"
+#include "tfm_api.h"
+#include "target_cfg.h"
 #include "tfm_ns_svc.h"
 #include "tfm_ns_lock.h"
-// #include "blink.h"
 #include "update.h"
-#include "target_cfg.h"
-#include "Driver_USART.h"
+
+// github.com/lab11/pic-explorations/movable_blink/code.c
+typedef struct {
+    unsigned int* entry_loc;        /* Entry point for user application */
+    unsigned int* init_data_loc;    /* Data initialization information in flash */
+    unsigned int init_data_size;    /* Size of initialization information */
+    unsigned int got_start_offset;  /* Offset to start of GOT */
+    unsigned int got_end_offset;    /* Offset to end of GOT */
+    unsigned int plt_start_offset;  /* Offset to start of PLT */
+    unsigned int plt_end_offset;    /* Offset to end of PLT */
+    unsigned int bss_start_offset;  /* Offset to start of BSS */
+    unsigned int bss_end_offset;    /* Offset to end of BSS */
+} Load_Info;
+
+extern void  main(void);
+extern unsigned int* _etext;
+extern unsigned int* _edata;
+extern unsigned int* _got;
+extern unsigned int* _egot;
+extern unsigned int* _plt;
+extern unsigned int* _eplt;
+extern unsigned int* _bss;
+extern unsigned int* _ebss;
+
+// Load Info is used by the runtime in order to load the application
+//  Note that locations in the text section assume .text starts at 0x00200000
+//  and are therefore updated
+__attribute__ ((section(".load_info"), used))
+Load_Info app_info = {
+    .entry_loc          = (unsigned int*)((unsigned int)main - 0x00200000),
+    .init_data_loc      = (unsigned int*)((unsigned int)(&_etext) - 0x00200000),
+    .init_data_size     = (unsigned int)(&_edata),
+    .got_start_offset   = (unsigned int)(&_got),
+    .got_end_offset     = (unsigned int)(&_egot),
+    .plt_start_offset   = (unsigned int)(&_plt),
+    .plt_end_offset     = (unsigned int)(&_eplt),
+    .bss_start_offset   = (unsigned int)(&_bss),
+    .bss_end_offset     = (unsigned int)(&_ebss),
+};
 
 /* For UART the CMSIS driver is used */
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
@@ -79,6 +118,7 @@ static const osThreadAttr_t blink_attr = {
     .priority = osPriorityHigh,
 };
 
+/*
 static uint64_t update_lp_stack[(3U * 1024U) / (sizeof(uint64_t))];
 static uint64_t update_hp_stack[(3U * 1024U) / (sizeof(uint64_t))];
 
@@ -94,24 +134,27 @@ static const osThreadAttr_t update_hp_attr = {
     .stack_mem = update_hp_stack,
     .priority = osPriorityRealtime,
 };
+*/
 
 static osStatus_t   status;
 static osThreadId_t thread_id;
 
+/*
 struct update_args {
     osThreadId_t blink_id;
     uint64_t *blink_stack;
 } ua;
+*/
 
 __attribute__((noreturn))
-void derp() {
+void busyloop() {
     while(1);
 }
 
 #ifndef __GNUC__
 __attribute__((noreturn))
 #endif
-int main(void)
+void main(void)
 {
     NS_DRIVER_STDIO.Initialize(update_uart_cb);
     NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
@@ -121,11 +164,11 @@ int main(void)
     /* Initialize the TFM NS lock */
     tfm_ns_lock_init();
     // thread_id = osThreadNew(blink, NULL, &blink_attr);
-    thread_id = osThreadNew(derp, NULL, &blink_attr);
-    ua.blink_id = thread_id;
-    ua.blink_stack = (uint64_t *) &blink_stack;
-    osThreadNew(update_low_priority, &ua, &update_lp_attr);
-    osThreadNew(update_high_priority, NULL, &update_hp_attr);
+    thread_id = osThreadNew(busyloop, NULL, &blink_attr);
+    //ua.blink_id = thread_id;
+    //ua.blink_stack = (uint64_t *) &blink_stack;
+    //osThreadNew(update_low_priority, &ua, &update_lp_attr);
+    //osThreadNew(update_high_priority, NULL, &update_hp_attr);
     status = osKernelStart();
 
     /* Reached only in case of error */
