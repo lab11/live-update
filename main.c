@@ -20,6 +20,9 @@ typedef struct {
     unsigned int bss_end_offset;    /* Offset to end of BSS */
     unsigned int rel_start_offset;  /* Offset to start of relocation table */
     unsigned int rel_end_offset;    /* Offset to end of relocation table */
+    unsigned int* svc_handler_loc;      /* SVC_Handler location */
+    unsigned int* pendsv_handler_loc;   /* PendSV_Handler location */
+    unsigned int* systick_handler_loc;  /* SysTick_Handler location */
 } Load_Info; 
 extern unsigned char *_apps;
 extern unsigned char *_eapps;
@@ -30,9 +33,6 @@ __attribute__((noreturn))
 void main(void)
 {
     Load_Info *code_info = (Load_Info *)&_apps;
-
-    int y = 1;
-    while(y);
 
     unsigned int *flash_location = (unsigned int *)&_apps;
     unsigned int *sram_location = (unsigned int *)0x20018000; // use upper half of MUSCA NS on chip RAM
@@ -70,7 +70,8 @@ void main(void)
         }
 
         // for some reason, the relocation table also includes Load_Info; just don't
-        if ((unsigned int) target >= (unsigned int) code_info && (unsigned int) target < ((unsigned int) code_info + sizeof(Load_Info))) {
+        if ((unsigned int) target >= (unsigned int) code_info && 
+            (unsigned int) target < ((unsigned int) code_info + sizeof(Load_Info))) {
             rel_start += 2;
             continue;
         }
@@ -86,22 +87,16 @@ void main(void)
         rel_start += 2; // skip info, assume they're all R_ARM_RELATIVE entries (0x17)
     }
 
-    /*
-    // fixup GOT
-    unsigned int *got_start = (unsigned int *)((unsigned int)sram_location + (*code_info).got_start_offset);
-    unsigned int got_size = (*code_info).got_end_offset - (*code_info).got_start_offset;
-    unsigned int *got_end   = (unsigned int *)((unsigned int)got_start + got_size);
+    // Relocate interrupt handlers TODO stop doing this so jankily
+    unsigned int svc = ((unsigned int)(*code_info).svc_handler_loc + (unsigned int)flash_location); 
+    unsigned int pendsv = ((unsigned int)(*code_info).pendsv_handler_loc + (unsigned int)flash_location); 
+    unsigned int systick = ((unsigned int)(*code_info).systick_handler_loc + (unsigned int)flash_location); 
 
-    while (got_start < got_end) {
-        unsigned int fixed_up_val = 0;
-        if (*got_start >= flash_link_location) { // fixup offset relative to code SRAM location
-            fixed_up_val = ((unsigned int)*got_start - flash_link_location) + (unsigned int)flash_location;
-        } else { // fixup offset relative to internal data SRAM location
-            fixed_up_val = *got_start + (unsigned int)sram_location;
-        }
-        *got_start++ = fixed_up_val;
-    }
-    */
+    // ...ugh
+    unsigned int *vector_table = (unsigned int *) 0x000a0400; // TODO this is cheating
+    *(vector_table + 11) = svc;
+    *(vector_table + 14) = pendsv;
+    *(vector_table + 15) = systick;
 
     /* Context Switch */
     // set base register (r9)
@@ -116,6 +111,8 @@ void main(void)
     unsigned int jmp = ((unsigned int)(*code_info).entry_loc + (unsigned int)flash_location);
     void (*fn)(void) = (void (*)(void))(((unsigned int)jmp) | 1); // |1 is very important!! Must stay in thumb mode
 
+    int y = 1;
+    while(y);
     fn();
 
     /* Do nothing */

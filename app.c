@@ -17,6 +17,8 @@
 #include "tfm_ns_svc.h"
 #include "tfm_ns_lock.h"
 #include "update.h"
+#include "tfm_gpio_veneers.h"
+#include "rtx_os.h"
 
 // github.com/lab11/pic-explorations/movable_blink/code.c
 typedef struct {
@@ -31,6 +33,9 @@ typedef struct {
     unsigned int bss_end_offset;    /* Offset to end of BSS */
     unsigned int rel_start_offset;  /* Offset to start of relocation table */
     unsigned int rel_end_offset;    /* Offset to end of relocation table */
+    unsigned int* svc_handler_loc;      /* SVC_Handler location */
+    unsigned int* pendsv_handler_loc;   /* PendSV_Handler location */
+    unsigned int* systick_handler_loc;  /* SysTick_Handler location */
 } Load_Info;
 
 extern void  main(void);
@@ -42,9 +47,7 @@ extern unsigned int* _plt;
 extern unsigned int* _eplt;
 extern unsigned int* _bss;
 extern unsigned int* _ebss;
-extern unsigned int* _rel;
-extern unsigned int* _erel;
-
+extern unsigned int* _rel; extern unsigned int* _erel; 
 // Load Info is used by the runtime in order to load the application
 //  Note that locations in the text section assume .text starts at 0x10000000
 //  and are therefore updated
@@ -61,6 +64,9 @@ Load_Info app_info = {
     .bss_end_offset     = (unsigned int)(&_ebss),
     .rel_start_offset   = ((unsigned int)(&_rel) - 0x10000000),
     .rel_end_offset     = ((unsigned int)(&_erel) - 0x10000000),
+    .svc_handler_loc    = (unsigned int*)((unsigned int)SVC_Handler - 0x10000000),
+    .pendsv_handler_loc = (unsigned int*)((unsigned int)PendSV_Handler - 0x10000000),
+    .systick_handler_loc= (unsigned int*)((unsigned int)SysTick_Handler - 0x10000000),
 };
 
 /* For UART the CMSIS driver is used */
@@ -157,6 +163,27 @@ void busyloop() {
     while(1);
 }
 
+#define PIN 4
+
+static uint8_t on = 0;
+
+void blink_init() {
+    tfm_gpio_enable_output(PIN); 
+}
+
+void blink() {
+    blink_init();
+
+    for (;;) {
+        osDelay(500); // only blocking call (as if we were waiting for loop body 'callback')
+
+        if (on) tfm_gpio_clear(PIN);
+        else tfm_gpio_set(PIN);
+
+        on = ~on;
+    }
+}
+
 #ifndef __GNUC__
 __attribute__((noreturn))
 #endif
@@ -165,19 +192,12 @@ void main(void)
     NS_DRIVER_STDIO.Initialize(update_uart_cb);
     NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
 
-    int x = 1;
-    while(x);
-
-    NS_DRIVER_STDIO.Send("yoo", 3);
-
-    while(1);
-
     status = osKernelInitialize();
 
     /* Initialize the TFM NS lock */
     tfm_ns_lock_init();
-    // thread_id = osThreadNew(blink, NULL, &blink_attr);
-    thread_id = osThreadNew(busyloop, NULL, &blink_attr);
+    thread_id = osThreadNew(blink, NULL, &blink_attr);
+    // thread_id = osThreadNew(busyloop, NULL, &blink_attr);
     //ua.blink_id = thread_id;
     //ua.blink_stack = (uint64_t *) &blink_stack;
     //osThreadNew(update_low_priority, &ua, &update_lp_attr);
