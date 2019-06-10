@@ -106,6 +106,8 @@ elseif(${COMPILER} STREQUAL "GNUARM")
         -msoft-float
         -mcmse
         --specs=nano.specs
+        -mthumb
+        -march=armv8-m.main
     )
 
     set(CFLAGS
@@ -116,6 +118,7 @@ elseif(${COMPILER} STREQUAL "GNUARM")
         -Wno-format
         -Wno-return-type
         -Wno-unused-but-set-variable
+        -Wno-unused-variable
         -ffunction-sections
         -fdata-sections
         -fno-strict-aliasing

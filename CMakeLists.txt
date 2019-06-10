@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${TFM_ROOT_DIR}/cmake)
 include("Common/BuildSys")
 
 #Start an embedded project.
-embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/config.cmake")
+embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/cmake/config.cmake")
 project(tfm_ns LANGUAGES ASM C)
 embedded_project_fixup()
 
@@ -156,7 +156,7 @@ add_executable(${PIC_EXE_NAME} $<TARGET_OBJECTS:${PROJECT_OBJ_LIB}>)
 #Set common linker flags
 #config_setting_shared_linker_flags(${PIC_EXE_NAME})
 embedded_set_target_link_flags(TARGET ${PIC_EXE_NAME} FLAGS ${LDFLAGS} ${PIC_LDFLAGS})
-embedded_set_target_linker_file(TARGET ${PIC_EXE_NAME} PATH "${CMAKE_CURRENT_LIST_DIR}/pic.ld")
+embedded_set_target_linker_file(TARGET ${PIC_EXE_NAME} PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/pic.ld")
 
 #Add the RTX library
 if(NOT DEFINED RTX_LIB_PATH)
@@ -251,8 +251,8 @@ add_executable(${EXE_NAME}
 embedded_set_target_link_includes(TARGET ${EXE_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
 
 embedded_set_target_compile_flags(TARGET ${EXE_NAME} LANGUAGE C FLAGS ${CFLAGS})
-embedded_set_target_link_flags(TARGET ${EXE_NAME} FLAGS ${LDFLAGS})
-embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${CMAKE_CURRENT_LIST_DIR}/musca_ns.ld")
+embedded_set_target_link_flags(TARGET ${EXE_NAME} FLAGS ${LDFLAGS} --entry=Reset_Handler)
+embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/musca_ns.ld")
 
 compiler_generate_binary_output(${EXE_NAME})
 
@@ -301,3 +301,6 @@ endif()
 embedded_project_end(${PROJECT_NAME})
 embedded_project_end(${PROJECT_NAME}_pic)
 embedded_project_end(${PROJECT_OBJ_LIB})
+
+add_subdirectory(${TFM_ROOT_DIR}/bl2/ext/mcuboot)
+
