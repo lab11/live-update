@@ -105,4 +105,37 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;
     } > RAM
+
+    /* Manually specify these sections so they go last */
+    .interp :
+    {
+        *(.interp*)
+    } > FLASH
+
+    .dynsym :
+    {
+        *(.dynsym*)
+    } > FLASH
+
+    .dynstr :
+    {
+        *(.dynstr*)
+    } > FLASH
+
+    .hash :
+    {
+        *(.hash*)
+    } > FLASH
+
+    .ARM.exidx :
+    {
+        *(.ARM.exidx*)
+    } > FLASH
+
+    .rel.dyn :
+    {
+        _rel = .;
+        *(.rel*)
+        _erel = .;
+    } > FLASH
 }

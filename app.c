@@ -29,6 +29,8 @@ typedef struct {
     unsigned int plt_end_offset;    /* Offset to end of PLT */
     unsigned int bss_start_offset;  /* Offset to start of BSS */
     unsigned int bss_end_offset;    /* Offset to end of BSS */
+    unsigned int rel_start_offset;  /* Offset to start of relocation table */
+    unsigned int rel_end_offset;    /* Offset to end of relocation table */
 } Load_Info;
 
 extern void  main(void);
@@ -40,14 +42,16 @@ extern unsigned int* _plt;
 extern unsigned int* _eplt;
 extern unsigned int* _bss;
 extern unsigned int* _ebss;
+extern unsigned int* _rel;
+extern unsigned int* _erel;
 
 // Load Info is used by the runtime in order to load the application
-//  Note that locations in the text section assume .text starts at 0x00200000
+//  Note that locations in the text section assume .text starts at 0x10000000
 //  and are therefore updated
 __attribute__ ((section(".load_info"), used))
 Load_Info app_info = {
-    .entry_loc          = (unsigned int*)((unsigned int)main - 0x00200000),
-    .init_data_loc      = (unsigned int*)((unsigned int)(&_etext) - 0x00200000),
+    .entry_loc          = (unsigned int*)((unsigned int)main - 0x10000000),
+    .init_data_loc      = (unsigned int*)((unsigned int)(&_etext) - 0x10000000),
     .init_data_size     = (unsigned int)(&_edata),
     .got_start_offset   = (unsigned int)(&_got),
     .got_end_offset     = (unsigned int)(&_egot),
@@ -55,6 +59,8 @@ Load_Info app_info = {
     .plt_end_offset     = (unsigned int)(&_eplt),
     .bss_start_offset   = (unsigned int)(&_bss),
     .bss_end_offset     = (unsigned int)(&_ebss),
+    .rel_start_offset   = ((unsigned int)(&_rel) - 0x10000000),
+    .rel_end_offset     = ((unsigned int)(&_erel) - 0x10000000),
 };
 
 /* For UART the CMSIS driver is used */
@@ -94,21 +100,21 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
 /* Struct FILE is implemented in stdio.h. Used to redirect printf to
  * NS_DRIVER_STDIO
  */
-FILE __stdout;
+//FILE __stdout;
 /* Redirects armclang printf to NS_DRIVER_STDIO */
-int fputc(int ch, FILE *f) {
+//int fputc(int ch, FILE *f) {
     /* Send byte to NS_DRIVER_STDIO */
-    (void)NS_DRIVER_STDIO.Send((const unsigned char *)&ch, 1);
+//    (void)NS_DRIVER_STDIO.Send((const unsigned char *)&ch, 1);
     /* Return character written */
-    return ch;
-}
+//    return ch;
+//}
 /* redirects gcc printf to NS_DRIVER_STDIO */
-int _write(int fd, char * str, int len)
-{
-    (void)NS_DRIVER_STDIO.Send(str, len);
+//int _write(int fd, char * str, int len)
+//{
+//    (void)NS_DRIVER_STDIO.Send(str, len);
 
-    return len;
-}
+//    return len;
+//}
 
 static uint64_t blink_stack[(1024U) / (sizeof(uint64_t))];
 static const osThreadAttr_t blink_attr = {
@@ -158,6 +164,13 @@ void main(void)
 {
     NS_DRIVER_STDIO.Initialize(update_uart_cb);
     NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
+
+    int x = 1;
+    while(x);
+
+    NS_DRIVER_STDIO.Send("yoo", 3);
+
+    while(1);
 
     status = osKernelInitialize();
 
