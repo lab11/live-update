@@ -125,7 +125,7 @@ add_custom_target(bootloader-flash
 add_dependencies(bootloader-flash ${PROJECT_NAME})
 
 # make startdebug
-set(GDB_DEBUG_SCRIPT "../make/debug.gdb")
+set(GDB_DEBUG_SCRIPT "../../make/debug.gdb")
 add_custom_target(bootloader-startdebug
     COMMAND ${GDBSERVER} ${GDBSERVER_ARGS} &
     COMMAND sleep 2

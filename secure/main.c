@@ -106,8 +106,7 @@ int main() {
 
     //tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSE);
     //tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID, SPM_PARTITION_STATE_RUNNING);
-    
-    LOG_MSG("Hi!");
 
+    LOG_MSG("Hi!");
     jump_to_ns_code();
 }
