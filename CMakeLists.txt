@@ -10,6 +10,9 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
+# TODO: figure out why Zephyr doesn't run if not in debug mode
+set(CMAKE_BUILD_TYPE "Debug")
+
 function(debug_print_compilers NUM)
     message(STATUS "${NUM}>>> CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
     message(STATUS "${NUM}>>> CMAKE_ASM_COMPILER: ${CMAKE_ASM_COMPILER}")
@@ -47,11 +50,24 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/startup" "startup")
 # Add bootloader project; must be built explicitly
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/bootloader" "bootloader" EXCLUDE_FROM_ALL)
 
-# Add secure and non-secure executables
+# Add secure executable
 set(SECURE_TARGET "secure")
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${SECURE_TARGET}" "${SECURE_TARGET}")
-set(NONSECURE_TARGET "app")
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${NONSECURE_TARGET}" "${NONSECURE_TARGET}")
+
+# Add non-secure executable (DISABLED)
+#set(NONSECURE_TARGET "app")
+#add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${NONSECURE_TARGET}" "${NONSECURE_TARGET}")
+
+# Add Zephyr OS build as NS executable (ENABLED)
+set(NONSECURE_TARGET "zephyr")
+set(ZEPHYR_DIR ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr)
+add_custom_target(${NONSECURE_TARGET} ALL)
+add_custom_command(
+    TARGET ${NONSECURE_TARGET} POST_BUILD
+
+    COMMAND west build -b v2m_musca_nonsecure samples/hello_world/
+    WORKING_DIRECTORY ${ZEPHYR_DIR}
+)
 
 # Generate image to flash to the board
 add_custom_target(${PROJECT_NAME} ALL)
@@ -63,7 +79,9 @@ add_custom_command(
     COMMAND ${CMAKE_CURRENT_LIST_DIR}/bootloader/scripts/assemble.py
     ARGS -l ${CMAKE_CURRENT_LIST_DIR}/sdk/musca_a/include/flash_layout.h
         -s ${CMAKE_CURRENT_BINARY_DIR}/${SECURE_TARGET}/${SECURE_TARGET}.bin
-        -n ${CMAKE_CURRENT_BINARY_DIR}/${NONSECURE_TARGET}/${NONSECURE_TARGET}.bin
+        # TODO: generalize
+        #-n ${CMAKE_CURRENT_BINARY_DIR}/${NONSECURE_TARGET}/${NONSECURE_TARGET}.bin
+        -n ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr/build/zephyr/${NONSECURE_TARGET}.bin
         -o ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_combined.bin
 
     COMMAND ${PYTHONCLIENT}
@@ -88,13 +106,14 @@ add_custom_command(
     COMMAND ${CMAKE_OBJDUMP}
     ARGS -D $<TARGET_FILE:${SECURE_TARGET}> > ${SECURE_TARGET}.dump
 
-    COMMAND ${CMAKE_OBJDUMP}
-    ARGS -D $<TARGET_FILE:${NONSECURE_TARGET}> > ${NONSECURE_TARGET}.dump
+    # TODO: Fix
+    #COMMAND ${CMAKE_OBJDUMP}
+    #ARGS -D $<TARGET_FILE:${NONSECURE_TARGET}> > ${NONSECURE_TARGET}.dump
 )
 
 # make flash
 add_custom_target(flash
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MBED/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MUSCA/
 )
 add_dependencies(flash ${PROJECT_NAME})
 
@@ -106,4 +125,12 @@ add_custom_target(startdebug
     COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/${SECURE_TARGET}/${SECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
 )
 add_dependencies(startdebug ${PROJECT_NAME})
+
+# make ns-startdebug
+#add_custom_target(ns-startdebug
+#    COMMAND ${GDBSERVER} ${GDBSERVER_ARGS} &
+#    COMMAND sleep 2
+#    COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
+#)
+#add_dependencies(ns-startdebug ${PROJECT_NAME})
 

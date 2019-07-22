@@ -120,7 +120,7 @@ add_custom_command(
 
 # make flash
 add_custom_target(bootloader-flash
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MBED/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MUSCA/
 )
 add_dependencies(bootloader-flash ${PROJECT_NAME})
 
