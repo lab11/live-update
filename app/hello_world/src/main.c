@@ -1,13 +1,14 @@
-/*
- * Copyright (c) 2012-2014 Wind River Systems, Inc.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// PIC app that doesn't include sys/printk.h
 
-#include <zephyr.h>
-#include <sys/printk.h>
+extern void (*printk)(const char *fmt, ...);
 
 void main(void)
 {
-	printk("Hello World! %s\n", CONFIG_BOARD);
+    int b = 1;
+    while (1);
+
+    for (int a = b; a < 10; a++) {
+	    printk("a: %d\n", a);
+    }
 }
+

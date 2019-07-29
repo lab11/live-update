@@ -2,35 +2,89 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
+set(LIVE_UPDATE_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
+
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(hello_world)
 
-target_sources(app PRIVATE src/main.c)
+# ---- PIC app ---- 
+zephyr_get_compile_options_for_lang(C Z_COMPILE_OPTIONS)
+set(PIC_FLAGS
+    -fPIE
+    -msingle-pic-base
+    -mpic-register=r9
+    -mno-pic-data-is-text-relative
+)
+set(LINKER_FLAGS
+    -Wl,--emit-relocs
+    -Wl,--unresolved-symbols=ignore-in-object-files
+    -nostartfiles
+    -pie
+    -Wl,-gc-sections
+)
 
-## https://stackoverflow.com/questions/32183975/how-to-print-all-the-properties-of-a-target-in-cmake
-#
-## Get all properties that cmake supports
-#execute_process(COMMAND cmake --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
-## Convert command output into a CMake list
-#STRING(REGEX REPLACE ";" "\\\\;" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
-#STRING(REGEX REPLACE "\n" ";" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
-#
-#list(REMOVE_DUPLICATES CMAKE_PROPERTY_LIST)
-#
-#function(print_target_properties tgt)
-#    foreach (prop ${CMAKE_PROPERTY_LIST})
-#        string(REPLACE "<CONFIG>" "${CMAKE_BUILD_TYPE}" prop ${prop})
-#        if(prop STREQUAL "LOCATION" OR prop MATCHES "^LOCATION_" OR prop MATCHES "_LOCATION$")
-#            continue()
-#        endif()
-#        get_target_property(propval ${tgt} ${prop})
-#        if (propval)
-#            get_target_property(propval ${tgt} ${prop})
-#            message ("${tgt} ${prop} = ${propval}")
-#        endif()
-#    endforeach(prop)
-#endfunction(print_target_properties)
-#
-#print_target_properties(app)
+add_executable(pic src/main.c)
+# Make sure we compile the pic object first
+add_dependencies(app pic)
 
+set_property(TARGET pic PROPERTY RUNTIME_OUTPUT_DIRECTORY app)
+
+# Set options
+target_compile_options(pic PRIVATE
+    ${Z_COMPILE_OPTIONS}
+    ${PIC_FLAGS}
+)
+target_link_libraries(pic
+    -T ${LIVE_UPDATE_ROOT}/make/ld/pic.ld
+    ${LINKER_FLAGS}
+)
+set_property(
+    TARGET pic
+    PROPERTY SUFFIX ".elf"
+)
+
+set(PIC_APP_ELF $<TARGET_FILE_DIR:pic>/relocated_$<TARGET_FILE_NAME:pic>)
+# Resolve external functions
+add_custom_command(
+    TARGET pic POST_BUILD
+    COMMAND python
+    ARGS relocate_extern_fns.py $<TARGET_FILE:pic> ${ZEPHYR_BINARY_DIR}/zephyr.map -o ${PIC_APP_ELF}
+    WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/make/scripts
+)
+
+# Generate binary file
+add_custom_command(
+    TARGET pic POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY}
+    ARGS -O binary ${PIC_APP_ELF} $<TARGET_FILE_DIR:pic>/pic.bin
+)
+
+# Link into binary object
+add_custom_command(
+    TARGET pic POST_BUILD
+    COMMAND ${CMAKE_LINKER}
+    ARGS -r -b binary -o $<TARGET_FILE_DIR:pic>/temp.bin.o $<TARGET_FILE_DIR:pic>/pic.bin
+)
+
+# Rename data section
+add_custom_command(
+    TARGET pic POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY}
+    ARGS --rename-section .data=.picapp $<TARGET_FILE_DIR:pic>/temp.bin.o $<TARGET_FILE_DIR:pic>/pic.bin.o
+    BYPRODUCTS app/pic.bin.o
+)
+
+# ---- Non-PIC App ----
+
+target_include_directories(app PRIVATE
+    include/
+)
+
+target_sources(app PRIVATE
+    src/loader.c
+    $<TARGET_FILE_DIR:pic>/pic.bin.o
+)
+
+# Set aside special section for embedded PIC application
+zephyr_linker_sources(SECTIONS ${LIVE_UPDATE_ROOT}/make/ld/app_section.ld)
 
