@@ -35,7 +35,7 @@ SECTIONS
     {
         /* Generate the PIC app header for the loader */
         _flash_base = .;
-        LONG(0x0);                  /* uint32_t entry (set by static relocation) */
+        LONG(_text);                /* uint32_t entry          */
         LONG(_got);                 /* uint32_t got_start      */
         LONG(SIZEOF(.got));         /* uint32_t got_size       */
         LONG(_etext - _flash_base); /* uint32_t data_sym_start */
@@ -49,6 +49,7 @@ SECTIONS
     .text :
     {
         _text = .;
+        *(.text.main)
         *(.text*)
 
         KEEP(*(.init))

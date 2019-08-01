@@ -121,8 +121,10 @@ def resolve_got_symbols(sections, relocations, input_elf_content):
     for r in relocations:
         # ELF section offset + offset within GOT
         got_entry_offset = int(sections['.got']['off'], base=16) + r['got_offset']
+        # Make sure function calls in Thumb mode!
+        thumb_symbol_val = int(r['symbol_val'], base=16) | 1
         # Convert resolved address (updated symbol_val) to little endian before writing
-        value = int(r['symbol_val'], base=16).to_bytes(4, byteorder='little')
+        value = thumb_symbol_val.to_bytes(4, byteorder='little')
         input_elf_content[got_entry_offset:got_entry_offset+4] = value
 
     return input_elf_content
@@ -182,20 +184,22 @@ def patch_ptr_indirection(elf_sections, relocations, dump_lines, elf_content):
         
     return elf_content
 
-
+# For resolved relocations, change dynamic relocation type from R_ARM_RELATIVE to R_ARM_NONE
+# The format of the .rel.dyn section is a simple list of 8-byte entries, so we manipulate it directly:
+#  ([32 bit offset into GOT] [32 bit info field])*
 def patch_dyn_relocations(elf_sections, relocations, elf_content):
 
-    # For resolved relocations, change dynamic relocation type from R_ARM_RELATIVE to R_ARM_NONE
-    # The format of the .rel.dyn section is a simple list of 8-byte entries, so we manipulate it directly:
-    #  ([32 bit offset into GOT] [32 bit info field])*
+    if '.rel.dyn' not in elf_sections:
+        return elf_content
+
     dyn_section = elf_sections['.rel.dyn']
     dyn_elf_base = int(dyn_section['off'], base=16)
 
     for dyn_offset in range(0, int(dyn_section['size'], base=16), 8):
         got_offset_val = int.from_bytes(elf_content[dyn_elf_base+dyn_offset:dyn_elf_base+dyn_offset+4], byteorder='little')
         for r in relocations:
-            if r['got_offset'] == got_offset_val: # set R_ARM_NONE = 0?
-                arm_none_val = (0x00000000).to_bytes(4, byteorder='little')
+            if r['got_offset'] == got_offset_val: # set R_ARM_NONE = 0
+                arm_none_val = (0x0).to_bytes(4, byteorder='little')
                 elf_content[dyn_elf_base+dyn_offset+4:dyn_elf_base+dyn_offset+8] = arm_none_val
 
     return elf_content 
@@ -266,7 +270,8 @@ def relocate(elf_in, elf_out, extern_map, dump, readelf):
     elf_content = patch_dyn_relocations(elf_sections, text_relocations, elf_content)
 
     # Patch the entry function in the PIC header to point to the right symbol
-    elf_content = patch_pic_entry(elf_sections, dump_lines, elf_content)
+    #    note: not currently necessary, given direct placement of main() at top of .text section
+    #elf_content = patch_pic_entry(elf_sections, dump_lines, elf_content)
     
     # Finally, write modified ELF back to file
     elf_out.write(elf_content)

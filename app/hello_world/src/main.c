@@ -2,13 +2,9 @@
 
 extern void (*printk)(const char *fmt, ...);
 
-void main(void)
-{
-    int b = 1;
-    while (1);
+void main(void) {
+    printk("testing this PIC app...\n");
 
-    for (int a = b; a < 10; a++) {
-	    printk("a: %d\n", a);
-    }
+    while(1);
 }
 

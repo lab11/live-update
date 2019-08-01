@@ -134,3 +134,9 @@ add_dependencies(startdebug ${PROJECT_NAME})
 #)
 #add_dependencies(ns-startdebug ${PROJECT_NAME})
 
+# make clean-zephyr
+add_custom_target(clean-zephyr
+    COMMAND make clean
+    WORKING_DIRECTORY ${ZEPHYR_DIR}/build
+)
+
