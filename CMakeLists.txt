@@ -111,6 +111,26 @@ add_custom_command(
     #ARGS -D $<TARGET_FILE:${NONSECURE_TARGET}> > ${NONSECURE_TARGET}.dump
 )
 
+# Save output to commit-specific repository for update generation
+set(LU_GIT_REV_FILE /tmp/liveupdate-git-rev)
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+
+    COMMAND git
+    ARGS rev-parse HEAD > ${LU_GIT_REV_FILE}
+
+    COMMAND rm
+    ARGS -rf ${CMAKE_CURRENT_LIST_DIR}/.update/$(< ${LU_GIT_REV_FILE})/
+
+    COMMAND mkdir
+    ARGS ${CMAKE_CURRENT_LIST_DIR}/.update/$(< ${LU_GIT_REV_FILE})/
+
+    COMMAND cp
+    ARGS ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr/build/zephyr/zephyr.map
+        ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr/build/app/relocated_pic.elf
+        ${CMAKE_CURRENT_LIST_DIR}/.update/$(< ${LU_GIT_REV_FILE})/
+)
+
 # make flash
 add_custom_target(flash
     COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MUSCA/
