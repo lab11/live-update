@@ -26,6 +26,8 @@ set(LINKER_FLAGS
 add_executable(pic src/main.c)
 # Make sure we compile the pic object first
 add_dependencies(app pic)
+# Link zephyr first; we need the map file to resolve external function calls
+add_dependencies(pic zephyr)
 
 set_property(TARGET pic PROPERTY RUNTIME_OUTPUT_DIRECTORY app)
 
@@ -49,7 +51,7 @@ add_custom_command(
     TARGET pic POST_BUILD
     COMMAND python
     ARGS relocate_extern_fns.py $<TARGET_FILE:pic> ${ZEPHYR_BINARY_DIR}/zephyr.map -o ${PIC_APP_ELF}
-    WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/make/scripts
+    WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/scripts
 )
 
 # Generate binary file
