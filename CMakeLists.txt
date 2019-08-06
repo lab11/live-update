@@ -105,7 +105,6 @@ add_custom_command(
 
     COMMAND ${CMAKE_OBJDUMP}
     ARGS -D $<TARGET_FILE:${SECURE_TARGET}> > ${SECURE_TARGET}.dump
-
     # TODO: Fix
     #COMMAND ${CMAKE_OBJDUMP}
     #ARGS -D $<TARGET_FILE:${NONSECURE_TARGET}> > ${NONSECURE_TARGET}.dump
@@ -114,7 +113,7 @@ add_custom_command(
 # Save output to commit-specific repository for update generation
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/save_update_files.sh
+    COMMAND ${CMAKE_CURRENT_LIST_DIR}/scripts/save_update.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -132,14 +131,6 @@ add_custom_target(startdebug
     COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/../zephyros/zephyr/build/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
 )
 add_dependencies(startdebug ${PROJECT_NAME})
-
-# make ns-startdebug
-#add_custom_target(ns-startdebug
-#    COMMAND ${GDBSERVER} ${GDBSERVER_ARGS} &
-#    COMMAND sleep 2
-#    COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
-#)
-#add_dependencies(ns-startdebug ${PROJECT_NAME})
 
 # make clean-zephyr
 add_custom_target(clean-zephyr
