@@ -4,3 +4,4 @@ ignore-*/
 lastVerNum.txt
 *.hex
 zephyros/
+.update/
