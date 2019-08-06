@@ -286,7 +286,7 @@ args = parser.parse_args()
 # Zephyr map not linked the first time compiled
 # TODO: fix this
 if not os.path.exists(args.map):
-    print("[Warning] no Zephyr map file, rebuild necessary")
+    print("[Warning] no Zephyr map file at " + args.map + ", rebuild necessary")
     extern_map = None
 else:
     extern_map = open(args.map, 'r')

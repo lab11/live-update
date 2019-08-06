@@ -61,11 +61,16 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${SECURE_TARGET}" "${SECURE_TARGET}"
 # Add Zephyr OS build as NS executable (ENABLED)
 set(NONSECURE_TARGET "zephyr")
 set(ZEPHYR_DIR ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr)
+
+if(NOT DEFINED LIVE_UPDATE_APP)
+    set(LIVE_UPDATE_APP hello_world)
+endif()
+
 add_custom_target(${NONSECURE_TARGET} ALL)
 add_custom_command(
     TARGET ${NONSECURE_TARGET} POST_BUILD
 
-    COMMAND west build -b v2m_musca_nonsecure ${CMAKE_CURRENT_LIST_DIR}/app/hello_world/
+    COMMAND west build --pristine -b v2m_musca_nonsecure ${CMAKE_CURRENT_LIST_DIR}/app/${LIVE_UPDATE_APP}/
     WORKING_DIRECTORY ${ZEPHYR_DIR}
 )
 

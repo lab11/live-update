@@ -17,7 +17,7 @@ static uint32_t app_sram[256];
  */
 void main(void)
 {
-    printk("Running PIC loader... (_picapps: %p, _epicapps: %p)\n", &_picapps, &_epicapps);
+    printk("Running PIC Loader (_picapps: %p, _epicapps: %p)\n", &_picapps, &_epicapps);
 
     struct pic_hdr *hdr = (struct pic_hdr *)&_picapps;
 
@@ -36,7 +36,7 @@ void main(void)
     }
 
     // Copy .data section into SRAM
-    printk("    copying .data...\n");
+    //printk("    copying .data...\n");
     uint32_t *data_src = (uint32_t *) (hdr->data_sym_start + (uint32_t)flash_location);
     uint32_t *data_dst = sram_location;
     for (int i = 0; i < (hdr->data_size / sizeof(uint32_t)); i++) {
@@ -44,13 +44,13 @@ void main(void)
     }
 
     // Zero out .bss
-    printk("    copying .bss...\n");
+    //printk("    copying .bss...\n");
     uint32_t *bss_start = (uint32_t *)((uint32_t)sram_location + hdr->bss_start);
     for (int i = 0; i < (hdr->bss_size / sizeof(uint32_t)); i++) {
         *bss_start++ = 0;
     }
 
-    printk("    processing relocations...\n");
+    //printk("    processing relocations...\n");
     uint32_t *rel_start = (uint32_t *)(hdr->rel_start + (uint32_t)flash_location);
     // Each relocation entry consists of a pair of 4-byte values
     for (int i = 0; i < (hdr->rel_size / sizeof(uint32_t)) / 2; i++, rel_start+=2) {
@@ -86,16 +86,17 @@ void main(void)
         *target = fixed_val;
     }
 
-    printk("    setting GOT base register...\n");
+    //printk("    setting GOT base register...\n");
     // Context Switch:
     // Set base register (r9) to the beginning of GOT, at the start of data SRAM
     __asm("ldr   r9, %0" :: "m" ((uint32_t)sram_location));
 
     // Update entry location and jump into application
     uint32_t jmp = (hdr->entry - PIC_FLASH_LINK_BASE) + (uint32_t)flash_location;    
-    printk("    jumping to PIC main() at %x...\n", jmp);
+    //printk("    jumping to PIC main() at %x...\n", jmp);
     void (*pic_main)(void) = (void (*)(void))(jmp | 1); // Stay in thumb mode
 
+    printk("-- PIC Main --\n");
     pic_main();
 }
 

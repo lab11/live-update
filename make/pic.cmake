@@ -42,12 +42,18 @@ set_property(
     PROPERTY SUFFIX ".elf"
 )
 
-set(PIC_APP_ELF $<TARGET_FILE_DIR:pic>/relocated_$<TARGET_FILE_NAME:pic>)
 # Resolve external functions
+execute_process(COMMAND git rev-parse HEAD
+    OUTPUT_VARIABLE GIT_REV
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}
+)
+
+set(PIC_APP_ELF $<TARGET_FILE_DIR:pic>/relocated_$<TARGET_FILE_NAME:pic>)
 add_custom_command(
     TARGET pic POST_BUILD
     COMMAND python
-    ARGS relocate.py $<TARGET_FILE:pic> ${ZEPHYR_BINARY_DIR}/zephyr.map -o ${PIC_APP_ELF}
+    ARGS relocate.py $<TARGET_FILE:pic> ${LIVE_UPDATE_ROOT}/.update/${GIT_REV}/zephyr.map -o ${PIC_APP_ELF}
     WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/scripts
 )
 
