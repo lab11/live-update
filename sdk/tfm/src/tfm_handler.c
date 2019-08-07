@@ -73,6 +73,26 @@ void SecureFault_Handler(void)
     }
 
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
+    LOG_MSG("lr:");
+    for(int i = 0; i < 8; i++) {
+        uint32_t digit = (lr >> ((8 - i - 1)*4) & 0xf);
+        if (digit == 0) LOG_MSG("0");
+        if (digit == 1) LOG_MSG("1");
+        if (digit == 2) LOG_MSG("2");
+        if (digit == 3) LOG_MSG("3");
+        if (digit == 4) LOG_MSG("4");
+        if (digit == 5) LOG_MSG("5");
+        if (digit == 6) LOG_MSG("6");
+        if (digit == 7) LOG_MSG("7");
+        if (digit == 8) LOG_MSG("8");
+        if (digit == 9) LOG_MSG("9");
+        if (digit == 10) LOG_MSG("a");
+        if (digit == 11) LOG_MSG("b");
+        if (digit == 12) LOG_MSG("c");
+        if (digit == 13) LOG_MSG("d");
+        if (digit == 14) LOG_MSG("e");
+        if (digit == 15) LOG_MSG("f");
+    }
     while (1) {
         ;
     }
@@ -90,6 +110,15 @@ void HardFault_Handler(void)
      * a hard fault triggered directly, or another fault that has been
      * escalated.
      */
+    LOG_MSG("--> HardFault");
+    while (1) {
+        ;
+    }
+}
+
+void BusFault_Handler(void)
+{
+    LOG_MSG("--> BusFault");
     while (1) {
         ;
     }
