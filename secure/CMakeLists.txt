@@ -16,12 +16,13 @@ endif()
 
 add_executable(${SECURE_TARGET}
     "main.c"
+    "sgpio.c"
 )
 
 # Add include dirs here
-#target_include_directories(${SECURE_TARGET} PRIVATE
-#    "include/"
-#)
+target_include_directories(${SECURE_TARGET} PRIVATE
+    "include/"
+)
 
 # Set appropriate compiler and linker flags
 target_compile_options(${SECURE_TARGET} PUBLIC
@@ -56,6 +57,7 @@ add_dependencies(${SECURE_TARGET} ${S_LD_PP_TARGET})
 get_directory_property(_ADDITIONAL_MAKE_CLEAN_FILES DIRECTORY "./" ADDITIONAL_MAKE_CLEAN_FILES)
 set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${_ADDITIONAL_MAKE_CLEAN_FILES} ${FINAL_S_LD_FILE_NAME}")
 
+set(SG_IMPLIB ${CMAKE_CURRENT_BINARY_DIR}/sg_implib.o)
 target_link_libraries(${SECURE_TARGET}
     PUBLIC
         -T ${FINAL_S_LD_FILE_NAME}
@@ -66,6 +68,8 @@ target_link_libraries(${SECURE_TARGET}
         --specs=nano.specs
         -Wl,--no-wchar-size-warning
         -Wl,--print-memory-usage
+        -Wl,--out-implib=${SG_IMPLIB}
+        -Wl,--cmse-implib
         ${ARCH_C_FLAGS}
     PRIVATE
         sdk 

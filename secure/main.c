@@ -11,6 +11,7 @@
 #include "tfm_internal.h"
 #include "tfm_spm_hal.h"
 #include "uart_stdout.h"
+#include "sgpio.h"
 
 #undef cmse_nsfptr_create
 #define cmse_nsfptr_create(p) ((intptr_t) (p) & ~1)
