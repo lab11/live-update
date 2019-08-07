@@ -14,8 +14,7 @@ set(PIC_FLAGS
 )
 set(LINKER_FLAGS
     -Wl,--emit-relocs
-    -Wl,--unresolved-symbols=ignore-in-object-files
-    -nostartfiles
+    -Wl,--unresolved-symbols=ignore-in-object-files -nostartfiles
     -pie
     -Wl,-gc-sections
 )
@@ -53,7 +52,7 @@ set(PIC_APP_ELF $<TARGET_FILE_DIR:pic>/relocated_$<TARGET_FILE_NAME:pic>)
 add_custom_command(
     TARGET pic POST_BUILD
     COMMAND python
-    ARGS relocate.py $<TARGET_FILE:pic> ${LIVE_UPDATE_ROOT}/.update/${GIT_REV}/zephyr.map -o ${PIC_APP_ELF}
+    ARGS relocate.py $<TARGET_FILE:pic> ${LIVE_UPDATE_ROOT}/.update/${GIT_REV}/zephyr.map ${LIVE_UPDATE_ROOT}/cmake_build/secure/secure.map -o ${PIC_APP_ELF}
     WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/scripts
 )
 

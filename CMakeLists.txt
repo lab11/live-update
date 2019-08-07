@@ -77,6 +77,7 @@ add_custom_command(
 # Generate image to flash to the board
 add_custom_target(${PROJECT_NAME} ALL)
 add_dependencies(${PROJECT_NAME} ${SECURE_TARGET} ${NONSECURE_TARGET})
+add_dependencies(${NONSECURE_TARGET} ${SECURE_TARGET})
 
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD

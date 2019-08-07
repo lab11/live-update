@@ -19,6 +19,15 @@ void main(void)
 {
     printk("Running PIC Loader (_picapps: %p, _epicapps: %p)\n", &_picapps, &_epicapps);
 
+    // The section where we use everything once to include it
+    // TODO: get rid of this garbage
+    k_sleep(0);
+    
+    struct k_timer t_unused;
+    k_timer_init(&t_unused, NULL, NULL);
+    k_timer_start(&t_unused, 1000, 1000);
+    k_timer_stop(&t_unused);
+
     struct pic_hdr *hdr = (struct pic_hdr *)&_picapps;
 
     uint32_t *flash_location = (uint32_t *)&_picapps;
@@ -83,6 +92,7 @@ void main(void)
         } else {
             fixed_val = *target + (uint32_t)sram_location;
         }
+        printk("Relocating value at %p from %x -> %x\n", target, *target, fixed_val);
         *target = fixed_val;
     }
 

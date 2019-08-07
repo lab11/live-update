@@ -54,11 +54,11 @@ def parse_got_offsets(lines, relocations):
 
 
 def find_symbol(lines, pattern):
-    for l in lines:
+    for i, l in enumerate(lines):
         result = pattern.match(l)
         if result:
-            return result
-    return None
+            return i, result
+    return 0, None
 
 
 def parse_symbol_locations(lines, relocations):
@@ -66,11 +66,46 @@ def parse_symbol_locations(lines, relocations):
         return
 
     for r in relocations:
-        pattern = re.compile(".text."+r['symbol_name']+"\s*0x0*([0-9a-f]{8})")
-        result = find_symbol(lines, pattern)
+        pattern = re.compile("\.text\S*\."+r['symbol_name']+"\s*0x0*([0-9a-f]{8})")
+        index, result = find_symbol(lines, pattern)
         if result:
+            print("\t(1) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
             r['symbol_val'] = result.group(1)
+            continue
 
+        pattern = re.compile("\.text\S*"+r['symbol_name']+"\s*0x0*([0-9a-f]{8})")
+        index, result = find_symbol(lines, pattern)
+        if result:
+            print("\t(2) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+            r['symbol_val'] = result.group(1)
+            continue
+
+        pattern = re.compile("\.text\S*\."+r['symbol_name']+"\Z")
+        index, result = find_symbol(lines, pattern)
+        if result:
+            pattern2 = re.compile("\s*0x0*([0-9a-f]{8})")
+            index2, result = find_symbol(lines[index+1:], pattern2)
+            if result:
+                print("\t(3) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+                r['symbol_val'] = result.group(1)
+                continue
+
+        pattern = re.compile("\.text\S*"+r['symbol_name']+"\Z")
+        index, result = find_symbol(lines, pattern)
+        if result:
+            pattern2 = re.compile("\s*0x0*([0-9a-f]{8})")
+            index2, result = find_symbol(lines[index+1:], pattern2)
+            if result:
+                print("\t(4) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+                r['symbol_val'] = result.group(1)
+                continue
+
+        pattern = re.compile("\s*0x0*([0-9a-f]{8})\s*"+r['symbol_name']+"\Z")
+        index, result = find_symbol(lines, pattern)
+        if result:
+            print("\t(5) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+            r['symbol_val'] = result.group(1)
+            continue
 
 def parse_elf_section_headers(lines):
     sections = {}
@@ -160,26 +195,25 @@ def patch_ptr_indirection(elf_sections, relocations, dump_lines, elf_content):
                     if result:
                         r_fptr = result.group(2)
 
-                        # Replace the _next_ `ldr` instruction indexed using r_fptr with `nop`;
+                        # Replace the _next_ `ldr` instruction indexed using r_fptr with a direct `mov`;
                         # this is the pointer indirection we no longer need since we manually
                         # inserted the function location into the GOT
-                        indirection_pattern = re.compile('([0-9a-f]{8}).*ldr\s*\S\S,\s*\['+r_fptr+',\s*#0\]')
-                        for l3 in dump_lines[i+1+j+1+k+1:]: # may god have mercy on my soul
+                        indirection_pattern = re.compile('([0-9a-f]{8}).*ldr\s*(\S\S),\s*\['+r_fptr+',\s*#0\]')
+                        for l3index, l3 in enumerate(dump_lines[i+1+j+1+k+1:]): # may god have mercy on my soul
                             if l3.startswith("Disassembly of section"):
                                 break
                             result = indirection_pattern.match(l3)
                             if result:
                                 instruction_addr = result.group(1)
+                                r_dest = result.group(2)
                                 text_section_offset = \
                                     int(instruction_addr, base=16) - int(elf_sections['.text']['addr'], base=16)
                                 elf_content_offset = \
                                     int(elf_sections['.text']['off'], base=16) + text_section_offset
 
-                                # 16-bit Thumb NOP instruction
-                                nop_value = (0xbf00).to_bytes(2, byteorder='little')
-                                elf_content[elf_content_offset:elf_content_offset+2] = nop_value
-
-                                break
+                                mov_instr = (0b010001100 << 7) | ((int(r_fptr[1]) & 0b1111) << 3) | (int(r_dest[1]) & 0b111)
+                                mov_val = (mov_instr).to_bytes(2, byteorder='little')
+                                elf_content[elf_content_offset:elf_content_offset+2] = mov_val
                         break
         
     return elf_content
@@ -221,12 +255,17 @@ def patch_pic_entry(elf_sections, dump_lines, elf_content):
     return elf_content
     
 
-def relocate(elf_in, elf_out, extern_map, dump, readelf):
+def relocate(elf_in, elf_out, extern_map, secure_map, dump, readelf):
 
     if extern_map:
         map_lines = extract_lines(extern_map)
     else:
         map_lines = None
+
+    if secure_map:
+        secure_map_lines = extract_lines(secure_map)
+    else:
+        secure_map_lines = None
     
     status = subprocess.call("arm-none-eabi-objdump -D " + elf_in.name + " > " + dump.name, shell=True)
     if status != 0:
@@ -246,10 +285,13 @@ def relocate(elf_in, elf_out, extern_map, dump, readelf):
         if r['type'] != 'R_ARM_GOT_BREL':
             print("[Warning] found relocation with type", r['type'], "--", r)
 
+    print(text_relocations)
+
     # Associate relocations with GOT offsets
     parse_got_offsets(dump_lines, text_relocations)
     # Extract locations of unresolved functions
     parse_symbol_locations(map_lines, text_relocations)
+    parse_symbol_locations(secure_map_lines, text_relocations)
      
     input_content = bytearray(elf_in.read())
 
@@ -281,6 +323,7 @@ parser = argparse.ArgumentParser(description='Relocates unresolved extern functi
 parser.add_argument('-o', '--output', help='Output path', default='relocated.elf')
 parser.add_argument('input', help='ELF file with unresolved extern calls to relocate')
 parser.add_argument('map', help='Map file with extern symbols')
+parser.add_argument('securemap', help='Map file with secure symbols')
 args = parser.parse_args()
 
 # Zephyr map not linked the first time compiled
@@ -291,11 +334,17 @@ if not os.path.exists(args.map):
 else:
     extern_map = open(args.map, 'r')
 
+if not os.path.exists(args.securemap):
+    print("[Warning] no secure map file at " + args.securemap)
+    secure_map = None
+else:
+    secure_map = open(args.securemap, 'r')
+
 # Generate objdump and readelf outputs for easy analysis
 with tempfile.NamedTemporaryFile(mode='w+') as temp_dump, tempfile.NamedTemporaryFile(mode='w+') as temp_readelf, \
         open(args.output, 'w+b') as output_elf, open(args.input, 'rb') as input_elf:
     
-    relocate(input_elf, output_elf, extern_map, temp_dump, temp_readelf)
+    relocate(input_elf, output_elf, extern_map, secure_map, temp_dump, temp_readelf)
 
 if extern_map:
     extern_map.close()
