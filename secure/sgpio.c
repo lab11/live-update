@@ -17,6 +17,11 @@ gpio_write(int pin, int val) {
     }
 }
 
+int __attribute__((cmse_nonsecure_entry))
+gpio_read(int pin) {
+    return 0;
+}
+
 void __attribute__((cmse_nonsecure_entry))
 gpio_disable(int pin) {
     int *gpio_base = (int *)GPIO_BASE;
