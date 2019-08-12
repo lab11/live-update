@@ -1,11 +1,12 @@
 
 extern void (*printk)(const char *fmt, ...);
-extern void (*k_sleep)(int ms);
+extern void (*k_sleep)(int ms); // zephyr kernel call
 
 extern void (*gpio_enable_output)(int pin);
 extern void (*gpio_write)(int pin, int val);
 extern int  (*gpio_read)(int pin);
 extern void (*gpio_disable)(int pin);
+extern void (*gpio_add_callback)(int pin, k_callback_t cb);
 
 struct k_timer {
     char contents[44];

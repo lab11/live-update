@@ -56,7 +56,7 @@ void main(void) {
                 state = LRI;
             }
         }
+        k_sleep(5);
     }
-    k_sleep(5);
 }
 
