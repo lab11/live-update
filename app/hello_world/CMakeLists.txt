@@ -9,6 +9,7 @@ project(hello_world)
 
 target_include_directories(pic PRIVATE
     include/
+    ${LIVE_UPDATE_ROOT}/app/include/
 )
 
 target_sources(pic PRIVATE

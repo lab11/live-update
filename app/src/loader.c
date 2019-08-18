@@ -9,7 +9,7 @@
 extern uint32_t *_picapps;
 extern uint32_t *_epicapps;
 
-static uint32_t app_sram[256];
+static uint32_t app_sram[512];
 
 /*
  * Loader for main (PIC) application
@@ -17,7 +17,7 @@ static uint32_t app_sram[256];
  */
 void main(void)
 {
-    printk("Running PIC Loader (_picapps: %p, _epicapps: %p)\n", &_picapps, &_epicapps);
+    printk("\nRunning PIC Loader (_picapps: %p, _epicapps: %p)\n", &_picapps, &_epicapps);
 
     // The section where we use everything once to include it
     // TODO: get rid of this garbage
@@ -92,13 +92,14 @@ void main(void)
         } else {
             fixed_val = *target + (uint32_t)sram_location;
         }
-        //printk("Relocating value at %p from %x -> %x\n", target, *target, fixed_val);
+        printk("--Relocating value at %p from %x -> %x\n", target, *target, fixed_val);
         *target = fixed_val;
     }
 
     //printk("    setting GOT base register...\n");
     // Context Switch:
     // Set base register (r9) to the beginning of GOT, at the start of data SRAM
+    printk("--Setting PIC register (r9) to %x\n", (uint32_t)sram_location);
     __asm("ldr   r9, %0" :: "m" ((uint32_t)sram_location));
 
     // Update entry location and jump into application
@@ -106,7 +107,7 @@ void main(void)
     //printk("    jumping to PIC main() at %x...\n", jmp);
     void (*pic_main)(void) = (void (*)(void))(jmp | 1); // Stay in thumb mode
 
-    printk("\n-- App Main --\n\n");
+    printk("\n**** App Main ****\n\n");
     pic_main();
 }
 

@@ -19,6 +19,11 @@ set(LINKER_FLAGS
     -Wl,-gc-sections
 )
 
+# Stop zephyr from using r9 (PIC base register)
+zephyr_compile_options(
+    -ffixed-r9
+)
+
 add_executable(pic)
 # Link zephyr first; we need the map file to resolve external function calls
 add_dependencies(pic zephyr)

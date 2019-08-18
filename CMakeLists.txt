@@ -129,14 +129,13 @@ add_custom_target(flash
 )
 add_dependencies(flash ${PROJECT_NAME})
 
-# make startdebug
+# make gdb
 set(GDB_DEBUG_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/make/debug.gdb")
-add_custom_target(startdebug
+add_custom_target(gdb
     COMMAND ${GDBSERVER} ${GDBSERVER_ARGS} &
     COMMAND sleep 2
     COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/../zephyros/zephyr/build/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
 )
-add_dependencies(startdebug ${PROJECT_NAME})
 
 # make clean-all
 add_custom_target(clean-all
