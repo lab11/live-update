@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <arm_cmse.h>
 
 #include "secure_utilities.h"
 #include "tfm_svc.h"
@@ -72,27 +73,108 @@ void SecureFault_Handler(void)
                    sizeof(tfm_fault_context));
     }
 
+    char buf[200];
+
+    sprintf(buf, "in secure mode: %d", *((uint32_t *) 0xE000EDD0) != 0);
+    LOG_MSG(buf);
+
+    cmse_address_info_t i;
+    i = cmse_TT((uint32_t *)0xa2284);
+    sprintf(buf, "TT(0xa2284): value: %x\n\tsau_region=%d\n\tsau_region_valid=%d\n\tread_ok=%d\n\treadwrite_ok=%d\n\tns_read_ok=%d\n\tns_readwrite_ok=%d\n\tsecure=%d",
+            i.value,
+            i.flags.sau_region,
+            i.flags.sau_region_valid,
+            i.flags.read_ok,
+            i.flags.readwrite_ok,
+            i.flags.nonsecure_read_ok,
+            i.flags.nonsecure_readwrite_ok,
+            i.flags.secure
+    );
+    LOG_MSG(buf);
+
+    i = cmse_TT((uint32_t *)0xa39d1);
+    sprintf(buf, "TT(0xa39d1): value: %x\n\tsau_region=%d\n\tsau_region_valid=%d\n\tread_ok=%d\n\treadwrite_ok=%d\n\tns_read_ok=%d\n\tns_readwrite_ok=%d\n\tsecure=%d",
+            i.value,
+            i.flags.sau_region,
+            i.flags.sau_region_valid,
+            i.flags.read_ok,
+            i.flags.readwrite_ok,
+            i.flags.nonsecure_read_ok,
+            i.flags.nonsecure_readwrite_ok,
+            i.flags.secure
+    );
+    LOG_MSG(buf);
+
+
+
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
-    LOG_MSG("lr:");
-    for(int i = 0; i < 8; i++) {
-        uint32_t digit = (lr >> ((8 - i - 1)*4) & 0xf);
-        if (digit == 0) LOG_MSG("0");
-        if (digit == 1) LOG_MSG("1");
-        if (digit == 2) LOG_MSG("2");
-        if (digit == 3) LOG_MSG("3");
-        if (digit == 4) LOG_MSG("4");
-        if (digit == 5) LOG_MSG("5");
-        if (digit == 6) LOG_MSG("6");
-        if (digit == 7) LOG_MSG("7");
-        if (digit == 8) LOG_MSG("8");
-        if (digit == 9) LOG_MSG("9");
-        if (digit == 10) LOG_MSG("a");
-        if (digit == 11) LOG_MSG("b");
-        if (digit == 12) LOG_MSG("c");
-        if (digit == 13) LOG_MSG("d");
-        if (digit == 14) LOG_MSG("e");
-        if (digit == 15) LOG_MSG("f");
+    LOG_MSG("---- SAU Registers ----");
+
+
+    uint32_t sau_ctrl = *((uint32_t *)0xE000EDD4);
+    sprintf(buf, "SAU_CTRL: %x", sau_ctrl);
+    LOG_MSG(buf);
+    sprintf(buf, "\tALLNS:  %d", (sau_ctrl >> 1) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tENABLE: %d", (sau_ctrl >> 0) & 1);
+    LOG_MSG(buf);
+
+    uint32_t sau_sfsr = *((uint32_t *)0xE000EDE4);
+    sprintf(buf, "SFSR: %x", sau_sfsr);
+    LOG_MSG(buf);
+    sprintf(buf, "\tLSERR:     %d", (sau_sfsr >> 7) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tSFARVALID: %d", (sau_sfsr >> 6) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tLSPERR:    %d", (sau_sfsr >> 5) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tINVTRAN:   %d", (sau_sfsr >> 4) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tAUVIOL:    %d", (sau_sfsr >> 3) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tINVER:     %d", (sau_sfsr >> 2) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tINVIS:     %d", (sau_sfsr >> 1) & 1);
+    LOG_MSG(buf);
+    sprintf(buf, "\tINVEP:     %d", (sau_sfsr >> 0) & 1);
+    LOG_MSG(buf);
+
+    uint32_t sau_sfar = *((uint32_t *)0xE000EDE0);
+    sprintf(buf, "SFAR: %x", sau_sfar);
+    LOG_MSG(buf);
+
+    uint32_t sau_type = *((uint32_t *)0xE000EDD4);
+    sprintf(buf, "SAU_TYPE: %x", sau_type);
+    LOG_MSG(buf);
+    sprintf(buf, "\tSREGION: %d", (sau_type >> 0) & 0xff);
+    LOG_MSG(buf);
+
+    // Iterate through regions
+    uint32_t *sau_rnr = (uint32_t *)0xE000EDD8; 
+    uint32_t *sau_rbar = (uint32_t *)0xE000EDDC;
+    uint32_t *sau_rlar = (uint32_t *)0xE000EDE0;
+
+    for(int r = 0; r < (sau_type & 0xff); r++) {
+        sprintf(buf, "\t-- Region %d --", r);
+        LOG_MSG(buf);
+
+        *sau_rnr = r;
+        
+        sprintf(buf, "\t\tSAU_RBAR: %x", *sau_rbar);
+        LOG_MSG(buf);
+        sprintf(buf, "\t\t\tBADDR: %x", *sau_rbar & 0xFFFFFFE0);   
+        LOG_MSG(buf);
+
+        sprintf(buf, "\t\tSAU_RLAR: %x", *sau_rlar);
+        LOG_MSG(buf);
+        sprintf(buf, "\t\t\tLADDR:  %x", (*sau_rlar & 0xFFFFFFE0) | 0x1F);   
+        LOG_MSG(buf);
+        sprintf(buf, "\t\t\tNSC:    %x", ((*sau_rlar) >> 1) & 1);
+        LOG_MSG(buf);
+        sprintf(buf, "\t\t\tENABLE: %x", ((*sau_rlar) >> 0) & 1);
+        LOG_MSG(buf);
     }
+
     while (1) {
         ;
     }

@@ -69,14 +69,14 @@ def parse_symbol_locations(lines, relocations):
         pattern = re.compile("\.text\S*\."+r['symbol_name']+"\s*0x0*([0-9a-f]{8})")
         index, result = find_symbol(lines, pattern)
         if result:
-            print("\t(1) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+            print("\t(1) Resolved symbol", r['symbol_name'], "to", result.group(1), "using line \n\t<", lines[index], ">")
             r['symbol_val'] = result.group(1)
             continue
 
         pattern = re.compile("\.text\S*"+r['symbol_name']+"\s*0x0*([0-9a-f]{8})")
         index, result = find_symbol(lines, pattern)
         if result:
-            print("\t(2) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+            print("\t(2) Resolved symbol", r['symbol_name'], "to", result.group(1), "using line \n\t<", lines[index], ">")
             r['symbol_val'] = result.group(1)
             continue
 
@@ -86,7 +86,7 @@ def parse_symbol_locations(lines, relocations):
             pattern2 = re.compile("\s*0x0*([0-9a-f]{8})")
             index2, result = find_symbol(lines[index+1:], pattern2)
             if result:
-                print("\t(3) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+                print("\t(3) Resolved symbol", r['symbol_name'], "to", result.group(1), "using line \n\t<", lines[index], ">")
                 r['symbol_val'] = result.group(1)
                 continue
 
@@ -96,14 +96,14 @@ def parse_symbol_locations(lines, relocations):
             pattern2 = re.compile("\s*0x0*([0-9a-f]{8})")
             index2, result = find_symbol(lines[index+1:], pattern2)
             if result:
-                print("\t(4) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+                print("\t(4) Resolved symbol", r['symbol_name'], "to", result.group(1), "using line \n\t<", lines[index], ">")
                 r['symbol_val'] = result.group(1)
                 continue
 
         pattern = re.compile("\s*0x0*([0-9a-f]{8})\s*"+r['symbol_name']+"\Z")
         index, result = find_symbol(lines, pattern)
         if result:
-            print("\t(5) Resolved symbol", r['symbol_name'], "using line <", lines[index], ">")
+            print("\t(5) Resolved symbol", r['symbol_name'], "to", result.group(1), "using line \n\t<", lines[index], ">")
             r['symbol_val'] = result.group(1)
             continue
 
@@ -284,8 +284,6 @@ def relocate(elf_in, elf_out, extern_map, secure_map, dump, readelf):
     for r in text_relocations:
         if r['type'] != 'R_ARM_GOT_BREL':
             print("[Warning] found relocation with type", r['type'], "--", r)
-
-    print(text_relocations)
 
     # Associate relocations with GOT offsets
     parse_got_offsets(dump_lines, text_relocations)

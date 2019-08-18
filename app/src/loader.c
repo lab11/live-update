@@ -92,7 +92,7 @@ void main(void)
         } else {
             fixed_val = *target + (uint32_t)sram_location;
         }
-        printk("Relocating value at %p from %x -> %x\n", target, *target, fixed_val);
+        //printk("Relocating value at %p from %x -> %x\n", target, *target, fixed_val);
         *target = fixed_val;
     }
 
@@ -106,7 +106,7 @@ void main(void)
     //printk("    jumping to PIC main() at %x...\n", jmp);
     void (*pic_main)(void) = (void (*)(void))(jmp | 1); // Stay in thumb mode
 
-    printk("-- PIC Main --\n");
+    printk("\n-- App Main --\n\n");
     pic_main();
 }
 

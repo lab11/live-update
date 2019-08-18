@@ -138,9 +138,16 @@ add_custom_target(startdebug
 )
 add_dependencies(startdebug ${PROJECT_NAME})
 
+# make clean-all
+add_custom_target(clean-all
+    COMMAND make clean
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 # make clean-zephyr
 add_custom_target(clean-zephyr
     COMMAND make clean
     WORKING_DIRECTORY ${ZEPHYR_DIR}/build
 )
+add_dependencies(clean-all clean-zephyr)
 
