@@ -26,7 +26,7 @@ zephyr_compile_options(
 
 add_executable(pic)
 # Link zephyr first; we need the map file to resolve external function calls
-add_dependencies(pic zephyr)
+#add_dependencies(pic zephyr)
 # Make sure we compile the pic object first
 add_dependencies(app pic)
 
@@ -53,34 +53,40 @@ execute_process(COMMAND git rev-parse HEAD
     WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}
 )
 
-set(PIC_APP_ELF $<TARGET_FILE_DIR:pic>/relocated_$<TARGET_FILE_NAME:pic>)
+set(PIC_DIR ${ZEPHYR_BASE}/build/app)
+set(PIC_APP_ELF ${PIC_DIR}/relocated_pic.elf)
+
 add_custom_command(
-    TARGET pic POST_BUILD
+    OUTPUT ${PIC_APP_ELF}
     COMMAND python
-    ARGS relocate.py $<TARGET_FILE:pic> ${LIVE_UPDATE_ROOT}/.update/${GIT_REV}/zephyr.map ${LIVE_UPDATE_ROOT}/cmake_build/secure/secure.map -o ${PIC_APP_ELF}
+    ARGS relocate.py $<TARGET_FILE:pic> ${ZEPHYR_BASE}/build/zephyr/zephyr.map ${LIVE_UPDATE_ROOT}/cmake_build/secure/secure.map -o ${PIC_APP_ELF}
+    DEPENDS pic
     WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/scripts
 )
 
 # Generate binary file
 add_custom_command(
-    TARGET pic POST_BUILD
+    OUTPUT ${PIC_DIR}/pic.bin
     COMMAND ${CMAKE_OBJCOPY}
-    ARGS -O binary ${PIC_APP_ELF} $<TARGET_FILE_DIR:pic>/pic.bin
+    ARGS -O binary ${PIC_APP_ELF} ${PIC_DIR}/pic.bin
+    DEPENDS ${PIC_APP_ELF}
 )
 
 # Link into binary object
 add_custom_command(
-    TARGET pic POST_BUILD
+    OUTPUT ${PIC_DIR}/temp.bin.o
     COMMAND ${CMAKE_LINKER}
-    ARGS -r -b binary -o $<TARGET_FILE_DIR:pic>/temp.bin.o $<TARGET_FILE_DIR:pic>/pic.bin
+    ARGS -r -b binary -o ${PIC_DIR}/temp.bin.o ${PIC_DIR}/pic.bin
+    DEPENDS ${PIC_DIR}/pic.bin
 )
 
 # Rename data section
 add_custom_command(
-    TARGET pic POST_BUILD
+    OUTPUT ${PIC_DIR}/pic.bin.o
     COMMAND ${CMAKE_OBJCOPY}
-    ARGS --rename-section .data=.picapp $<TARGET_FILE_DIR:pic>/temp.bin.o $<TARGET_FILE_DIR:pic>/pic.bin.o
-    BYPRODUCTS app/pic.bin.o
+    ARGS --rename-section .data=.picapp ${PIC_DIR}/temp.bin.o ${PIC_DIR}/pic.bin.o
+    DEPENDS ${PIC_DIR}/temp.bin.o
+    #BYPRODUCTS app/pic.bin.o
 )
 
 # ---- Non-PIC App ----

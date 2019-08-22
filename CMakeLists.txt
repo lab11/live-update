@@ -10,6 +10,10 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
+if(NOT DEFINED LIVE_UPDATE_APP)
+    message(FATAL_ERROR "Error: `LIVE_UPDATE_APP` not defined")
+endif()
+
 # TODO: figure out why Zephyr doesn't run if not in debug mode
 set(CMAKE_BUILD_TYPE "Debug")
 
@@ -62,15 +66,34 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${SECURE_TARGET}" "${SECURE_TARGET}"
 set(NONSECURE_TARGET "zephyr")
 set(ZEPHYR_DIR ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr)
 
-if(NOT DEFINED LIVE_UPDATE_APP)
-    set(LIVE_UPDATE_APP hello_world)
-endif()
-
 add_custom_target(${NONSECURE_TARGET} ALL)
+
+# Link zephyr binary once to get correct map file and relink a second time for
+# PIC relocations. Assumes relocations cause no net code-size increase.
+set(NONSECURE_TARGET_FIRST_PASS ns_target_first_pass)
+add_custom_target(${NONSECURE_TARGET_FIRST_PASS})
+add_dependencies(${NONSECURE_TARGET} ${NONSECURE_TARGET_FIRST_PASS})
+
+add_custom_command(
+    TARGET ${NONSECURE_TARGET_FIRST_PASS} POST_BUILD
+
+    COMMAND west build -b v2m_musca_nonsecure ${CMAKE_CURRENT_LIST_DIR}/app/${LIVE_UPDATE_APP}/
+    WORKING_DIRECTORY ${ZEPHYR_DIR}
+)
+
+add_custom_command(
+    TARGET ${NONSECURE_TARGET} PRE_BUILD
+
+    # TODO: don't hardcode these files
+    #COMMAND rm relocated_pic.elf temp.bin.o pic.bin.o pic.bin
+    COMMAND rm *
+    WORKING_DIRECTORY ${ZEPHYR_DIR}/build/app
+)
+
 add_custom_command(
     TARGET ${NONSECURE_TARGET} POST_BUILD
 
-    COMMAND west build --pristine -b v2m_musca_nonsecure ${CMAKE_CURRENT_LIST_DIR}/app/${LIVE_UPDATE_APP}/
+    COMMAND west build -b v2m_musca_nonsecure ${CMAKE_CURRENT_LIST_DIR}/app/${LIVE_UPDATE_APP}/
     WORKING_DIRECTORY ${ZEPHYR_DIR}
 )
 
@@ -85,9 +108,9 @@ add_custom_command(
     COMMAND ${CMAKE_CURRENT_LIST_DIR}/bootloader/scripts/assemble.py
     ARGS -l ${CMAKE_CURRENT_LIST_DIR}/sdk/musca_a/include/flash_layout.h
         -s ${CMAKE_CURRENT_BINARY_DIR}/${SECURE_TARGET}/${SECURE_TARGET}.bin
-        # TODO: generalize
+        # TODO: should generalize
         #-n ${CMAKE_CURRENT_BINARY_DIR}/${NONSECURE_TARGET}/${NONSECURE_TARGET}.bin
-        -n ${CMAKE_CURRENT_LIST_DIR}/zephyros/zephyr/build/zephyr/${NONSECURE_TARGET}.bin
+        -n ${ZEPHYR_DIR}/build/zephyr/${NONSECURE_TARGET}.bin
         -o ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_combined.bin
 
     COMMAND ${PYTHONCLIENT}
@@ -134,7 +157,7 @@ set(GDB_DEBUG_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/make/debug.gdb")
 add_custom_target(gdb
     COMMAND ${GDBSERVER} ${GDBSERVER_ARGS} &
     COMMAND sleep 2
-    COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/../zephyros/zephyr/build/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
+    COMMAND ${GDBCLIENT} ${ZEPHYR_DIR}/build/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
 )
 
 # make clean-all

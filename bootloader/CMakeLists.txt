@@ -57,6 +57,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC
     -Wno-unused-variable
     -Wno-return-type
     -Wno-unused-but-set-variable
+    -ffixed-r9
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
