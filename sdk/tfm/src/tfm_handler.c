@@ -78,6 +78,7 @@ void SecureFault_Handler(void)
     sprintf(buf, "in secure mode: %d", *((uint32_t *) 0xE000EDD0) != 0);
     LOG_MSG(buf);
 
+    /*
     cmse_address_info_t i;
     i = cmse_TT((uint32_t *)0xa2284);
     sprintf(buf, "TT(0xa2284): value: %x\n\tsau_region=%d\n\tsau_region_valid=%d\n\tread_ok=%d\n\treadwrite_ok=%d\n\tns_read_ok=%d\n\tns_readwrite_ok=%d\n\tsecure=%d",
@@ -104,8 +105,7 @@ void SecureFault_Handler(void)
             i.flags.secure
     );
     LOG_MSG(buf);
-
-
+    */
 
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
     LOG_MSG("---- SAU Registers ----");
