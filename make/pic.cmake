@@ -2,6 +2,8 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
+link_directories("${LIVE_UPDATE_ROOT}/libgcc")
+
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 
 # ---- PIC app ---- 
@@ -58,7 +60,7 @@ set(PIC_APP_ELF ${PIC_DIR}/relocated_pic.elf)
 
 add_custom_command(
     OUTPUT ${PIC_APP_ELF}
-    COMMAND python
+    COMMAND python3
     ARGS relocate.py $<TARGET_FILE:pic> ${ZEPHYR_BASE}/build/zephyr/zephyr.map ${LIVE_UPDATE_ROOT}/cmake_build/secure/secure.map -o ${PIC_APP_ELF}
     DEPENDS pic
     WORKING_DIRECTORY ${LIVE_UPDATE_ROOT}/scripts

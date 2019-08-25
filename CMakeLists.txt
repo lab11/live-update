@@ -46,6 +46,8 @@ project("${STRIPPED_LIST_DIR}" LANGUAGES C ASM)
 # vars for some reason. Grr.
 include("project_config")
 
+link_directories("${CMAKE_CURRENT_LIST_DIR}/libgcc")
+
 # Platform-specific dependencies
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/sdk" "sdk")
 # Startup scripts
@@ -84,8 +86,6 @@ add_custom_command(
 add_custom_command(
     TARGET ${NONSECURE_TARGET} PRE_BUILD
 
-    # TODO: don't hardcode these files
-    #COMMAND rm relocated_pic.elf temp.bin.o pic.bin.o pic.bin
     COMMAND rm *
     WORKING_DIRECTORY ${ZEPHYR_DIR}/build/app
 )

@@ -3,6 +3,9 @@ cmake_build/
 ignore-*/
 lastVerNum.txt
 *.hex
-zephyros/
 .update/
 .DS_Store
+zephyros/.west/
+zephyros/build/
+zephyros/modules/
+zephyros/tools/

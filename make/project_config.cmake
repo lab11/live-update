@@ -31,7 +31,7 @@ set(GDBSERVER_ARGS
     "gdbserver"
 )
 
-set(PYTHONCLIENT python)
+set(PYTHONCLIENT python3)
 
 # Apply CPU-specific flags
 if (NOT CMAKE_C_FLAGS MATCHES ".*{CMAKE_C_FLAGS_CPU}.*")
