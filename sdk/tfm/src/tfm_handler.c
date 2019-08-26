@@ -75,24 +75,7 @@ void SecureFault_Handler(void)
 
     char buf[200];
 
-    sprintf(buf, "in secure mode: %d", *((uint32_t *) 0xE000EDD0) != 0);
-    LOG_MSG(buf);
-
-    /*
-    cmse_address_info_t i;
-    i = cmse_TT((uint32_t *)0xa2284);
-    sprintf(buf, "TT(0xa2284): value: %x\n\tsau_region=%d\n\tsau_region_valid=%d\n\tread_ok=%d\n\treadwrite_ok=%d\n\tns_read_ok=%d\n\tns_readwrite_ok=%d\n\tsecure=%d",
-            i.value,
-            i.flags.sau_region,
-            i.flags.sau_region_valid,
-            i.flags.read_ok,
-            i.flags.readwrite_ok,
-            i.flags.nonsecure_read_ok,
-            i.flags.nonsecure_readwrite_ok,
-            i.flags.secure
-    );
-    LOG_MSG(buf);
-
+    /* TT example
     i = cmse_TT((uint32_t *)0xa39d1);
     sprintf(buf, "TT(0xa39d1): value: %x\n\tsau_region=%d\n\tsau_region_valid=%d\n\tread_ok=%d\n\treadwrite_ok=%d\n\tns_read_ok=%d\n\tns_readwrite_ok=%d\n\tsecure=%d",
             i.value,
@@ -109,7 +92,6 @@ void SecureFault_Handler(void)
 
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
     LOG_MSG("---- SAU Registers ----");
-
 
     uint32_t sau_ctrl = *((uint32_t *)0xE000EDD4);
     sprintf(buf, "SAU_CTRL: %x", sau_ctrl);
@@ -150,6 +132,7 @@ void SecureFault_Handler(void)
     LOG_MSG(buf);
 
     // Iterate through regions
+    /*
     uint32_t *sau_rnr = (uint32_t *)0xE000EDD8; 
     uint32_t *sau_rbar = (uint32_t *)0xE000EDDC;
     uint32_t *sau_rlar = (uint32_t *)0xE000EDE0;
@@ -174,6 +157,7 @@ void SecureFault_Handler(void)
         sprintf(buf, "\t\t\tENABLE: %x", ((*sau_rlar) >> 0) & 1);
         LOG_MSG(buf);
     }
+    */
 
     while (1) {
         ;
