@@ -160,6 +160,12 @@ add_custom_target(gdb
     COMMAND ${GDBCLIENT} ${ZEPHYR_DIR}/build/${NONSECURE_TARGET}/${NONSECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
 )
 
+add_custom_target(gdb-secure
+    COMMAND ${GDBSERVER} ${GDBSERVER_ARGS} &
+    COMMAND sleep 2
+    COMMAND ${GDBCLIENT} ${CMAKE_CURRENT_BINARY_DIR}/${SECURE_TARGET}/${SECURE_TARGET}.elf --command=${GDB_DEBUG_SCRIPT}
+)
+
 # make clean-all
 add_custom_target(clean-all
     COMMAND make clean
