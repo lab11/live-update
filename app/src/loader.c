@@ -109,5 +109,7 @@ void main(void)
 
     printk("\n**** App Main ****\n\n");
     pic_main();
+
+    while(1); // TODO: remove once r9 problem is fixed
 }
 

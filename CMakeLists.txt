@@ -174,7 +174,7 @@ add_custom_target(clean-all
 
 # make clean-zephyr
 add_custom_target(clean-zephyr
-    COMMAND make clean
+    COMMAND rm -rf *
     WORKING_DIRECTORY ${ZEPHYR_DIR}/build
 )
 add_dependencies(clean-all clean-zephyr)
