@@ -2,7 +2,7 @@
 
 GCC_SRC_DIR=$1
 
-NEWLIB_VERSION=2.5.0.20170421
+NEWLIB_VERSION=3.1.0
 
 SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
 NEWLIB_INCLUDE_PATH=$SCRIPTPATH/../newlib/newlib-$NEWLIB_VERSION/newlib/libc/include
@@ -15,7 +15,7 @@ if [[ ! -e $NEWLIB_INCLUDE_PATH ]]; then
   exit 1
 fi
 
-export CFLAGS_FOR_TARGET="-g -Os -ffunction-sections -fdata-sections -fPIC -msingle-pic-base -mno-pic-data-is-text-relative -mthumb -march=armv8-m.main -isystem $NEWLIB_INCLUDE_PATH"
+export CFLAGS_FOR_TARGET="-g -Os -ffunction-sections -fdata-sections -fPIC -msingle-pic-base -mno-pic-data-is-text-relative -mthumb -march=armv8-m.main -mfloat-abi=softfp -mfpu=fpv5-sp-d16 -isystem $NEWLIB_INCLUDE_PATH"
 
 if gcc --version | grep -q clang; then
   echo "$(tput bold)System gcc is clang. Overriding with gcc-6"
@@ -35,7 +35,9 @@ else
 fi
 
 #export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
+cd $GCC_SRC_DIR
 $GCC_SRC_DIR/contrib/download_prerequisites
+cd -
 
 # 6.2.0:
 $GCC_SRC_DIR/configure \
