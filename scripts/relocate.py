@@ -5,10 +5,18 @@ import subprocess
 import sys
 import tempfile
 
-
+'''
+Read file contents into whitespace-stripped line list.
+'''
 def extract_lines(f):
     return [l.strip() for l in f.readlines()]
 
+
+'''
+Parse .rel.text entries, ignoring relocations that are nonzero (matching
+entries in .rel.dyn for dynamic relocation) if desired. Zero-valued relocations
+are more likely missing extern references that must be resolved.
+'''
 
 def parse_rel_text(lines, ignore_nonzero_symbol_vals=False):
     relocations = []
@@ -342,7 +350,10 @@ else:
 with tempfile.NamedTemporaryFile(mode='w+') as temp_dump, tempfile.NamedTemporaryFile(mode='w+') as temp_readelf, \
         open(args.output, 'w+b') as output_elf, open(args.input, 'rb') as input_elf:
     
-    relocate(input_elf, output_elf, extern_map, secure_map, temp_dump, temp_readelf)
+    if secure_map:
+        relocate(input_elf, output_elf, extern_map, secure_map, temp_dump, temp_readelf)
+    else:
+        status = subprocess.call("cp " + args.input + " " + args.output, shell=True)
 
 if extern_map:
     extern_map.close()
