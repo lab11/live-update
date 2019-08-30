@@ -230,15 +230,18 @@ def patch_ptr_indirection(e, e_contents, relocations, dump_contents):
             '.*ldr\s*(\S\S),\s*\[pc,.*\('+r['offset']+'.*\)'
         ))
 
-    # Important note: assumes that the `instruction_addr` points to a 16-bit instruction
-    def overwrite_with_mov(instruction_addr, r_src, r_dst):
+    # Important note: set append_nop if attempting to replace 32-bit instruction
+    def overwrite_with_mov(instruction_addr, r_src, r_dst, append_nop=False):
 
         text = e.get_section_by_name('.text')
         text_offset = int(instruction_addr, base=16) - text['sh_addr']
         offset_into_elf_contents = text['sh_offset'] + text_offset
 
-        mov_instr = (0b010001100 << 7) | ((int(r_src[1:]) & 0b1111) << 3) | (int(r_dst[1:]) & 0b111)
+        mov_instr = (0b01000110 << 8) | ((int(r_dst[1:]) >> 3) & 0b1) << 7 | ((int(r_src[1:]) & 0b1111) << 3) | (int(r_dst[1:]) & 0b111)
         write_to_elf(e_contents, offset_into_elf_contents, mov_instr, 2)
+
+        if append_nop:
+            write_to_elf(e_contents, offset_into_elf_contents+2, 0x0, 2)
 
     # Given a register containing a GOT offset, patch the following lines to
     # remove the additional function pointer indirection.
@@ -255,7 +258,8 @@ def patch_ptr_indirection(e, e_contents, relocations, dump_contents):
         for i, l in enumerate(lines):
             result = fptr_load_pattern.match(l)
             if result:
-                r_fptr = result.group(2)        
+                r_fptr = result.group(2)
+                print_debug("found r_fptr: " + r_fptr)
                 indirection_lines = lines[i+1:]
                 break
 
@@ -264,13 +268,14 @@ def patch_ptr_indirection(e, e_contents, relocations, dump_contents):
             return
 
         # (2) 
-        indirection_load_pattern = re.compile('([0-9a-f]{8}).*ldr\s*(\S\S),\s*\['+r_fptr+'(,\s*#0)?\]')
+        indirection_load_pattern = re.compile('([0-9a-f]{8}).*ldr(\.w)?\s*(\S\S),\s*\['+r_fptr+'(,\s*#0)?\]')
         for i, l in enumerate(indirection_lines):
             result = indirection_load_pattern.match(l)
             if result:
                 instruction_addr = result.group(1)
-                r_dest = result.group(2)
-                overwrite_with_mov(instruction_addr, r_fptr, r_dest)
+                r_dest = result.group(3)
+                print_debug("found r_dest:" + r_dest + " on line " + l)
+                overwrite_with_mov(instruction_addr, r_fptr, r_dest, append_nop=result.group(2))
 
     for i, l in enumerate(text_contents):
         for p in patterns:
