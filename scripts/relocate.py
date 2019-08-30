@@ -66,11 +66,14 @@ are more likely missing extern references that must be resolved.
 '''
 def parse_text_relocations(e, ignore_nonzero_symbol_vals=False):
 
+    parsed_relocations = []
+
     rel_text = e.get_section_by_name('.rel.text')
+    if not rel_text:
+        return parsed_relocations
+
     rel_symtab = e.get_section(rel_text['sh_link'])
     rel_stringtable = e.get_section_by_name('.strtab')
-
-    parsed_relocations = []
 
     for relocation in rel_text.iter_relocations():
         relocation_symbol = rel_symtab.get_symbol(relocation['r_info_sym'])
@@ -290,6 +293,8 @@ def patch_ptr_indirection(e, e_contents, relocations, dump_contents):
 def patch_dyn_relocations(e, e_contents, relocations):
 
     rel_dyn = e.get_section_by_name('.rel.dyn')
+    if not rel_dyn:
+        return
     rel_dyn_base_offset = rel_dyn['sh_offset']
 
     for i in range(rel_dyn.num_relocations()):
