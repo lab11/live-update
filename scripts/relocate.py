@@ -84,7 +84,7 @@ def parse_text_relocations(e, ignore_nonzero_symbol_vals=False):
 
         parsed_relocations.append({
             'offset': '{:08x}'.format(relocation['r_offset']),
-            'v2_offset': relocation['r_offset'],
+            'offset_val': relocation['r_offset'],
             'info': '{:08x}'.format(relocation['r_info']),
             'type': relocation_type,
             'symbol_val': '{:08x}'.format(relocation_symbol['st_value']),
@@ -98,7 +98,7 @@ def parse_got_offsets(e, relocations):
     # We're looking in the text section for the GOT offsets matching the parsed relocations
     text = e.get_section_by_name('.text')
     for r in relocations:
-        text_offset = relocations[0]['v2_offset'] - text['sh_addr']
+        text_offset = r['offset_val'] - text['sh_addr']
         
         if text_offset < 0 or text_offset >= text['sh_size']:
             print_warning('Relocation .text offset has bad value ' + text_offset)
@@ -122,41 +122,62 @@ def parse_symbol_locations(map_contents, relocations):
     def generate_patterns(relocation):
         
         return [
+            [ # symbol address on one line, try first for exact .text.`fn` match
+                re.compile('\.text\.'+relocation['symbol_name']+'\s*0x0*([0-9a-f]{8})')
+            ],
             [ # symbol address on one line
-                re.compile('\.text\S*\.?'+relocation['symbol_name']+'\s*0x0*([0-9a-f]{8})')
+                re.compile('\.text\S*'+relocation['symbol_name']+'\s*0x0*([0-9a-f]{8})')
+            ],
+            [ # symbol address wrapped to next line, exact match first
+                re.compile('\.text\.?'+relocation['symbol_name']),
+                re.compile('\s*0x0*([0-9a-f]{8})')
             ],
             [ # symbol address wrapped to next line
-                re.compile('\.text\S*\.?'+relocation['symbol_name']+'\Z'),
+                re.compile('\.text\S*?'+relocation['symbol_name']),
                 re.compile('\s*0x0*([0-9a-f]{8})')
             ],
             [ # use the symbol name after the address instead, since apparently sometimes that's necessary
-                re.compile('\s*0x0*([0-9a-f]{8})\s*'+r['symbol_name']+'\Z')
+                re.compile('\s*0x0*([0-9a-f]{8})\s*'+r['symbol_name'])
             ],
         ]
 
     def apply_pattern(map_contents, pattern_list):
-        base_index = 0 
-        final_result = None 
+        print_debug('apply_pattern(contents, ' + str(pattern_list) + ')')
 
+        final_result = None 
+        first_match_index = -1
+
+        print_debug('\ttrying to find first line match for pattern ' + str(pattern_list[0]) + ' in map contents')
         for i, l in enumerate(map_contents):
             result = pattern_list[0].match(l)
             if result:
-                base_index = i
+                print_debug('\tfirst line matched at index ' + str(i) + ' line: ' + l)
                 if len(pattern_list) == 1: # last pattern (only one)
+                    print_debug('\tonly one pattern, returning final result')
                     final_result = result
+                else:
+                    print_debug('\tmore than one pattern, setting first match index to ' + str(i))
+                first_match_index = i
                 break
                 
-        for i, p in enumerate(pattern_list[1:]):
-            result = p.match(map_contents[base_index + i])
-            if not result:
-                break
+        if first_match_index >= 0:
+            print_debug('\tfirst_match_index set to 0 or greater, proceeding to secondary patterns')
+            for i, p in enumerate(pattern_list[1:]):
+                print_debug('\ttrying to find ' + str(i+1) + 'line match for pattern ' + str(p) + ' in text line ' + map_contents[first_match_index + 1 + i])
+                result = p.match(map_contents[first_match_index + 1 + i])
+                if not result:
+                    print_debug("\tdidn't find a match")
+                    break
 
-            if i == len(pattern_list) - 1: # last pattern
-                final_result = result
+                print_debug('\t'+str(i+1)+' line matched')
+                if i == len(pattern_list[1:]) - 1: # last pattern
+                    print_debug("\tthat was the last pattern, returning final result")
+                    final_result = result
 
-        return base_index, final_result
+        return first_match_index, final_result
 
     for r in relocations:
+        print_debug('generating patterns for unresolved symbol `' + r['symbol_name'] + '`')
         patterns = generate_patterns(r)
         for p_list in patterns:
             line_index, result = apply_pattern(map_contents, p_list)
@@ -164,10 +185,10 @@ def parse_symbol_locations(map_contents, relocations):
                 r['symbol_val'] = result.group(1)
 
                 # Print the symbol resolution for sanity checking
-                info_string = 'resolved symbol `' + r['symbol_name'] + '` to ' + r['symbol_val'] + ' using line(s) \n'
+                info_string = 'resolved symbol `' + r['symbol_name'] + '` (GOT offset: ' + hex(r['got_offset']) + ') to ' + r['symbol_val'] + ' using line(s) \n'
                 for i in range(len(p_list)):
                     info_string += '\t\t' + map_contents[line_index + i]
-                print_debug(info_string)
+                print_info(info_string)
                 break
 
 
@@ -270,7 +291,7 @@ def patch_dyn_relocations(e, e_contents, relocations):
         relocation_entry = rel_dyn.get_relocation(i)
         for r in relocations:
             if r['got_offset'] == relocation_entry['r_offset']:
-                write_to_elf(e_contents, rel_dyn_base_offset + (i * 8), enums.ENUM_RELOC_TYPE_ARM['R_ARM_NONE'], 4)
+                write_to_elf(e_contents, rel_dyn_base_offset + (i * 8) + 4, enums.ENUM_RELOC_TYPE_ARM['R_ARM_NONE'], 4)
 
 
 # Patch the entry function in the PIC header to point to the right symbol
@@ -308,6 +329,7 @@ def relocate(elf_in_file, elf_out_file, extern_map, secure_map, dump, readelf):
     parse_symbol_locations(extern_map_contents, text_relocations)
     parse_symbol_locations(secure_map_contents, text_relocations)
      
+    elf_in_file.seek(0)
     elf_contents = bytearray(elf_in_file.read())
 
     # Modify GOT affected by text relocations to resolve external functions
@@ -337,6 +359,8 @@ parser.add_argument('input', help='ELF file with unresolved extern calls to relo
 parser.add_argument('map', help='Map file with extern symbols')
 parser.add_argument('securemap', help='Map file with secure symbols')
 args = parser.parse_args()
+
+ENABLE_DEBUG = False
 
 if not os.path.exists(args.map):
     print_warning('no Zephyr map file at ' + args.map + ', no relocations for external symbols processed.')
