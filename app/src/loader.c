@@ -108,6 +108,11 @@ void main(void)
     void (*pic_main)(void) = (void (*)(void))(jmp | 1); // Stay in thumb mode
 
     printk("\n**** App Main ****\n\n");
+
+    // Uncomment to do janky `gdb`
+    //volatile int b = 1;
+    //while(b);
+
     pic_main();
 
     while(1); // TODO: remove once r9 problem is fixed
