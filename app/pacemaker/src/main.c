@@ -41,13 +41,12 @@ void begin_vrp() {
 }
 
 void main(void) {
-    // this file will initialize a timer, while true
+    // this function will initialize a timer
     // define inputs (from gpio pins)
     // use gpio_write or gpio_pin_write to write to pins?
     // use gpio_port_read to read inputs
     // gpio_enable_output(2);
     //Keep track of a global timer
-
 
     // k_timer_init(&t, timer_expire_cb, timer_stop_cb);
     // k_timer_start(&t, 500, 500);
