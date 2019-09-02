@@ -385,9 +385,11 @@ with tempfile.NamedTemporaryFile(mode='w+') as temp_dump, \
      open(args.output, 'w+b') as output_elf, \
      open(args.input, 'rb') as input_elf:
     
-    # TODO: just output original elf if no extern map
-    #    status = subprocess.call("cp " + args.input + " " + args.output, shell=True)
-    relocate(input_elf, output_elf, extern_map, secure_map, temp_dump, temp_readelf)
+    if secure_map and extern_map:
+        relocate(input_elf, output_elf, extern_map, secure_map, temp_dump, temp_readelf)
+    else:
+        print("cp " + args.input + " " + args.output)
+        status = subprocess.call("cp " + args.input + " " + args.output, shell=True)
 
 if extern_map:
     extern_map.close()
