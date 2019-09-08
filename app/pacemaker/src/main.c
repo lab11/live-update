@@ -1,5 +1,9 @@
 #include "interface.h"
-
+#include "lri.c"
+#include "avi.c"
+#include "vrp.c"
+#include "stdbool.h"
+#include <stdarg.h>
 
 
 // Pins
@@ -16,109 +20,76 @@
 #define TURI    400
 #define TPVAB   50
 
-
-typedef enum {
-    Idle,
-    LRI, 
-    ASed
-} pacemaker_state;
-
-typedef enum {
-    LRI, 
-    ASed
-} pacemaker_event;
+// Thread stuff
+#define STACKSIZE 1024
+#define PRIORITY 7
 
 // static enum pacestate state = LRI;
+// bool VSed;
+// bool ASed;
 
-// timer
-struct k_timer t;
+bool VP_allowed;
 
-//Prototype of eventhandlers
-pacemaker_state LRIHandler(void) {
-    return LRI;
+// Timers
+static struct k_timer avi_timer;
+static struct k_timer uri_timer;
+static struct k_timer vrp_timer;
+static struct k_timer lri_timer;
+static struct k_timer aei_timer;
+
+char * event;
+
+/* Will notify all FSM threads that atrial event or ventricular event has been sensed; takes var args*/
+void notify_threads(int arg_count, ...) {
+    va_list valist;
+    va_start(valist, arg_count);
+    int i;
+
+    for (i = 0; i < arg_count; i++) {
+      void (*fun_ptr)() = va_arg(valist, int); // Not sure about this syntax
+      (*fun_ptr)(event); // This should call the observe function in the respective thread
+   }
+
+   va_end(valist);
 }
 
-pacemaker_state ASedHandler(void) {
-    return ASed;
-}
-
-
-void timer_expire_cb(struct k_timer *t) {
-    k_timer_stop(&t);
-
-}
-
-void timer_stop_cb(struct k_timer *t) {
-    k_timer_start(t, TLRI - TAVI, TLRI - TAVI);
-    printk("timer stopped\n");
-}
-
-void check_lri() {
-    // gpio_enable_output(ATRIAL_PACE_PIN);
-
-    // k_timer_init(&t, timer_expire_cb, timer_stop_cb);
-    // k_timer_start(&t, TLRI - TAVI, TLRI - TAVI);
-
-    
-    switch (state) {
-    case LRI:
-        if (gpio_read(VENTRICLE_SENSE_PIN) || gpio_read(VENTRICLE_PACE_PIN)) {
-            k_timer_stop(&t);
-        } else if (gpio_read(ATRIAL_SENSE_PIN)) {
-            state = ASed;
-        }
-        break;
-    case ASed:
-        if (gpio_read(VENTRICLE_SENSE_PIN) || gpio_read(VENTRICLE_PACE_PIN)) {
-            k_timer_stop(&t);
-            state = LRI;
-        }
+/* Used by other threads to submit obervations 
+   If being invoked for a Ventricle Pacing event, then calling thread MUST guarantee that VP_allowed = 1 prior to calling 
+   Can also be invoked by GPIO inputs in which case VP_allowed should not be checked
+*/
+void observe(char* event) {
+    if (!strcmp(event, "ventricle")) {
+        // The below function calls need to be chained together
+        event = "ventricle";
+        gpio_write(VENTRICLE_PACE_PIN, 0x1); // sets pin=on
+        notify_threads(3, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
+        gpio_write(VENTRICLE_PACE_PIN, 0x0); // sets pin=on
+    } else if (!strcmp(event, "atrial")) {
+        event="atrial";
+        gpio_write(ATRIAL_PACE_PIN, 0x1); // sets pin=on
+        notify_threads(1, &avi_observe);
+        gpio_write(ATRIAL_PACE_PIN, 0x0); // sets pin=on
     }
-    k_sleep(5);
-    
-    // The clock is reset when a ventricular event (VS, VP) is received. 
-    // If no atrial event has been sensed (AS), the component will deliver atrial pacing (AP) after TLRI-TAVI.
-}
 
-void check_avi() {
-
-    // check_uri()
-    // If no ventricular event has been sensed (VS) within TAVI after 
-    // an atrial event (AS, AP), the component will deliver ventricular pacing (VP)
-}
-
-void check_uri() {
-    //  URI component uses a global clock clk to track the time after a ventricular event (VS, VP).
-    // If the global clock value is less than TURI when the AVI component is about to 
-    // deliver VP, AVI component will hold VP and deliver it after the global clock reaches TURI. 
-}
-
-void begin_vrp() {
-    // a VRP period follows each ventricular event (VS, VP) in order to filter noise.
 }
 
 void main(void) {
-    pacemaker_state nextState = Idle;
-    pacemaker_event nextEvent;
-
-    // this function will initialize a timer
-    // define inputs (from gpio pins)
-    // use gpio_write or gpio_pin_write to write to pins?
-    // use gpio_port_read to read inputs
-    
     gpio_enable_output(ATRIAL_PACE_PIN);
-    //Keep track of a global timer
+    gpio_enable_output(VENTRICLE_PACE_PIN);
 
-    // k_timer_init(&t, timer_expire_cb, timer_stop_cb);
-    // k_timer_start(&t, 500, 500);
+    /* These are copied over from pacemaker_example code, but not sure how they function */
+    // gpio_add_oneshot(VENTRICLE_SENSE_PIN, ventricle_sense_cb);
+    // gpio_add_oneshot(VENTRICLE_PACE_PIN, ventricle_pace_cb);
+    // gpio_add_oneshot(ATRIAL_SENSE_PIN, atrial_pace_cb);
 
-    // while loop keeps checking if certain conditions have been met 
-    while(1) {
-        pacemaker_event nextEvent = ReadEvent() // Reading input from pins
-        switch(nextState) {
-            case Idle: 
-        }
-        // 
-    }
+    /* Three threads corresponding to three groups of timing components will be spawned */
+    K_THREAD_DEFINE(lri_id, STACKSIZE, lri_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT); // need to include in interface.h maybe?
+    K_THREAD_DEFINE(avi_id, STACKSIZE, avi_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT);
+    K_THREAD_DEFINE(vrp_id, STACKSIZE, vrp_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT);
+
+    // Force ventrical pace event
+    observe("ventricle")
+
+    // TODO: Add support for receiving inputs from GPIO pins
 }
 
