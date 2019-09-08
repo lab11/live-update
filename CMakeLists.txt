@@ -148,7 +148,7 @@ add_custom_command(
 
 # make flash
 add_custom_target(flash
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MUSCA/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MBED/
 )
 add_dependencies(flash ${PROJECT_NAME})
 
