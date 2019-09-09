@@ -146,9 +146,15 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
+set(FLASH_DIR "/Volumes/MUSCA")
+# Check for old DAPLink firmware volume and flash there instead
+if(IS_DIRECTORY "/Volumes/MBED")
+    set(FLASH_DIR "/Volumes/MBED")
+endif()
+
 # make flash
 add_custom_target(flash
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MUSCA/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex ${FLASH_DIR}
 )
 add_dependencies(flash ${PROJECT_NAME})
 
