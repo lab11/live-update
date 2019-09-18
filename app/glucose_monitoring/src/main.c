@@ -1,14 +1,12 @@
-// TODO: Divide by 10 for all values with comment of divide10 when floating point works
-//#include "interface.h"
-#include <string.h>
-#include <stdio.h>
+// TODO: Divide by 1000000 for all values with comment of divide10 when floating point works
+#include "interface.h"
 
 // USER SET
-#define SCHEDULED_BASAL 10 // divide10 && daily scheduled rate?
-#define TARGET 400 // divide10
-#define THRESHOLD 100 // divide10
+#define SCHEDULED_BASAL 1000000 // divide1000000 && daily scheduled rate?
+#define TARGET 40000000 // divide1000000
+#define THRESHOLD 10000000 // divide1000000
 #define ISF 2 // TODO: allow auto-correction w sensitivity factor
-#define MAX_BASAL_PUMP 20
+#define MAX_BASAL_PUMP 20000000 //divide1000000
 #define DIA 240 // Technically 4 hours converted to 240 minutes
 
 // DEFAULTS
@@ -31,14 +29,16 @@ int calculate_next_temp(int current_bg, int delta, int average_long_delta,
     int existing_basal, int expected_bg, int bg_impact) {
   int temp_basal = existing_basal;
 
+  // Advanced BG Deviation ------------
   if (ABS(delta) > ABS(average_long_delta) * 2 || current_bg > TARGET + THRESHOLD) {
     expected_bg += average_long_delta - bg_impact;
   }
 
-  if ((current_bg > TARGET + THRESHOLD && ABS(delta) > bg_impact / 2 && existing_basal > SCHEDULED_BASAL) ||
+  if ((current_bg > TARGET + THRESHOLD && ABS(delta) > bg_impact * 2 && existing_basal > SCHEDULED_BASAL) ||
       (current_bg < TARGET - THRESHOLD && delta < bg_impact / 2 && existing_basal < SCHEDULED_BASAL)) {
     return MIN(CALC_MAX, existing_basal);
   }
+  // ----------------------------------
 
   if (current_bg < TARGET - THRESHOLD) {
     temp_basal = 0;
@@ -92,11 +92,11 @@ int calculate_bg_impact(int insulin_intake[], int length, int beginning_index) {
       }
     }
   }
-  return activity / MINUTES_PER_APPLICATION * ISF;
+  return activity * ISF;
 }
 
 int get_next_bg(int i) {
-  return (10 - i) * i * 10; // TODO: Replace with pin reading
+  return 70000000 - (11 - i) * i * 1000000; // TODO: Replace with pin reading
 }
 
 void main(void) {
@@ -118,7 +118,7 @@ void main(void) {
       existing_basal,
       calculate_expected_bg(insulin_intake, length, beginning_index, current_bg),
       calculate_bg_impact(insulin_intake, length, beginning_index));
-    printf("Blood glucose level: %d Temp basal rate: %d", current_bg, existing_basal);
+    printk("Blood glucose level: %d.%d Temp basal rate: %d.%d\n", current_bg/1000000, current_bg%1000000, existing_basal/1000000, existing_basal%1000000);
 
     for (int j = 1; j < length_bg; j++) {
       prev_bg[j - 1] = prev_bg[j];
