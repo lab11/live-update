@@ -46,6 +46,11 @@ project("${STRIPPED_LIST_DIR}" LANGUAGES C ASM)
 # vars for some reason. Grr.
 include("project_config")
 
+# Allow repo-independent config overwriting
+if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/make/local_config.cmake")
+    include("local_config")
+endif()
+
 link_directories("${CMAKE_CURRENT_LIST_DIR}/libgcc")
 
 # Platform-specific dependencies
@@ -146,9 +151,15 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
+set(FLASH_DIR "/Volumes/MUSCA")
+# Check for old DAPLink firmware volume and flash there instead
+if(IS_DIRECTORY "/Volumes/MBED")
+    set(FLASH_DIR "/Volumes/MBED")
+endif()
+
 # make flash
 add_custom_target(flash
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex /Volumes/MUSCA/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex ${FLASH_DIR}
 )
 add_dependencies(flash ${PROJECT_NAME})
 
