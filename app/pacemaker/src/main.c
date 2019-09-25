@@ -1,9 +1,8 @@
 #include "interface.h"
-#include "lri.c"
-#include "avi.c"
-#include "vrp.c"
 #include "stdbool.h"
 #include <stdarg.h>
+#include <stddef.h>
+#include "pacemaker.h"
 
 
 // Pins
@@ -37,17 +36,17 @@ static struct k_timer vrp_timer;
 static struct k_timer lri_timer;
 static struct k_timer aei_timer;
 
-char * event;
+char * prev_event;
 
 /* Will notify all FSM threads that atrial event or ventricular event has been sensed; takes var args*/
-void notify_threads(int arg_count, ...) {
+void notify_fsms(int arg_count, ...) {
     va_list valist;
     va_start(valist, arg_count);
     int i;
 
     for (i = 0; i < arg_count; i++) {
       void (*fun_ptr)() = va_arg(valist, int); // Not sure about this syntax
-      (*fun_ptr)(event); // This should call the observe function in the respective thread
+      (*fun_ptr)(prev_event); // This should call the observe function in the respective thread
    }
 
    va_end(valist);
@@ -60,14 +59,14 @@ void notify_threads(int arg_count, ...) {
 void observe(char* event) {
     if (!strcmp(event, "ventricle")) {
         // The below function calls need to be chained together
-        event = "ventricle";
+        prev_event = "ventricle";
         gpio_write(VENTRICLE_PACE_PIN, 0x1); // sets pin=on
-        notify_threads(3, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
+        notify_fsms(4, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
         gpio_write(VENTRICLE_PACE_PIN, 0x0); // sets pin=on
     } else if (!strcmp(event, "atrial")) {
-        event="atrial";
+        prev_event="atrial";
         gpio_write(ATRIAL_PACE_PIN, 0x1); // sets pin=on
-        notify_threads(1, &avi_observe);
+        notify_fsms(1, &avi_observe);
         gpio_write(ATRIAL_PACE_PIN, 0x0); // sets pin=on
     }
 
@@ -77,19 +76,30 @@ void main(void) {
     gpio_enable_output(ATRIAL_PACE_PIN);
     gpio_enable_output(VENTRICLE_PACE_PIN);
 
-    /* These are copied over from pacemaker_example code, but not sure how they function */
+    /* Add gpio callbacks ; TODO: needs to be fixed by Jean-Luc */
     // gpio_add_oneshot(VENTRICLE_SENSE_PIN, ventricle_sense_cb);
     // gpio_add_oneshot(VENTRICLE_PACE_PIN, ventricle_pace_cb);
     // gpio_add_oneshot(ATRIAL_SENSE_PIN, atrial_pace_cb);
 
     /* Three threads corresponding to three groups of timing components will be spawned */
-    K_THREAD_DEFINE(lri_id, STACKSIZE, lri_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT); // need to include in interface.h maybe?
-    K_THREAD_DEFINE(avi_id, STACKSIZE, avi_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT);
-    K_THREAD_DEFINE(vrp_id, STACKSIZE, vrp_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT);
+    // K_THREAD_DEFINE(lri_id, STACKSIZE, lri_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT); // need to include in interface.h maybe?
+    // K_THREAD_DEFINE(avi_id, STACKSIZE, avi_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT);
+    // K_THREAD_DEFINE(vrp_id, STACKSIZE, vrp_entry, NULL, NULL, NULL,PRIORITY, 0, K_NO_WAIT);
 
     // Force ventrical pace event
-    observe("ventricle")
 
-    // TODO: Add support for receiving inputs from GPIO pins
+    // init lri and aei
+    k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
+    k_timer_init(&aei_timer, aei_timer_expire_cb, aei_timer_stop_cb);
+
+    // init avi and uri
+    k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
+    k_timer_init(&uri_timer, uri_timer_expire_cb, NULL);
+
+    // init vrp
+    k_timer_init(&vrp_timer, NULL, NULL);
+
+    observe("ventricle");
+
 }
 

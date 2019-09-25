@@ -5,6 +5,7 @@
 #include "interface.h"
 #include "stdbool.h"
 #include <stddef.h>
+#include "pacemaker.h"
 
 // Params
 #define TAVI    150
@@ -14,8 +15,8 @@ extern struct k_timer avi_timer;
 extern struct k_timer uri_timer;
 extern struct k_timer vrp_timer;
 
-bool avi_expired;
-bool uri_expired;
+bool avi_expired = 0;
+bool uri_expired = 0;
 
 extern bool VP_allowed;
 
@@ -63,17 +64,16 @@ void uri_observe(char* event) {
     }
 }
 
-void avi_entry() {
+// void avi_entry() {
     // Initialization
-    k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
-    k_timer_init(&uri_timer, uri_timer_expire_cb, NULL);
+    // k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
+    // k_timer_init(&uri_timer, uri_timer_expire_cb, NULL);
 
-    uri_expired = 0;
-    avi_expired = 0;
+    // uri_expired = 0;
+    // avi_expired = 0;
 
     // Set up pending tasks
     // gpio_add_oneshot(VENTRICLE_SENSE_PIN, ventricle_sense_cb);
     // gpio_add_oneshot(VENTRICLE_PACE_PIN, ventricle_pace_cb);
     // gpio_add_oneshot(ATRIAL_SENSE_PIN, atrial_pace_cb);
-
-}
+// }

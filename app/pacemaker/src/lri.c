@@ -5,6 +5,7 @@
 #include "interface.h"
 #include "stdbool.h"
 #include <stddef.h>
+#include "pacemaker.h"
 
 // Params
 #define TAVI    150
@@ -14,7 +15,7 @@ extern struct k_timer lri_timer;
 extern struct k_timer aei_timer;
 
 /* Was an Atrial event sensed during AEI? */
-bool ASed;
+bool ASed = 0;
 
 /* Watches for ventricle events*/
 void lri_observe(char* event) {
@@ -55,10 +56,10 @@ void aei_timer_expire_cb(struct k_timer *t) {
 }
 
 /* Thread entry point */
-void lri_entry() {
+// void lri_entry() {
     // Initialization
-    k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
-    k_timer_init(&aei_timer, aei_timer_expire_cb, aei_timer_stop_cb);
+    // k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
+    // k_timer_init(&aei_timer, aei_timer_expire_cb, aei_timer_stop_cb);
 
-    ASed = 0;
-}
+    // ASed = 0;
+// }
