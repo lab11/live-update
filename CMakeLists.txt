@@ -190,3 +190,8 @@ add_custom_target(clean-zephyr
 )
 add_dependencies(clean-all clean-zephyr)
 
+# make serial
+add_custom_target(serial
+    COMMAND miniterm.py - 115200 --raw
+)
+
