@@ -54,6 +54,6 @@ target_compile_options(sdk PUBLIC
 
 target_compile_definitions(sdk PRIVATE
     TFM_LVL=1
-    DAUTH_CHIP_DEFAULT APPEND
+    DAUTH_FULL APPEND
 )
 

@@ -2,6 +2,7 @@
 #include "stdbool.h"
 #include <stdarg.h>
 #include <stddef.h>
+#include <string.h>
 #include "pacemaker.h"
 
 
@@ -39,18 +40,18 @@ static struct k_timer aei_timer;
 char * prev_event;
 
 /* Will notify all FSM threads that atrial event or ventricular event has been sensed; takes var args*/
-void notify_fsms(int arg_count, ...) {
-    va_list valist;
-    va_start(valist, arg_count);
-    int i;
+// void notify_fsms(int arg_count, ...) {
+//     va_list valist;
+//     va_start(valist, arg_count);
+//     int i;
 
-    for (i = 0; i < arg_count; i++) {
-      void (*fun_ptr)() = va_arg(valist, int); // Not sure about this syntax
-      (*fun_ptr)(prev_event); // This should call the observe function in the respective thread
-   }
+//     for (i = 0; i < arg_count; i++) {
+//       void (*fun_ptr)() = va_arg(valist, int); // Not sure about this syntax
+//       (*fun_ptr)(prev_event); // This should call the observe function in the respective thread
+//    }
 
-   va_end(valist);
-}
+//    va_end(valist);
+// }
 
 /* Used by other threads to submit obervations 
    If being invoked for a Ventricle Pacing event, then calling thread MUST guarantee that VP_allowed = 1 prior to calling 
@@ -59,15 +60,15 @@ void notify_fsms(int arg_count, ...) {
 void observe(char* event) {
     if (!strcmp(event, "ventricle")) {
         // The below function calls need to be chained together
-        prev_event = "ventricle";
-        gpio_write(VENTRICLE_PACE_PIN, 0x1); // sets pin=on
-        notify_fsms(4, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
-        gpio_write(VENTRICLE_PACE_PIN, 0x0); // sets pin=on
+        // prev_event = "ventricle";
+        // gpio_write(VENTRICLE_PACE_PIN, 0x1); // sets pin=on
+        // // notify_fsms(4, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
+        // gpio_write(VENTRICLE_PACE_PIN, 0x0); // sets pin=on
     } else if (!strcmp(event, "atrial")) {
-        prev_event="atrial";
-        gpio_write(ATRIAL_PACE_PIN, 0x1); // sets pin=on
-        notify_fsms(1, &avi_observe);
-        gpio_write(ATRIAL_PACE_PIN, 0x0); // sets pin=on
+        // prev_event="atrial";
+        // gpio_write(ATRIAL_PACE_PIN, 0x1); // sets pin=on
+        // // notify_fsms(1, &avi_observe);
+        // gpio_write(ATRIAL_PACE_PIN, 0x0); // sets pin=on
     }
 
 }
