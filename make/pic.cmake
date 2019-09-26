@@ -3,6 +3,7 @@
 cmake_minimum_required(VERSION 3.13.1)
 
 link_directories("${LIVE_UPDATE_ROOT}/libgcc")
+link_directories("${LIVE_UPDATE_ROOT}/newlib/cortex-m")
 
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 
