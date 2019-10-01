@@ -26,6 +26,7 @@ void vrp_observe(char* event) {
 // /* Timer expire callbacks */
 void vrp_timer_expire_cb(struct k_timer *t) {
     // Allow VP events to occur globally
+    printk("vrp timer expired");
     VP_allowed = 1;
 }
 

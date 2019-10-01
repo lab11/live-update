@@ -19,6 +19,7 @@ bool ASed = 0;
 
 /* Watches for ventricle events*/
 void lri_observe(char* event) {
+    printk("lri_observe");
     if(strcmp(event, "ventricle") == 0) {
         k_timer_stop(&lri_timer); // This will also restart the timer with expiration time = TLRI
     }
@@ -26,6 +27,7 @@ void lri_observe(char* event) {
 
 /* Watches for events*/
 void aei_observe(char* event) {
+    printk("aei_observe");
     if(strcmp(event, "ventricle") == 0) {
         ASed = 0;
         k_timer_stop(&aei_timer);
@@ -48,7 +50,7 @@ void aei_timer_stop_cb(struct k_timer *t) {
 /* Timer expire callbacks */
 void aei_timer_expire_cb(struct k_timer *t) {
     /* Triggers AP if no AS sensed */
-
+    printk("aei timer expired");
     if (ASed == 0) {
         // Notify parent thread that VP should be triggered
         observe("atrial");

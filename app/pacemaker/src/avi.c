@@ -23,6 +23,7 @@ extern bool VP_allowed;
 
 void avi_timer_expire_cb(struct k_timer *t) {
     // k_continue(shock_expire_cb);
+    printk("avi timer expired");
     avi_expired = 1;
 
     if (uri_expired == 1 && VP_allowed == 1) {
@@ -34,6 +35,7 @@ void avi_timer_expire_cb(struct k_timer *t) {
 
 void uri_timer_expire_cb(struct k_timer *t) {
     // k_continue(shock_expire_cb);
+    printk("uri timer expired");
     uri_expired = 1;
 
     if (k_timer_status_get(&vrp_timer) == 0) {
@@ -52,6 +54,7 @@ void uri_timer_expire_cb(struct k_timer *t) {
 }
 
 void avi_observe(char* event) {
+    printk("avi_observe");
     if(strcmp(event, "atrial") == 0) {
        k_timer_start(&avi_timer, TAVI, 0);
     }
@@ -59,6 +62,7 @@ void avi_observe(char* event) {
 
 /* Watches for ventricle events*/
 void uri_observe(char* event) {
+    printk("uri_observe");
     if(strcmp(event, "ventricle") == 0) {
        k_timer_start(&uri_timer, TURI, 0);
     }

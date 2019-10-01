@@ -5,8 +5,8 @@
 #include <string.h>
 #include "pacemaker.h"
 
-
 // Pins
+#define LED                 2
 #define VENTRICLE_SENSE_PIN 5 //Vget! action
 #define VENTRICLE_PACE_PIN  6 //VP!
 #define ATRIAL_SENSE_PIN    7 //Aget! action
@@ -21,8 +21,8 @@
 #define TPVAB   50
 
 // Thread stuff
-#define STACKSIZE 1024
-#define PRIORITY 7
+// #define STACKSIZE 1024
+// #define PRIORITY 7
 
 // static enum pacestate state = LRI;
 // bool VSed;
@@ -44,7 +44,7 @@ char * prev_event;
 //     va_list valist;
 //     va_start(valist, arg_count);
 //     int i;
-
+//     printk("notifying fsms...");
 //     for (i = 0; i < arg_count; i++) {
 //       void (*fun_ptr)() = va_arg(valist, int); // Not sure about this syntax
 //       (*fun_ptr)(prev_event); // This should call the observe function in the respective thread
@@ -53,6 +53,19 @@ char * prev_event;
 //    va_end(valist);
 // }
 
+void notify_fsms_ventricle() {
+    printk("notifying fsms...");
+    uri_observe("ventricle");
+    vrp_observe("ventricle");
+    aei_observe("ventricle");
+    lri_observe("ventricle");
+}
+
+void notify_fsms_atrial() {
+    printk("notifying fsms...");
+    avi_observe("atrial");
+}
+
 /* Used by other threads to submit obervations 
    If being invoked for a Ventricle Pacing event, then calling thread MUST guarantee that VP_allowed = 1 prior to calling 
    Can also be invoked by GPIO inputs in which case VP_allowed should not be checked
@@ -60,15 +73,19 @@ char * prev_event;
 void observe(char* event) {
     if (!strcmp(event, "ventricle")) {
         // The below function calls need to be chained together
-        // prev_event = "ventricle";
-        // gpio_write(VENTRICLE_PACE_PIN, 0x1); // sets pin=on
-        // // notify_fsms(4, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
-        // gpio_write(VENTRICLE_PACE_PIN, 0x0); // sets pin=on
+        printk("Observing Ventricle Event...");
+        prev_event = "ventricle";
+        gpio_write(VENTRICLE_PACE_PIN, 0x1); // sets pin=on
+        // notify_fsms(4, &uri_observe, &vrp_observe, &aei_observe, &lri_observe);
+        notify_fsms_ventricle();
+        gpio_write(VENTRICLE_PACE_PIN, 0x0); // sets pin=on
     } else if (!strcmp(event, "atrial")) {
-        // prev_event="atrial";
-        // gpio_write(ATRIAL_PACE_PIN, 0x1); // sets pin=on
-        // // notify_fsms(1, &avi_observe);
-        // gpio_write(ATRIAL_PACE_PIN, 0x0); // sets pin=on
+        printk("Observing Atrial Event...");
+        prev_event="atrial";
+        gpio_write(ATRIAL_PACE_PIN, 0x1); // sets pin=on
+        // notify_fsms(1, &avi_observe);
+        notify_fsms_atrial();
+        gpio_write(ATRIAL_PACE_PIN, 0x0); // sets pin=on
     }
 
 }
@@ -76,6 +93,7 @@ void observe(char* event) {
 void main(void) {
     gpio_enable_output(ATRIAL_PACE_PIN);
     gpio_enable_output(VENTRICLE_PACE_PIN);
+    gpio_enable_output(LED);
 
     /* Add gpio callbacks ; TODO: needs to be fixed by Jean-Luc */
     // gpio_add_oneshot(VENTRICLE_SENSE_PIN, ventricle_sense_cb);
@@ -90,17 +108,28 @@ void main(void) {
     // Force ventrical pace event
 
     // init lri and aei
+    volatile int b = 1;
     k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
+    while(b);
+    b = 1;
     k_timer_init(&aei_timer, aei_timer_expire_cb, aei_timer_stop_cb);
-
+    while(b);
     // init avi and uri
+    b = 1;
     k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
+    while(b);
+    b = 1;
     k_timer_init(&uri_timer, uri_timer_expire_cb, NULL);
+    while(b);
 
     // init vrp
+    b = 1;
     k_timer_init(&vrp_timer, NULL, NULL);
+    while(b);
 
+    printk("Forcing ventricle event...");
     observe("ventricle");
+    // printk("line 112");
 
 }
 

@@ -12,3 +12,4 @@ void avi_observe(char* event);
 void uri_timer_expire_cb(struct k_timer *t);
 void avi_timer_expire_cb(struct k_timer *t);
 void vrp_timer_expire_cb(struct k_timer *t);
+void notify_fsms_ventricle();
