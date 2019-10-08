@@ -26,6 +26,7 @@ void main(void)
     struct k_timer t_unused;
     k_timer_init(&t_unused, NULL, NULL);
     k_timer_start(&t_unused, 1000, 1000);
+    k_timer_status_get(&t_unused);
     k_timer_stop(&t_unused);
 
     struct pic_hdr *hdr = (struct pic_hdr *)&_picapps;
