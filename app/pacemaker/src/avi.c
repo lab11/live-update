@@ -2,9 +2,11 @@
  * Simple Pacemaker (asynchronous)
  */
 
-#include "interface.h"
-#include "stdbool.h"
+#include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
+
+#include "interface.h"
 #include "pacemaker.h"
 
 // Params
@@ -63,6 +65,8 @@ void avi_observe(char* event) {
 /* Watches for ventricle events*/
 void uri_observe(char* event) {
     printk("uri_observe");
+    volatile int b = 1;
+    while(b);
     if(strcmp(event, "ventricle") == 0) {
        k_timer_start(&uri_timer, TURI, 0);
     }

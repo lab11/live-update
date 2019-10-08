@@ -3,9 +3,11 @@
  */
 
 #include "interface.h"
-#include "stdbool.h"
-#include <stddef.h>
 #include "pacemaker.h"
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
 
 // Params
 #define TVRP    150

@@ -31,11 +31,11 @@
 bool VP_allowed;
 
 // Timers
-static struct k_timer avi_timer;
-static struct k_timer uri_timer;
-static struct k_timer vrp_timer;
-static struct k_timer lri_timer;
-static struct k_timer aei_timer;
+struct k_timer avi_timer;
+struct k_timer uri_timer;
+struct k_timer vrp_timer;
+struct k_timer lri_timer;
+struct k_timer aei_timer;
 
 char * prev_event;
 
@@ -108,24 +108,15 @@ void main(void) {
     // Force ventrical pace event
 
     // init lri and aei
-    volatile int b = 1;
     k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
-    while(b);
-    b = 1;
     k_timer_init(&aei_timer, aei_timer_expire_cb, aei_timer_stop_cb);
-    while(b);
+
     // init avi and uri
-    b = 1;
     k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
-    while(b);
-    b = 1;
     k_timer_init(&uri_timer, uri_timer_expire_cb, NULL);
-    while(b);
 
     // init vrp
-    b = 1;
     k_timer_init(&vrp_timer, NULL, NULL);
-    while(b);
 
     printk("Forcing ventricle event...");
     observe("ventricle");

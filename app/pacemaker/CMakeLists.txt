@@ -14,6 +14,9 @@ target_include_directories(pic PRIVATE
 
 target_sources(pic PRIVATE
     src/main.c
+    src/avi.c
+    src/lri.c
+    src/vrp.c
     #${LIVE_UPDATE_ROOT}/cmake_build/secure/sg_implib.o
 )
 
