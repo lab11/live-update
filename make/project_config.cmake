@@ -7,7 +7,7 @@ set(CMAKE_SYSTEM_NAME "Generic" CACHE INTERNAL "" FORCE)
 set(CMAKE_SYSTEM_PROCESSOR "arm" CACHE INTERNAL "" FORCE)
 
 # Configure arm-none-eabi toolchain
-set(TOOLCHAIN_PATH /usr/local/gcc-arm-none-eabi-8-2018-q4-major/bin/)
+set(TOOLCHAIN_PATH /usr/local/bin/)
 set(TOOLCHAIN_PREFIX ${TOOLCHAIN_PATH}arm-none-eabi-)
 
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}gcc)
