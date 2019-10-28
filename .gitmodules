@@ -4,3 +4,9 @@
 [submodule "zephyros/zephyr"]
 	path = zephyros/zephyr
 	url = https://github.com/jlwatson/zephyr
+[submodule "nrf5x-base"]
+	path = nrf5x-base
+	url = https://github.com/lab11/nrf5x-base
+[submodule "nrf52x-base"]
+	path = nrf52x-base
+	url = https://github.com/lab11/nrf52x-base
