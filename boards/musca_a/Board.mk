@@ -51,7 +51,7 @@ $(BUILDDIR):
 	$(Q)mkdir -p $@/arm-tfm
 
 $(ZEPHYR_CMAKELISTS): Makefile
-	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES)" --include_dirs "$(APP_HEADER_PATHS)" > $@
+	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
 		
 $(ELF_S): $(BUILDDIR)
 	$(Q)cmake $(ARM_TFM_DIR) -B $(BUILDDIR)arm-tfm -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DTARGET_PLATFORM=MUSCA_A -DCOMPILER=GNUARM	
