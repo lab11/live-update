@@ -4,3 +4,6 @@
 [submodule "trusted-firmware-m"]
 	path = ext/trusted-firmware-m
 	url = https://git.trustedfirmware.org/trusted-firmware-m.git
+[submodule "CMSIS_5-arm"]
+	path = ext/CMSIS_5
+	url = https://github.com/ARM-software/CMSIS_5.git

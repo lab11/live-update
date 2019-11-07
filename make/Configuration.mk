@@ -79,7 +79,7 @@ $(info $(space))
 ifneq ($(V),)
 	$(info )
 	$(info **************************************************)
-	$(info LIVE UPDATE -- VERBOSE BUILD)
+	$(info LIVE UPDATE -- VERBOSE BUILD
 	$(info **************************************************)
 	$(info Config:)
 	$(info TOOLCHAIN=$(TOOLCHAIN))
@@ -96,19 +96,20 @@ endif
 # These flags should be propagated to individual board builds (e.g. external
 # CMake projects like TF-M)
 
-override CFLAGS += \
+# TODO
+#override CFLAGS += \
 	#-Wall \
 	# TODO
 
-override OPTIMIZATION_FLAG ?= -Os
+#override OPTIMIZATION_FLAG ?= -Os
 
-override LDFLAGS += \
+#override LDFLAGS += \
 	# TODO
 
-override LDLIBS += \
+#override LDLIBS += \
 	# TODO
 
-override OBJDUMP_FLAGS += \
+#override OBJDUMP_FLAGS += \
 	--disassemble-all \
 	--source \
 	--disassembler-options=force-tumb\

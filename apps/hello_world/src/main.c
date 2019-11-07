@@ -1,5 +1,4 @@
-// PIC app that doesn't include sys/printk.h
-#include "interface.h"
+#include "sys/printk.h"
 
 void main(void) {
     printk("Hello, world!\n");
