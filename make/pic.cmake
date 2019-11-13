@@ -3,11 +3,14 @@
 cmake_minimum_required(VERSION 3.13.1)
 
 link_directories("${LIVE_UPDATE_ROOT}/libgcc")
+link_directories("${LIVE_UPDATE_ROOT}/newlib/cortex-m")
 
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 
 # ---- PIC app ---- 
 zephyr_get_compile_options_for_lang(C Z_COMPILE_OPTIONS)
+list(REMOVE_ITEM Z_COMPILE_OPTIONS -nostdinc) # allow std includes for apps
+
 set(PIC_FLAGS
     -fPIE
     -msingle-pic-base
