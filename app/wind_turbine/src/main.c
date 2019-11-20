@@ -7,6 +7,7 @@
 
 #define RHO 1 // Air density; Must determine value
 #define PI 3.14159265358979323846 // Replace with math.h's pi
+#define INTERVAL 1
 
  /*
  Should be constant for particular wind turbine but perhaps can update
@@ -33,12 +34,12 @@ float calculate_aerodynamic_torque (float rotor_speed, float pitch_angle,
       * pow (wind_speed, 2) / 2; // Equation (4)
 }
 
-float calculate_generator_torque (float rotor_speed, float electrical_power) {
+float calculate_generator_torque (float rotor_speed, float pitch_angle,
+  float wind_speed, float power_tracking_error, float c_0) {
   // Section 3.2.1
-  float power_tracking_error = P_NOM - electrical_power; // Must calc c_0; When deriv + val * c_0 = 0
   // Following for simple quadratic formula to solve equation (15)
   float a_const = 1 / (rotor_speed * J_T);
-  float b_const = - calculate_aerodynamic_torque (/* Must calculate variables or collect input*/) / (rotor_speed * J_T)
+  float b_const = - calculate_aerodynamic_torque (rotor_speed, pitch_angle, wind_speed) / (rotor_speed * J_T)
       - rotor_speed * K_T /* Must calculate K_T */ / (rotor_speed * J_T) - 1;
   float c_const = c_0 * power_tracking_error / rotor_speed;
 
@@ -46,5 +47,12 @@ float calculate_generator_torque (float rotor_speed, float electrical_power) {
 }
 
 void main(void) {
-
+  float prev_power_tracking_error = 0; // Must change
+  while (true) {
+    float power_tracking_error = P_NOM - electrical_power; // Must calc c_0; When deriv + val * c_0 = 0
+    calculate_generator_torque (/*Must read as input rotor_speed, pitch_angle, wind_speed*/,
+      power_tracking_error,
+      (prev_power_tracking_error - power_tracking_error) / (power_tracking_error * INTERVAL));
+    prev_power_tracking_error = power_tracking_error;
+  }
 }
