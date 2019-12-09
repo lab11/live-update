@@ -33,6 +33,7 @@ then
     wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
     tar -xvjf gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
     echo 'export PATH=/usr/local/gcc-arm-none-eabi-9-2019-q4-major/bin:"$PATH"' >> /home/vagrant/.bashrc
+    popd
 else
     echo "arm-none-eabi-gcc already installed:"
     arm-none-eabi-gcc --version
@@ -52,6 +53,12 @@ if ! west --version
 then
     pip3 install west
     echo 'export PATH=/usr/local/bin:"$PATH"' >> /home/vagrant/.bashrc
+
+    pushd .
+    cd /vagrant/zephyros
+    west init
+    west update
+    popd
 fi
 
 pip3 install -r /vagrant/zephyros/zephyr/scripts/requirements.txt
