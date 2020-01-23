@@ -13,3 +13,6 @@
 [submodule "mbedtls"]
     path = ext/mbedtls
     url = https://github.com/ARMmbed/mbedtls.git
+[submodule "nrf52x-base"]
+	path = nrf52x-base
+	url = https://github.com/lab11/nrf52x-base
