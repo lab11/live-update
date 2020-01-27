@@ -16,7 +16,7 @@ NRFUTIL = nrfutil
 GDB_PORT_NUMBER ?= 2331
 
 .PHONY: flash
-flash: all
+flash:
 	cp $(MERGED_HEX) /Volumes/MUSCA/
 
 .PHONY: serial
