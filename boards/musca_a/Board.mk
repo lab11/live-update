@@ -118,4 +118,5 @@ size-secure: $(ELF_S)
 clean::
 	@echo " Cleaning..."
 	$(Q)rm -rf $(BUILDDIR)
+	$(Q)rm -f $(ZEPHYR_CMAKELISTS)
 
