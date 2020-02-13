@@ -1,3 +1,6 @@
+#include "tfm_gpio_veneers.h"
+#include <time.h>
+
 /* User defined values in profile*/
 #define TARGET_LOW 80
 #define TARGET_HIGH 180
@@ -11,15 +14,167 @@
 /* MACROS */
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 
+#define FLOATS_BIT 32
+
 /* Peak activation percentage occurs at 75 minutes for DIA of 180 or 3 hours. */
 float PEAK = DIA * 75.0f / 180;
+
+int bits = 0;
+int bits_received = 0;
+int glucose_boolean = 0;
+struct requested_temp *current_temp_basal;
+
+void pin9_cb_bg(void);
+void pin9_cb_bolus(void);
+void pin10_cb(void);
+void pin11_cb(void);
+
+void calculate_basal(void);
+
+gpio_int_config pin9_cfg_bg = {
+    .type = 0,
+    .polarity = 1,
+    .cb = pin8_cb_bg
+};
+
+gpio_int_config pin9_cfg_bolus = {
+    .type = 0,
+    .polarity = 1,
+    .cb = pin8_cb_bolus
+};
+
+gpio_int_config pin10_cfg = {
+    .type = 0,
+    .polarity = 1,
+    .cb = pin10_cb
+};
+
+gpio_int_config pin11_cfg = {
+    .type = 0,
+    .polarity = 1,
+    .cb = pin11_cb
+};
+
+void pin9_cb(void) {
+  tfm_gpio_interrupt_enable(10, &pin10_cfg);
+  tfm_gpio_interrupt_enable(11, &pin11_cfg);
+  tfm_gpio_interrupt_disable(9);
+    printk("Got an interrupt on pin 9!\n");
+}
+
+void pin9_cb_bg(void) {
+  // Represents beginning of bit
+    pin9_cb();
+    glucose_boolean = 1;
+}
+
+void pin9_cb_bolus(void) {
+  // Represents beginning of bit
+    pin9_cb();
+    glucose_boolean = 0;
+}
+
+void pin10_cb(void) {
+  // Represents received 0 bit
+  tfm_gpio_interrupt_disable(10);
+  tfm_gpio_interrupt_disable(11);
+  tfm_gpio_interrupt_enable(9, &pin9_cfg_bg);
+  tfm_gpio_interrupt_enable(9, &pin9_cfg_bolus);
+    printk("Got an interrupt on pin 10!\n");
+    bits = bits << 1;
+    bits_received++;
+    if (bits_received == 32) {
+      // determine_basal
+      calculate_basal();
+    }
+}
+
+void pin11_cb(void) {
+  // Represents received 1 bit
+  tfm_gpio_interrupt_disable(10);
+  tfm_gpio_interrupt_disable(11);
+  tfm_gpio_interrupt_enable(9, &pin9_cfg_bg);
+  tfm_gpio_interrupt_enable(9, &pin9_cfg_bolus);
+    printk("Got an interrupt on pin 11!\n");
+    bits = (bits << 1) + 1;
+    bits_received++;
+    if (bits_received == 32) {
+      // determine_basal
+      calculate_basal();
+    }
+}
+
+void main(void) {
+  tfm_gpio_interrupt_enable(9, &pin9_cfg_bg);
+  tfm_gpio_interrupt_enable(9, &pin9_cfg_bolus);
+  current_temp_basal = (struct requested_temp *)malloc(sizeof(struct requested_temp));
+  current_temp_basal->duration = 0;
+  current_temp_basal->rate = 0f;
+
+}
+
+struct treatment_list * iob_data_absolute = NULL;
+struct glucose_readings * glucose_data_absolute = NULL;
+
+void calculate_deltas(struct glucose_readings *glucose_data, float *deltas) {
+  /*
+  delta = change in BG between glucose (most recent BG) and an average of BG value from between 2.5 and 7.5 minutes ago (usually just a single BG value from 5 minutes ago)
+  glucose = most recent BG
+  short_avgdelta = average rate of change (per 5m) in BG values between glucose (most recent BG) and each BG reading from 2.5 to 17.5 minutes ago
+  long_avgdelta = average rate of change (per 5m) in BG values between glucose (most recent BG) and each BG reading from 17.5 to 42.5 minutes ago
+  */
+  float avg_bg_delta, short_avg_delta, long_avg_delta = 0f, 0f, 0f;
+  int short_num, long_num = 0, 0;
+  struct glucose_readings *current = glucose_data->prev;
+  float current_difference;
+  while (current) {
+    current_difference = glucose_data->time - current->time;
+    if (2.5f * 60 <= current_difference && current_difference <= 7.5f * 60) {
+      avg_bg_delta += current->glucose;
+      short_avg_delta += (glucose_data->glucose) - (current->glucose);
+      short_num++;
+    } else if (17.5f * 60 <= current_difference && current_difference <= 42.5f * 60) {
+      long_avg_delta += (glucose_data->glucose) - (current->glucose);
+      long_num++;
+    } else {
+      current->prev = NULL; // Too far back so can forget about this glucose reading
+    }
+    current = current->prev;
+  }
+  deltas[0] = avg_bg_delta/short_num;
+  deltas[1] = short_avg_delta/short_num;
+  deltas[2] = long_avg_delta/long_num;
+}
+
+void calculate_basal() {
+  if (glucose_boolean) {
+    float new_glucose_reading = (float)bits;
+    // Append new glucose reading data
+    struct glucose_readings * new_data = (struct glucose_readings *) malloc(sizeof(struct glucose_readings));
+    new_data->time = time(NULL);
+    new_data->glucose = new_glucose_reading;
+    new_data->prev = glucose_data_absolute;
+    glucose_data_absolute = new_data;
+
+    float glucose_deltas[3];
+    calculate_deltas(glucose_data_absolute, glucose_deltas);
+    //determine_basal(current_temp_basal)
+  }
+}
 
 struct requested_temp {
   int duration;
   float rate;
 };
 
+struct glucose_readings {
+  time_t time; /* Represents the absolute time as seconds from Jan 17, 1970. */
+  float glucose;
+  struct glucose_readings * prev;
+};
+
 struct treatment_list {
+  time_t time; /* Represents the absolute time as seconds from Jan 17, 1970. */
   int minutes; /* Represents minutes between the next treatment and the current. */
   float insulin;
   struct treatment_list * prev;
