@@ -8,14 +8,14 @@ export PATH=/usr/local/bin:"$PATH"
 apt-get update
 apt-get install -y g++
 
-# Install CMake v3.15.5, if it's not there already
-if [[ ! $(cmake --version) =~ "3.15.5" ]]
+# Install CMake v3.16.4, if it's not there already
+if [[ ! $(cmake --version) =~ "3.16.4" ]]
 then
     pushd .
     cd /tmp
-    wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5.tar.gz
-    tar -xzvf cmake-3.15.5.tar.gz
-    cd cmake-3.15.5
+    wget https://github.com/Kitware/CMake/releases/download/v3.16.4/cmake-3.16.4.tar.gz
+    tar -xzvf cmake-3.16.4.tar.gz
+    cd cmake-3.16.4
     ./bootstrap
     make -j4
     make install
@@ -99,6 +99,9 @@ fi
 
 pip3 install pyelftools
 apt-get install -y srecord python-serial
+
+# OpenFAST packages
+apt-get install -y gfortran libopenblas-dev libhdf5-openmpi-dev libyaml-cpp-dev libopenmpi-dev libxml2-dev
 
 #addgroup vboxusers
 #adduser vagrant vboxusers
