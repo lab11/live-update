@@ -11,3 +11,4 @@ zephyros/modules/
 zephyros/tools/
 make/local_config.cmake
 .vagrant/
+.cscope.out
