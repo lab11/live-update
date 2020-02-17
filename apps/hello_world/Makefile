@@ -2,6 +2,7 @@ PROJECT_NAME = $(shell basename "$(realpath ./)")
 
 # Configuration
 BOARD = musca_a
+PARTITION = 0
 
 # Source and header files
 APP_HEADER_PATHS += ./include

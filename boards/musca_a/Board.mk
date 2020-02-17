@@ -13,6 +13,8 @@ DEBUG_SUFFIX = _debug
 ARM_TFM_DIR = $(BASE_DIR)/ext/trusted-firmware-m
 ZEPHYR_BASE = $(BASE_DIR)/zephyros/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
+ZEPHYR_PRJ_CONFIG = prj.conf
+ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
 
 MERGED_BIN = $(BUILDDIR)$(OUTPUT_NAME)_merged.bin
 SIGNED_BIN = $(BUILDDIR)$(OUTPUT_NAME)_merged_signed.bin
@@ -50,7 +52,13 @@ $(BUILDDIR):
 	$(Q)mkdir -p $@
 	$(Q)mkdir -p $@/arm-tfm
 
-$(ZEPHYR_CMAKELISTS): Makefile
+$(ZEPHYR_PRJ_CONFIG):
+	$(Q)cp $(BASE_DIR)/make/app-prj.conf $@
+
+$(ZEPHYR_APP_LINKER_SCRIPT): $(BUILDDIR)
+	$(Q)cp $(BASE_DIR)/make/app-sections.ld $@
+
+$(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_APP_LINKER_SCRIPT) $(ZEPHYR_PRJ_CONFIG)
 	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
 		
 $(ELF_S): $(BUILDDIR)
@@ -58,9 +66,17 @@ $(ELF_S): $(BUILDDIR)
 	$(Q)cmake --build $(BUILDDIR)arm-tfm -- install
 	$(Q)cp $(BUILDDIR)arm-tfm/install/outputs/MUSCA_A/tfm_s.axf $@
 
+ifeq ($(PARTITION),0)
 $(ELF): $(BUILDDIR) $(ZEPHYR_CMAKELISTS)
 	cd $(ZEPHYR_BASE) && west build --pristine -b v2m_musca_nonsecure $(APP_DIR)/
 	$(Q)cp $(ZEPHYR_BASE)/build/zephyr/zephyr.elf $@
+endif
+
+ifeq ($(PARTITION),1)
+$(ELF): $(BUILDDIR) $(ZEPHYR_CMAKELISTS)
+	cd $(ZEPHYR_BASE) && west build --pristine -b v2m_musca_nonsecure_p1 $(APP_DIR)/
+	$(Q)cp $(ZEPHYR_BASE)/build/zephyr/zephyr.elf $@
+endif
 
 $(BIN_S): $(ELF_S) | $(BUILDDIR)
 	$(TRACE_HEX)
@@ -119,4 +135,5 @@ clean::
 	@echo " Cleaning..."
 	$(Q)rm -rf $(BUILDDIR)
 	$(Q)rm -f $(ZEPHYR_CMAKELISTS)
+	$(Q)rm -f $(ZEPHYR_PRJ_CONFIG)
 

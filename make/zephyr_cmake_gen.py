@@ -18,5 +18,15 @@ target_sources(app PRIVATE {})
 if args.include_dirs:
     contents += "target_include_directories(app PRIVATE {})\n".format(args.include_dirs)
 
+# Set relocation for application source files (ignore .o's, e.g. veneer interfaces)
+c_sources = []
+for s in args.sources.split(" "):
+    if s.endswith(".c"):
+        c_sources.append(s)
+c_sources = " ".join(c_sources)
+
+contents += "zephyr_code_relocate({} APPFLASH_TEXT_RODATA)\n".format(c_sources)
+contents += "zephyr_code_relocate({} APPRAM_DATA_BSS)\n".format(c_sources)
+
 print(contents)
 
