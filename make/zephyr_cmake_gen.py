@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(description='Generate CMakeLists.txt file for app.')
 parser.add_argument('project', help='project name to pass to CMake `project` for application')

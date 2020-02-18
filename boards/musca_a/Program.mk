@@ -14,8 +14,6 @@ GDB_PORT_NUMBER ?= 2331
 
 .PHONY: flash
 flash:
-	# Keep track of the flashed version number to decide when to alternate slots
-	#cp $(MERGED_HEX) /Volumes/MUSCA/ && cp $(VERSION_FILENAME) $(LAST_FLASHED_VERISON_FILENAME)
 	cp $(MERGED_HEX) /Volumes/MUSCA/
 	
 .PHONY: serial

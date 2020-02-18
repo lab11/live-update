@@ -78,6 +78,7 @@ $(ELF): $(BUILDDIR) $(ZEPHYR_CMAKELISTS)
 	$(Q)cp $(ZEPHYR_BASE)/build/zephyr/zephyr.elf $@
 endif
 
+.PHONY: $(BIN_S)
 $(BIN_S): $(ELF_S) | $(BUILDDIR)
 	$(TRACE_HEX)
 	$(Q)$(OBJCOPY) -Oihex $< $(HEX_S)
@@ -86,6 +87,7 @@ $(BIN_S): $(ELF_S) | $(BUILDDIR)
 	$(TRACE_SIZ)
 	$(Q)$(SIZE) $<
 
+.PHONY: $(BIN)
 $(BIN): $(ELF) | $(BUILDDIR)
 	$(TRACE_HEX)
 	$(Q)$(OBJCOPY) -Oihex $< $(HEX)
@@ -94,6 +96,7 @@ $(BIN): $(ELF) | $(BUILDDIR)
 	$(TRACE_SIZ)
 	$(Q)$(SIZE) $<
 
+.PHONY: $(MERGED_BIN)
 $(MERGED_BIN): $(BIN_S) $(BIN) 
 	python3 $(ARM_TFM_DIR)/bl2/ext/mcuboot/scripts/assemble.py \
 		-l $(ARM_TFM_DIR)/platform/ext/target/musca_a/partition/flash_layout.h \
@@ -101,12 +104,14 @@ $(MERGED_BIN): $(BIN_S) $(BIN)
 		-n $(BIN) \
 		-o $@
 
+.PHONY: $(SIGNED_BIN)
 $(SIGNED_BIN): $(MERGED_BIN)
 	$(Q)python3 $(ARM_TFM_DIR)/bl2/ext/mcuboot/scripts/imgtool.py \
 		sign --layout $(ARM_TFM_DIR)/platform/ext/target/musca_a/partition/flash_layout.h \
 		-k $(ARM_TFM_DIR)/bl2/ext/mcuboot/root-rsa-2048.pem \
 		--align 1 -H 0x400 --pad 0x100000 $< $@
 
+.PHONY: $(MERGED_HEX)
 $(MERGED_HEX): $(SIGNED_BIN)
 	$(Q)srec_cat $(BUILDDIR)arm-tfm/bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 $< -Binary -offset 0x220000 -o $@ -Intel
 
