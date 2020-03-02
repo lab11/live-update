@@ -15,6 +15,7 @@ ZEPHYR_BASE = $(BASE_DIR)/zephyros/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
 ZEPHYR_PRJ_CONFIG = prj.conf
 ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
+ZEPHYR_BUILDDIR = $(ZEPHYR_BASE)/build
 
 MERGED_BIN = $(BUILDDIR)$(OUTPUT_NAME)_merged.bin
 SIGNED_BIN = $(BUILDDIR)$(OUTPUT_NAME)_merged_signed.bin
@@ -37,6 +38,8 @@ BIN_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).bin
 DEBUG_BIN_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX)$(DEBUG_SUFFIX).bin
 LST_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).lst
 MAP_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).map
+
+VERSION_FILE = $(BUILDDIR)lastVerNum.txt
 
 # Include supporting makefiles
 
@@ -66,17 +69,22 @@ $(ELF_S): $(BUILDDIR)
 	$(Q)cmake --build $(BUILDDIR)arm-tfm -- install
 	$(Q)cp $(BUILDDIR)arm-tfm/install/outputs/MUSCA_A/tfm_s.axf $@
 
-ifeq ($(PARTITION),0)
-$(ELF): $(BUILDDIR) $(ZEPHYR_CMAKELISTS)
-	cd $(ZEPHYR_BASE) && west build --pristine -b v2m_musca_nonsecure $(APP_DIR)/
-	$(Q)cp $(ZEPHYR_BASE)/build/zephyr/zephyr.elf $@
+
+VERSION_NUM = $(shell test -f ${VERSION_FILE} && tail -c 1 ${VERSION_FILE})
+ifeq ($(VERSION_NUM),)
+	VERSION_NUM = 0
+endif
+PARTITION = $(shell echo ${VERSION_NUM}%2 | bc)
+
+ZEPHYR_BOARD = v2m_musca_nonsecure
+ifeq ($(PARTITION),1)
+ZEPHYR_BOARD = v2m_musca_nonsecure_p1
 endif
 
-ifeq ($(PARTITION),1)
 $(ELF): $(BUILDDIR) $(ZEPHYR_CMAKELISTS)
-	cd $(ZEPHYR_BASE) && west build --pristine -b v2m_musca_nonsecure_p1 $(APP_DIR)/
+	@echo " Building application for PARTITION $(PARTITION)..."
+	cd $(ZEPHYR_BASE) && west build --pristine -b $(ZEPHYR_BOARD) $(APP_DIR)/
 	$(Q)cp $(ZEPHYR_BASE)/build/zephyr/zephyr.elf $@
-endif
 
 .PHONY: $(BIN_S)
 $(BIN_S): $(ELF_S) | $(BUILDDIR)
@@ -139,6 +147,7 @@ size-secure: $(ELF_S)
 clean::
 	@echo " Cleaning..."
 	$(Q)rm -rf $(BUILDDIR)
+	$(Q)rm -rf $(ZEPHYR_BUILDDIR)
 	$(Q)rm -f $(ZEPHYR_CMAKELISTS)
 	$(Q)rm -f $(ZEPHYR_PRJ_CONFIG)
 
