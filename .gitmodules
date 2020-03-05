@@ -7,9 +7,13 @@
 [submodule "CMSIS_5-arm"]
 	path = ext/CMSIS_5
 	url = https://github.com/ARM-software/CMSIS_5.git
+	ignore = dirty
 [submodule "mbedcrypto"]
     path = ext/mbed-crypto
     url = https://github.com/ARMmbed/mbed-crypto.git
 [submodule "mbedtls"]
     path = ext/mbedtls
     url = https://github.com/ARMmbed/mbedtls.git
+[submodule "ext/nrf9x-base"]
+	path = ext/nrf9x-base
+	url = git@github.com:lab11/nrf9x-base

@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(description='Generate CMakeLists.txt file for app.')
 parser.add_argument('project', help='project name to pass to CMake `project` for application')
@@ -15,8 +16,27 @@ project({})\n
 target_sources(app PRIVATE {})
 """.format(args.project, args.sources)
 
+# Set relocation for application source files (ignore .o's, e.g. veneer interfaces)
+c_sources = []
+tfm_headers = None
+for s in args.sources.split(" "):
+    if s.endswith(".c"):
+        c_sources.append(s)
+    if s.endswith("s_veneers.o"):
+        tfm_headers = s
+c_sources = " ".join(c_sources)
+
+if tfm_headers:
+    contents += "target_sources(zephyr PRIVATE {})\n".format(tfm_headers)
+    for s in args.include_dirs.split(" "):
+        if s.endswith("tfm/inc"):
+            contents += "target_include_directories(zephyr_interface INTERFACE {})\n".format(s)
+
 if args.include_dirs:
     contents += "target_include_directories(app PRIVATE {})\n".format(args.include_dirs)
+
+contents += "zephyr_code_relocate({} APPFLASH_TEXT_RODATA)\n".format(c_sources)
+contents += "zephyr_code_relocate({} APPRAM_DATA_BSS)\n".format(c_sources)
 
 print(contents)
 
