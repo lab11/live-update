@@ -1,3 +1,7 @@
+/*
+ * Simple Pacemaker (asynchronous)
+ */
+
 #include "stdbool.h"
 #include <stdarg.h>
 #include <stddef.h>
@@ -104,6 +108,6 @@ void main(void) {
     k_timer_init(&diagnostic_timer, NULL, NULL);
 
     // Uncomment to force ventricle event when no external inputs available
-    printf("Forcing Ventricle Event");
+    printk("Forcing Ventricle Event");
     observe(VENTRICLE);
 }
