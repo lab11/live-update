@@ -24,7 +24,6 @@ for s in args.sources.split(" "):
         c_sources.append(s)
     if s.endswith("s_veneers.o"):
         tfm_headers = s
-c_sources = " ".join(c_sources)
 
 if tfm_headers:
     contents += "target_sources(zephyr PRIVATE {})\n".format(tfm_headers)
@@ -35,8 +34,9 @@ if tfm_headers:
 if args.include_dirs:
     contents += "target_include_directories(app PRIVATE {})\n".format(args.include_dirs)
 
-contents += "zephyr_code_relocate({} APPFLASH_TEXT_RODATA)\n".format(c_sources)
-contents += "zephyr_code_relocate({} APPRAM_DATA_BSS)\n".format(c_sources)
+for c_src in c_sources:
+    contents += "zephyr_code_relocate({} APPFLASH_TEXT_RODATA)\n".format(c_src)
+    contents += "zephyr_code_relocate({} APPRAM_DATA_BSS)\n".format(c_src)
 
 print(contents)
 
