@@ -8,15 +8,20 @@
 #define ATRIAL_SENSE_PIN    7 //Aget! action
 #define ATRIAL_PACE_PIN     8 //AP!; the shocker
 
-void observe(char* event);
-void lri_observe(char* event);
-void aei_observe(char* event);
+typedef enum {
+    VENTRICLE=0, 
+    ATRIAL=1
+} EventType_t;
+
+void observe(EventType_t event);
+void lri_observe();
+void aei_observe();
 void lri_timer_stop_cb(struct k_timer *t);
 void aei_timer_stop_cb(struct k_timer *t);
 void aei_timer_expire_cb(struct k_timer *t);
-void vrp_observe(char* event);
-void uri_observe(char* event);
-void avi_observe(char* event);
+void vrp_observe();
+void uri_observe();
+void avi_observe();
 void uri_timer_expire_cb(struct k_timer *t);
 void avi_timer_expire_cb(struct k_timer *t);
 void vrp_timer_expire_cb(struct k_timer *t);

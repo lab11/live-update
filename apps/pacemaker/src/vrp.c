@@ -18,7 +18,7 @@ extern bool VP_allowed;
 extern struct k_timer vrp_timer;
 
 /* Watches for ventricle events*/
-void vrp_observe(char* event) {
+void vrp_observe() {
     printk("vrp_observe \n");
     VP_allowed = 0;
     k_timer_start(&vrp_timer, TVRP, 0);
@@ -30,11 +30,3 @@ void vrp_timer_expire_cb(struct k_timer *t) {
     printk("vrp timer expired \n");
     VP_allowed = 1;
 }
-
-/* Thread entry point */
-// void vrp_entry() {
-    // Initialization
-    // k_timer_init(&vrp_timer, NULL, NULL);
-
-    // VP_allowed = 0;
-// }

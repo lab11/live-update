@@ -35,7 +35,7 @@ void avi_timer_expire_cb(struct k_timer *t) {
         if (uri_expired == 1 && VP_allowed == 1) {
             // Notify parent thread that VP should be triggered
             tfm_gpio_set(VENTRICLE_PACE_PIN);
-            observe("ventricle");
+            observe(VENTRICLE);
         } else if (uri_expired == 0 && VP_allowed == 0) {
             // TODO: sleep?   
         }
@@ -58,34 +58,20 @@ void uri_timer_expire_cb(struct k_timer *t) {
     // if (avi_expired == 1) {
     //     // Notify parent thread that VP should be triggered
     //     printk("avi expired...observing ventricle event \n");
-    //     observe("ventricle");
+    //     observe(VENTRICLE);
     // } 
     // Not else
     return;
     
 }
 
-void avi_observe(char* event) {
+void avi_observe() {
     printk("avi_observe \n");
     k_timer_start(&avi_timer, TAVI, 0);
 }
 
 /* Watches for ventricle events*/
-void uri_observe(char* event) {
+void uri_observe() {
     printk("uri_observe \n");
     k_timer_start(&uri_timer, TURI, 0);
 }
-
-// void avi_entry() {
-    // Initialization
-    // k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
-    // k_timer_init(&uri_timer, uri_timer_expire_cb, NULL);
-
-    // uri_expired = 0;
-    // avi_expired = 0;
-
-    // Set up pending tasks
-    // gpio_add_oneshot(VENTRICLE_SENSE_PIN, ventricle_sense_cb);
-    // gpio_add_oneshot(VENTRICLE_PACE_PIN, ventricle_pace_cb);
-    // gpio_add_oneshot(ATRIAL_SENSE_PIN, atrial_pace_cb);
-// }

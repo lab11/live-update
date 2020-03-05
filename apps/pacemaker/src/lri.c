@@ -20,13 +20,13 @@ extern struct k_timer aei_timer;
 extern bool ASed;
 
 /* Watches for ventricle events*/
-void lri_observe(char* event) {
+void lri_observe() {
     printk("lri_observe \n");
     k_timer_start(&lri_timer, TLRI, 0);
 }
 
 /* Watches for events*/
-void aei_observe(char* event) {
+void aei_observe() {
     printk("aei_observe \n");
     ASed = 0;
     k_timer_start(&aei_timer, TLRI-TAVI, 0);
@@ -53,7 +53,7 @@ void aei_timer_expire_cb(struct k_timer *t) {
         printk("line 53 \n");
         // Notify parent thread that VP should be triggered
         tfm_gpio_set(ATRIAL_PACE_PIN);
-        observe("atrial");
+        observe(ATRIAL);
     }
 }
 
