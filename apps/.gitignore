@@ -1,3 +1,4 @@
 *CMakeLists.txt
 */_build/
 *prj.conf
+*/.*
