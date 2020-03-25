@@ -31,8 +31,7 @@
 #define UN 85 // INTEGER(4), PARAMETER        :: Un            = 87                              ! I/O unit for pack/unpack (checkpoint & restart)
 #define PC_DBG_OUT 0 // LOGICAL(1), PARAMETER        :: PC_DbgOut     = .FALSE.                         ! Flag to indicate whether to output debugging information
 
-#define TAB '\t' // CHARACTER(   1), PARAMETER   :: Tab           = CHAR( 9 )                       ! The tab character.
-#define FMT_DAT "(F8.3,99('\"//Tab//\"',ES10.3E2,:))" // CHARACTER(  25), PARAMETER   :: FmtDat    = "(F8.3,99('"//Tab//"',ES10.3E2,:))" ! The format of the debugging data
+#define FMT_DAT "(F8.3,99(\t,ES10.3E2,:))" // CHARACTER(  25), PARAMETER   :: FmtDat    = "(F8.3,99('"//Tab//"',ES10.3E2,:))" ! The format of the debugging data
 
 float from_sc(void) { // !REAL(C_FLOAT),          INTENT(IN   ) :: from_SC   (*)  ! DATA from the supercontroller
   return 0.0 // TODO: Return data from controller
@@ -68,14 +67,14 @@ static float last_gen_torque; // REAL(4), SAVE                :: LastGenTrq     
 static float last_time; // REAL(4), SAVE                :: LastTime                                        ! Last time this DLL was called, sec.
 static float last_time_pc; // REAL(4), SAVE                :: LastTimePC                                      ! Last time the pitch  controller was called, sec.
 static float last_time_vs; // REAL(4), SAVE                :: LastTimeVS                                      ! Last time the torque controller was called, sec.
-static float pit_com = 3; //REAL(4), SAVE                :: PitCom    (3)                                   ! Commanded pitch of each blade the last time the controller was called, rad.
+static float pit_com[3]; //REAL(4), SAVE                :: PitCom    (3)                                   ! Commanded pitch of each blade the last time the controller was called, rad.
 float pit_com_i; // REAL(4)                      :: PitComI                                         ! Integral term of command pitch, rad.
 float pit_com_p; // REAL(4)                      :: PitComP                                         ! Proportional term of command pitch, rad.
 float pit_com_t; // REAL(4)                      :: PitComT                                         ! Total command pitch based on the sum of the proportional and integral terms, rad.
-float pit_rate; // REAL(4)                      :: PitRate   (3)                                   ! Pitch rates of each blade based on the current pitch angles and current pitch command, rad/s.
+float pit_rate[3]; // REAL(4)                      :: PitRate   (3)                                   ! Pitch rates of each blade based on the current pitch angles and current pitch command, rad/s.
 
 float spd_err; // REAL(4)                      :: SpdErr                                          ! Current speed error, rad/s.
-float time = avr_swap(2); // REAL(4)                      :: Time                                            ! Current simulation time, sec. // Time         =       avrSWAP( 2)
+float curr_time = avr_swap(2); // REAL(4)                      :: Time                                            ! Current simulation time, sec. // Time         =       avrSWAP( 2)
 float trq_rate; // REAL(4)                      :: TrqRate                                         ! Torque rate based on the current and last torque commands, N-m/s.
 float vs_slope15; // REAL(4), SAVE                :: VS_Slope15                                      ! Torque/speed slope of region 1 1/2 cut-in torque ramp , N-m/(rad/s).
 float vs_slope25; // REAL(4), SAVE                :: VS_Slope25                                      ! Torque/speed slope of region 2 1/2 induction generator, N-m/(rad/s).
@@ -93,10 +92,57 @@ char *err_msg; // CHARACTER(SIZE(avcMSG)-1)    :: ErrMsg                        
 
 // ! Load variables from calling program (See Appendix A of Bladed User's Guide):
 
-printf("from_sc: %f, %f, %f", from_sc(), from_sc(), from_sc()); // !print *, 'from_sc: ', from_sc(1:4)
-to_sc(1, 5.0); // !to_sc(1) = 5.0;
-to_sc(2, 2.0); // !to_sc(2) = 2.0;
 
-bl_pitch[0] = MIN(MAX(avr_swap(4), PC_MIN_PIT), PC_MAX_PIT); // !BlPitch  (1) =       MIN( MAX( avrSWAP( 4), PC_MinPit ), PC_MaxPit )    ! assume that blade pitch can't exceed limits // BlPitch  (1) =       avrSWAP( 4)
-bl_pitch[0] = MIN(MAX(avr_swap(33), PC_MIN_PIT), PC_MAX_PIT); // !BlPitch  (2) =       MIN( MAX( avrSWAP(33), PC_MinPit ), PC_MaxPit )    ! assume that blade pitch can't exceed limits // BlPitch  (2) =       avrSWAP(33)
-bl_pitch[0] = MIN(MAX(avr_swap(34), PC_MIN_PIT), PC_MAX_PIT); // !BlPitch  (3) =       MIN( MAX( avrSWAP(34), PC_MinPit ), PC_MaxPit )    ! assume that blade pitch can't exceed limits // BlPitch  (3) =       avrSWAP(34)
+// printf("from_sc: %f, %f, %f", from_sc(), from_sc(), from_sc()); // !print *, 'from_sc: ', from_sc(1:4)
+// to_sc(1, 5.0); // !to_sc(1) = 5.0;
+// to_sc(2, 2.0); // !to_sc(2) = 2.0;
+
+// bl_pitch[0] = MIN(MAX(avr_swap(4), PC_MIN_PIT), PC_MAX_PIT); // !BlPitch  (1) =       MIN( MAX( avrSWAP( 4), PC_MinPit ), PC_MaxPit )    ! assume that blade pitch can't exceed limits // BlPitch  (1) =       avrSWAP( 4)
+// bl_pitch[1] = MIN(MAX(avr_swap(33), PC_MIN_PIT), PC_MAX_PIT); // !BlPitch  (2) =       MIN( MAX( avrSWAP(33), PC_MinPit ), PC_MaxPit )    ! assume that blade pitch can't exceed limits // BlPitch  (2) =       avrSWAP(33)
+// bl_pitch[2] = MIN(MAX(avr_swap(34), PC_MIN_PIT), PC_MAX_PIT); // !BlPitch  (3) =       MIN( MAX( avrSWAP(34), PC_MinPit ), PC_MaxPit )    ! assume that blade pitch can't exceed limits // BlPitch  (3) =       avrSWAP(34)
+
+bl_pitch[0] = avr_swap(4) // BlPitch  (1) =       avrSWAP( 4)
+bl_pitch[1] = avr_swap(33) // BlPitch  (2) =       avrSWAP(33)
+bl_pitch[2] = avr_swap(34) // BlPitch  (3) =       avrSWAP(34)
+
+// ! Read any External Controller Parameters specified in the User Interface
+// !   and initialize variables:
+
+if (i_status == 0) {// IF ( iStatus == 0 )  THEN  ! .TRUE. if we're on the first call to the DLL
+
+  //! Inform users that we are using this user-defined routine:
+  AVI_FAIL = 1; // aviFAIL  = 1
+  err_msg = "Running with torque and pitch control of the NREL offshore 5MW baseline wind turbine from DISCON.dll as written by J. Jonkman of NREL/NWTC for use in the IEA Annex XXIII OC3 studies."; //ErrMsg   = 'Running with torque and pitch control of the NREL offshore '// &
+           // '5MW baseline wind turbine from DISCON.dll as written by J. '// &
+           // 'Jonkman of NREL/NWTC for use in the IEA Annex XXIII OC3 '   // &
+           // 'studies.'
+
+  //! Determine some torque control parameters not specified directly:
+
+  vs_sy_sp = VS_RTGNSP / (1.0 + 0.01 * VS_SLPC); // VS_SySp    = VS_RtGnSp/( 1.0 +  0.01*VS_SlPc )
+  vs_slope15 = (VS_RGN2K * VS_RGN2SP * VS_RGN2SP) / (VS_RGN2SP - VS_CTINSP); // VS_Slope15 = ( VS_Rgn2K*VS_Rgn2Sp*VS_Rgn2Sp )/( VS_Rgn2Sp - VS_CtInSp )
+  vs_slope25 = (VS_RTPWR / VS_RTGNSP) /(VS_RTGNSP - vs_sy_sp); // VS_Slope25 = ( VS_RtPwr/VS_RtGnSp           )/( VS_RtGnSp - VS_SySp   )
+  if (VS_RGN2K == 0){ //IF ( VS_Rgn2K == 0.0 )  THEN  ! .TRUE. if the Region 2 torque is flat, and thus, the denominator in the ELSE condition is zero
+     vs_tr_gn_sp = vs_sy_sp; // VS_TrGnSp = VS_SySp
+  } else { // ELSE                          ! .TRUE. if the Region 2 torque is quadratic with speed
+     vs_tr_gn_sp = (vs_slope15 - sqrt(vs_slope25 * (vs_slope25 - 4.0 * VS_RGN2K * vs_sy_sp))) / (2.0 * VS_RGN2K); //VS_TrGnSp = ( VS_Slope25 - SQRT( VS_Slope25*( VS_Slope25 - 4.0*VS_Rgn2K*VS_SySp ) ) )/( 2.0*VS_Rgn2K )
+  } // ENDIF
+
+  // Unnecessary because those param are all "hardcoded" for this particular wind turbine (lines 186 - 269) ! Check validity of input parameters
+  // Will not have debug files (lines 272 - 296)
+
+  // ! Initialize the SAVEd variables:
+  // ! NOTE: LastGenTrq, though SAVEd, is initialized in the torque controller
+  // !       below for simplicity, not here.
+
+  gen_speed_f = gen_speed; // GenSpeedF  = GenSpeed                        ! This will ensure that generator speed filter will use the initial value of the generator speed on the first pass
+  pit_com = bl_pitch; // PitCom     = BlPitch                         ! This will ensure that the variable speed controller picks the correct control region and the pitch controller picks the correct gain on the first call
+  gain_correction = 1.0 / (1.0 + pit_com[1] / PC_KK); // GK         = 1.0/( 1.0 + PitCom(1)/PC_KK )   ! This will ensure that the pitch angle is unchanged if the initial SpdErr is zero
+  int_spd_err = pit_com[1] / (gain_correction * PC_KI); // IntSpdErr  = PitCom(1)/( GK*PC_KI )          ! This will ensure that the pitch angle is unchanged if the initial SpdErr is zero
+
+  last_time = curr_time; // LastTime   = Time                            ! This will ensure that generator speed filter will use the initial value of the generator speed on the first pass
+  last_time_pc = curr_time - PC_DT; // LastTimePC = Time - PC_DT                    ! This will ensure that the pitch  controller is called on the first pass
+  last_time_vs = curr_time - VS_DT; // LastTimeVS = Time - VS_DT                    ! This will ensure that the torque controller is called on the first pass
+
+} //ENDIF
+// Translation so far: 313/590
