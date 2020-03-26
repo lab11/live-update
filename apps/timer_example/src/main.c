@@ -8,9 +8,10 @@ void timer_handler(struct k_timer *t) {
     printk("Timer trigger number %d\n", trigger_count);
 }
 
-K_TIMER_DEFINE(t, timer_handler, NULL);
+struct k_timer t;
 
 void main(void) {
+    k_timer_init(&t, timer_handler, NULL);
     k_timer_start(&t, K_SECONDS(1), K_SECONDS(1));
 }
 
