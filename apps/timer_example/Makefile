@@ -9,6 +9,5 @@ APP_SOURCE_PATHS += ./src
 APP_SOURCES = $(wildcard ./src/*.c)
 
 # Include main makefile
-BASE_DIR ?= ../..
-include $(BASE_DIR)/make/AppMakefile.mk
+include ../../make/AppMakefile.mk
 

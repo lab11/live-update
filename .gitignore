@@ -2,6 +2,7 @@ cmake_build/
 *.swp
 ignore-*/
 lastVerNum.txt
+.lastVerNum.txt
 *.hex
 .update/
 .DS_Store
@@ -10,3 +11,5 @@ zephyros/build/
 zephyros/modules/
 zephyros/tools/
 make/local_config.cmake
+.vagrant/
+.cscope.out
