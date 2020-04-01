@@ -13,6 +13,9 @@ DEBUG_SUFFIX = _debug
 ARM_TFM_DIR = $(BASE_DIR)/ext/trusted-firmware-m
 ZEPHYR_BASE = $(BASE_DIR)/zephyros/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
+ZEPHYR_PRJ_CONFIG = prj.conf
+ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
+ZEPHYR_BUILDDIR = $(ZEPHYR_BASE)/build
 
 MERGED_BIN = $(BUILDDIR)$(OUTPUT_NAME)_merged.bin
 SIGNED_BIN = $(BUILDDIR)$(OUTPUT_NAME)_merged_signed.bin
@@ -36,6 +39,8 @@ DEBUG_BIN_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX)$(DEBUG_SUFFIX).bin
 LST_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).lst
 MAP_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).map
 
+VERSION_FILE = .lastVerNum.txt
+
 # Include supporting makefiles
 
 include $(BASE_DIR)/boards/$(BOARD)/Program.mk
@@ -50,7 +55,13 @@ $(BUILDDIR):
 	$(Q)mkdir -p $@
 	$(Q)mkdir -p $@/arm-tfm
 
-$(ZEPHYR_CMAKELISTS): Makefile
+$(ZEPHYR_PRJ_CONFIG):
+	$(Q)cp $(BASE_DIR)/make/app-prj.conf $@
+
+$(ZEPHYR_APP_LINKER_SCRIPT): $(BUILDDIR)
+	$(Q)cp $(BASE_DIR)/make/app-sections.ld $@
+
+$(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_APP_LINKER_SCRIPT) $(ZEPHYR_PRJ_CONFIG)
 	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
 		
 $(ELF_S): $(BUILDDIR)
@@ -58,10 +69,24 @@ $(ELF_S): $(BUILDDIR)
 	$(Q)cmake --build $(BUILDDIR)arm-tfm -- install
 	$(Q)cp $(BUILDDIR)arm-tfm/install/outputs/MUSCA_A/tfm_s.axf $@
 
+
+VERSION_NUM = $(shell test -f ${VERSION_FILE} && tail -c 1 ${VERSION_FILE})
+ifeq ($(VERSION_NUM),)
+	VERSION_NUM = 0
+endif
+PARTITION = $(shell echo ${VERSION_NUM}%2 | bc)
+
+ZEPHYR_BOARD = v2m_musca_nonsecure
+ifeq ($(PARTITION),1)
+ZEPHYR_BOARD = v2m_musca_nonsecure_p1
+endif
+
 $(ELF): $(BUILDDIR) $(ZEPHYR_CMAKELISTS)
-	cd $(ZEPHYR_BASE) && west build --pristine -b v2m_musca_nonsecure $(APP_DIR)/
+	@echo " Building application for PARTITION $(PARTITION)..."
+	cd $(ZEPHYR_BASE) && west build --pristine -b $(ZEPHYR_BOARD) $(APP_DIR)/
 	$(Q)cp $(ZEPHYR_BASE)/build/zephyr/zephyr.elf $@
 
+.PHONY: $(BIN_S)
 $(BIN_S): $(ELF_S) | $(BUILDDIR)
 	$(TRACE_HEX)
 	$(Q)$(OBJCOPY) -Oihex $< $(HEX_S)
@@ -70,6 +95,7 @@ $(BIN_S): $(ELF_S) | $(BUILDDIR)
 	$(TRACE_SIZ)
 	$(Q)$(SIZE) $<
 
+.PHONY: $(BIN)
 $(BIN): $(ELF) | $(BUILDDIR)
 	$(TRACE_HEX)
 	$(Q)$(OBJCOPY) -Oihex $< $(HEX)
@@ -78,6 +104,7 @@ $(BIN): $(ELF) | $(BUILDDIR)
 	$(TRACE_SIZ)
 	$(Q)$(SIZE) $<
 
+.PHONY: $(MERGED_BIN)
 $(MERGED_BIN): $(BIN_S) $(BIN) 
 	python3 $(ARM_TFM_DIR)/bl2/ext/mcuboot/scripts/assemble.py \
 		-l $(ARM_TFM_DIR)/platform/ext/target/musca_a/partition/flash_layout.h \
@@ -85,12 +112,14 @@ $(MERGED_BIN): $(BIN_S) $(BIN)
 		-n $(BIN) \
 		-o $@
 
+.PHONY: $(SIGNED_BIN)
 $(SIGNED_BIN): $(MERGED_BIN)
 	$(Q)python3 $(ARM_TFM_DIR)/bl2/ext/mcuboot/scripts/imgtool.py \
 		sign --layout $(ARM_TFM_DIR)/platform/ext/target/musca_a/partition/flash_layout.h \
 		-k $(ARM_TFM_DIR)/bl2/ext/mcuboot/root-rsa-2048.pem \
 		--align 1 -H 0x400 --pad 0x100000 $< $@
 
+.PHONY: $(MERGED_HEX)
 $(MERGED_HEX): $(SIGNED_BIN)
 	$(Q)srec_cat $(BUILDDIR)arm-tfm/bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 $< -Binary -offset 0x220000 -o $@ -Intel
 
@@ -118,5 +147,7 @@ size-secure: $(ELF_S)
 clean::
 	@echo " Cleaning..."
 	$(Q)rm -rf $(BUILDDIR)
+	$(Q)rm -rf $(ZEPHYR_BUILDDIR)
 	$(Q)rm -f $(ZEPHYR_CMAKELISTS)
+	$(Q)rm -f $(ZEPHYR_PRJ_CONFIG)
 
