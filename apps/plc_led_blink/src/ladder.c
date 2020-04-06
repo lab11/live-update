@@ -1,4 +1,5 @@
 #include "ladder.h"
+#include <sys/printk.h>
 
 void init_plc(void) {
 	tfm_gpio_enable_output(LED);
