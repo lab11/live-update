@@ -5,7 +5,7 @@
 
 #define PIN 7
 
-K_TIMER_DEFINE(scan_timer, PlcCycle, NULL);
+K_TIMER_DEFINE(scan_timer, plc_callback, NULL);
 
 void main(void) {
 	init_plc();
