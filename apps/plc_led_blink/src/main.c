@@ -6,11 +6,7 @@
 
 #define PIN 7
 
-void cycle(struct k_timer *t) {
-    PlcCycle();
-}
-
-K_TIMER_DEFINE(scan_timer, cycle, NULL);
+K_TIMER_DEFINE(scan_timer, plc_callback, NULL);
 
 void main(void) {
 	init_plc();

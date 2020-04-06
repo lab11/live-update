@@ -29,3 +29,4 @@ make flash
 This indicates that the code has finished uploading.
 
 run 'make serial' and select the number corrosponding to 'DAPLink CMSIS-DAP' to view the stdio of the board
+

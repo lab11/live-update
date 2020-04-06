@@ -1,25 +1,40 @@
 #include "ladder.h"
-#include <sys/printk.h>
+#include "sys/printk.h"
+
+#define NUM_LED_PINS 3
+static uint8_t LED_pins[] = {2, 3, 4};
+
+void plc_callback(void) {	
+	read_in_table();
+	PlcCycle();
+	write_out_table();
+}
 
 void init_plc(void) {
-	tfm_gpio_enable_output(LED);
-	tfm_gpio_set(LED);
+	enable_pin_outputs(output_pins, NUM_PINS);
+
+	if (USE_LED) {
+		enable_pin_outputs(LED_pins, NUM_LED_PINS);
+		LED_off(R);
+		LED_off(G);
+		LED_off(B);
+	}
 
 	printk("plc initialized\n");
 }
 
+/**************** Define Auto-Generated Functions Below ****************/
+
 BOOL Read_U_b_Xbutton(void) {
-	return (BOOL) tfm_gpio_read(BUTTON);
+	BOOL state = (BOOL) read_button(PIN7);
+	printk("Button State: %d/n", state);
+	return state;
 }
 
 BOOL Read_U_b_Yled(void) {
-	return (BOOL) tfm_gpio_read(LED);
+	return (BOOL) read_LED(R);
 }
 
 void Write_U_b_Yled(BOOL v) {
-	if (v == 0) {
-		tfm_gpio_clear(LED);
-	} else {
-		tfm_gpio_set(LED);
-	}
+	write_LED(R, v);
 }
