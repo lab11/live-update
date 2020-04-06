@@ -1,5 +1,7 @@
 #pragma once
 
+#include <kernel.h>
+
 #include "plc_platform.h"
 
 typedef signed short SWORD;
@@ -16,7 +18,7 @@ static uint8_t output_pins[] = {};	/* List pins to use as outputs as {PIN0, PIN1
 void PlcCycle(void);	
 
 /* Use this function as your timer callback function */
-void plc_callback(void);
+void plc_callback(struct k_timer *t);
 
 /* Always call this before you initialize your plc timer */
 void init_plc(void); 	

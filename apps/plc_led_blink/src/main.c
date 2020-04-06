@@ -1,5 +1,5 @@
-#include "sys/printk.h"
-#include "kernel.h"
+#include <sys/printk.h>
+#include <kernel.h>
 
 #include "tfm_gpio_veneers.h"
 #include "ladder.h"

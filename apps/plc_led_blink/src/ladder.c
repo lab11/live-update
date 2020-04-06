@@ -1,10 +1,12 @@
+#include <kernel.h>
+#include <sys/printk.h>
+
 #include "ladder.h"
-#include "sys/printk.h"
 
 #define NUM_LED_PINS 3
 static uint8_t LED_pins[] = {2, 3, 4};
 
-void plc_callback(void) {	
+void plc_callback(struct k_timer *t) {	
 	read_in_table();
 	PlcCycle();
 	write_out_table();
