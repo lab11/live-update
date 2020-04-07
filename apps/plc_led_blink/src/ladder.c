@@ -29,7 +29,7 @@ void init_plc(void) {
 
 BOOL Read_U_b_Xbutton(void) {
 	BOOL state = (BOOL) read_button(PIN7);
-	printk("Button State: %d/n", state);
+	printk("Button State: %d\n", state);
 	return state;
 }
 

@@ -35,27 +35,30 @@ void write_out_table(void) {
 	return;
 }
 
-void write_pin(uint8_t pin, BOOL val) {
-	if (val) {
-		tfm_gpio_set(pin);
-	} else {
-		tfm_gpio_clear(pin);
-	}
-	return;
-}
-
 void set_pin(uint8_t pin) {
-	tfm_gpio_set(pin);
+	if (pin > 15) { return; }
+	gpio_out_table |= (1 << pin);
 	return;
 }
 
 void clr_pin(uint8_t pin) {
-	tfm_gpio_clear(pin);
+	if (pin > 15) { return; }
+	gpio_out_table &= ~(1 << pin);
+	return;
+}
+
+void write_pin(uint8_t pin, BOOL val) {
+	if (val) {
+		set_pin(pin);
+	} else {
+		clr_pin(pin);
+	}
 	return;
 }
 
 BOOL read_pin(uint8_t pin) {
-	return (BOOL) tfm_gpio_read(pin);
+	if (pin > 15) { return pin; }
+	return (BOOL) (gpio_in_table >> pin) % 2;
 }
 
 void LED_on(LED color) {

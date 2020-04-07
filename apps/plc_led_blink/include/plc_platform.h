@@ -36,13 +36,13 @@ void read_in_table(void);
 
 void write_out_table(void);
 
-void write_pin(uint8_t pin, BOOL val);
-
 /**************** For User ****************/
 
 void set_pin(uint8_t pin);
 
 void clr_pin(uint8_t pin);
+
+void write_pin(uint8_t pin, BOOL val);
 
 BOOL read_pin(uint8_t pin);
 
