@@ -1,3 +1,5 @@
+#include <sys/printk.h>
+
 #include "tfm_gpio_veneers.h"
 #include "plc_platform.h"
 
@@ -9,7 +11,7 @@ void enable_pin_outputs(uint8_t* pins, uint8_t num_pins) {
 	for (uint8_t i = 0; i < num_pins; i++) {
 		out |= (1 << pins[i]);
 	}
-	printk(out);
+	printk("%x\n", out);
 	tfm_gpio_enable_outputs(out);
 	return;
 }
@@ -23,12 +25,12 @@ void enable_pin_output(uint8_t pin) {
 
 void read_in_table(void) {
 	gpio_in_table = tfm_gpio_read_all();
-	printk(gpio_in_table);
+	printk("%x\n", gpio_in_table);
 	return;
 }
 
 void write_out_table(void) {
-	printk(gpio_out_table);
+	printk("%x\n", gpio_out_table);
 	tfm_gpio_write_all(gpio_out_table);
 	return;
 }
