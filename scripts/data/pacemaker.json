@@ -1,0 +1,54 @@
+{
+    "timers": {
+        "lri_timer": {
+            "stop_callback": "lri_stop",
+            "expire_callback": null
+        },
+        "aei_timer": {
+            "stop_callback": "aei_stop",
+            "expire_callback": "aei_expire"
+        },
+        "avi_timer": {
+            "stop_callback": null,
+            "expire_callback": "avi_expire"
+        },
+        "uri_timer": {
+            "stop_callback": null,
+            "expire_callback": "uri_expire"
+        },
+        "vrp_timer": {
+            "stop_callback": null,
+            "expire_callback": "vrp_expire"
+        }
+    },
+    "top_level_fns": {
+        "main": {
+            "timers_stopped": ["lri_timer", "avi_timer"],
+            "timers_started": ["uri_timer", "vrp_timer", "aei_timer", "lri_timer"]
+        },
+        "ventricle_sense": {
+            "timers_stopped": ["lri_timer", "avi_timer"],
+            "timers_started": ["uri_timer", "vrp_timer", "aei_timer", "lri_timer"]
+        },
+        "atrial_sense": {
+            "timers_stopped": [],
+            "timers_started": ["avi_timer"]
+        },
+        "aei_expire": {
+            "timers_stopped": [],
+            "timers_started": ["avi_timer"]
+        },
+        "avi_expire": {
+            "timers_stopped": ["lri_timer", "avi_timer"],
+            "timers_started": ["uri_timer", "vrp_timer", "aei_timer", "lri_timer"]
+        },
+        "uri_expire": {
+            "timers_stopped": [],
+            "timers_started": []
+        },
+        "vrp_expire": {
+            "timers_stopped": [],
+            "timers_started": []
+        }
+    }
+}
