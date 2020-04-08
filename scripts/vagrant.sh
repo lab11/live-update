@@ -56,14 +56,20 @@ then
 
     pushd .
     cd /vagrant/ext
+    mkdir ncs
+    mkdir zephyros
+    cd ncs
     west init -m https://github.com/jlwatson/fw-nrfconnect-nrf
+    west update
+    cd ../zephyros
+    west init -m https://github.com/jlwatson/zephyr
     west update
     popd
 fi
 
-pip3 install -r /vagrant/ext/zephyr/scripts/requirements.txt
-pip3 install -r /vagrant/ext/nrf/scripts/requirements.txt
-pip3 install -r /vagrant/ext/bootloader/mcuboot/scripts/requirements.txt
+pip3 install -r /vagrant/ext/ncs/zephyr/scripts/requirements.txt
+pip3 install -r /vagrant/ext/ncs/nrf/scripts/requirements.txt
+pip3 install -r /vagrant/ext/ncs/bootloader/mcuboot/scripts/requirements.txt
 
 if [[ ! $(cat /home/vagrant/.bashrc) =~ "ZEPHYR_TOOLCHAIN_VARIANT" ]]
 then
@@ -75,11 +81,6 @@ then
     echo 'export GNUARMEMB_TOOLCHAIN_PATH=/usr/local/gcc-arm-none-eabi-9-2019-q4-major' >> /home/vagrant/.bashrc
 fi
 
-if [[ ! $(cat /home/vagrant/.bashrc) =~ "ZEPHYR_BASE" ]]
-then
-    echo 'export ZEPHYR_BASE=/vagrant/ext/zephyr' >> /home/vagrant/.bashrc
-fi
-
 if [[ ! $(cat /home/vagrant/.bashrc) =~ "ZEPHYR_SDK_INSTALL_DIR" ]]
 then
     wget -O /tmp/sdk_setup.run https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.2/zephyr-sdk-0.11.2-setup.run
@@ -88,11 +89,6 @@ then
     echo 'export ZEPHYR_SDK_INSTALL_DIR=/usr/local/zephyr_sdk' >> /home/vagrant/.bashrc
     echo 'export PATH=/usr/local/zephyr_sdk/sysroots/x86_64-pokysdk-linux/usr/bin:"$PATH"' >> /home/vagrant/.bashrc
     echo 'export CMAKE_PREFIX_PATH=/usr/local/zephyr_sdk/sysroots/x86_64-pokysdk-linux/usr' >> /home/vagrant/.bashrc
-fi
-
-if [[ ! $(cat /home/vagrant/.bashrc) =~ "zephyr-env.sh" ]]
-then
-    echo 'source /vagrant/ext/zephyr/zephyr-env.sh' >> /home/vagrant/.bashrc
 fi
 
 pip3 install pyelftools
