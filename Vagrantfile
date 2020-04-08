@@ -53,19 +53,20 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     # Customize the amount of memory on the VM:
     vb.memory = "4096"
-    vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-interval", 10000 ]
-    vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-min-adjust", 100 ]
-    vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-on-restore", 1 ]
-    vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 10000 ]
 
-    vb.customize [ "modifyvm", :id, "--usb", "on" ]
-    vb.customize [ "modifyvm", :id, "--usbehci", "on" ]
-    vb.customize [ "usbfilter", "add", "0",
-        "--target", :id,
-        "--name", "MUSCA_A DAP",
-        "--vendorid", "0x0d28",
-        "--productid", "0x7523"
-    ]
+    #vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-interval", 10000 ]
+    #vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-min-adjust", 100 ]
+    #vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-on-restore", 1 ]
+    #vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 10000 ]
+
+    #vb.customize [ "modifyvm", :id, "--usb", "on" ]
+    #vb.customize [ "modifyvm", :id, "--usbehci", "on" ]
+    #vb.customize [ "usbfilter", "add", "0",
+    #    "--target", :id,
+    #    "--name", "MUSCA_A DAP",
+    #    "--vendorid", "0x0d28",
+    #    "--productid", "0x7523"
+    #]
   end
  
   # View the documentation for the provider you are using for more

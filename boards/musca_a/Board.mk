@@ -11,7 +11,7 @@ SECURE_SUFFIX = _s
 DEBUG_SUFFIX = _debug
 
 ARM_TFM_DIR = $(BASE_DIR)/ext/trusted-firmware-m
-ZEPHYR_BASE = $(BASE_DIR)/zephyros/zephyr
+ZEPHYR_BASE = $(BASE_DIR)/ext/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
 ZEPHYR_PRJ_CONFIG = prj.conf
 ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
