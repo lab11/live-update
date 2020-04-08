@@ -11,7 +11,7 @@ SECURE_SUFFIX = _s
 DEBUG_SUFFIX = _debug
 
 ARM_TFM_DIR = $(BASE_DIR)/ext/trusted-firmware-m
-ZEPHYR_BASE = $(BASE_DIR)/ext/zephyr
+ZEPHYR_BASE = $(BASE_DIR)/ext/zephyros/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
 ZEPHYR_PRJ_CONFIG = prj.conf
 ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
@@ -48,7 +48,12 @@ include $(BASE_DIR)/boards/$(BOARD)/Program.mk
 # --- Rules for building apps ---
 
 .PHONY: all
-all: $(BIN_S) $(BIN) $(MERGED_HEX)
+all: init_zephyr_env $(BIN_S) $(BIN) $(MERGED_HEX)
+
+.PHONY: init_zephyr_env
+init_zephyr_env:
+	$(shell export ZEPHYR_BASE=$(ZEPHYR_BASE))
+	$(shell source $(ZEPHYR_BASE)/zephyr-env.sh)
 
 $(BUILDDIR):
 	$(TRACE_DIR)
