@@ -39,6 +39,20 @@ else
     arm-none-eabi-gcc --version
 fi
 
+# Install JLink and nRF command line tools
+if ! nrfjprog
+then
+    pushd .
+    cd /tmp
+
+    wget --post-data="accept_license_agreement=accepted&submit=Download&nbspsoftware" "https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb"
+    dpkg -i JLink_Linux_x86_64.deb
+
+    wget https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz
+    tar -xzvf nRFCommandLineTools1030Linuxamd64tar.gz
+    dpkg -i --force-overwrite nRF-Command-Line-Tools_10_3_0_Linux-amd64.deb
+fi
+
 # Install python libraries
 apt-get install -y python3-pip
 pip3 install pycryptodome
