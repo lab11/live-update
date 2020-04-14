@@ -62,12 +62,12 @@ BOOL read_pin(uint8_t pin) {
 }
 
 void LED_on(LED color) {
-	set_pin(color);
+	clr_pin(color);
 	return;
 }
 
 void LED_off(LED color) {
-	clr_pin(color);
+	set_pin(color);
 	return;
 }
 
@@ -77,9 +77,9 @@ BOOL read_LED(LED color) {
 
 void write_LED(LED color, BOOL v) {
 	if (v == 0) {
-		LED_off(R);
+		LED_on(color);
 	} else {
-		LED_on(R);
+		LED_off(color);
 	}
 }
 
