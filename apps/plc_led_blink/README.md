@@ -1,6 +1,31 @@
-NOTE: In order to compile this folder, you must add the function 'tfm_gpio_read()' to 'tfm_gpio_veneers.h' and 'tfm_gpio_veneers.c'
-I have created this function in a separate branch from 'MASTER' and I have not merged the branches.
-The updated files are in the 'Live Updates' Google Drive
+***The Ladder Logic Programming Pipeline***
+Assuming you already know how to program in ladder logic, use LDmicro to write your program,
+then compile yout program as an ANSI C file by going to 'Settings -> Microcontroller' and selecting C code.
+
+Take note of your desired cycle time. You will need this information to call the plc function periodically.
+
+LDmicro will autogenerate C code with function prototypes where I/O functionality is required, (buttons, LEDs, switches, I2C, etc.) which the user is required to define in a header file 'ladder.h' and an accompanying source file 'ladder.c'. We have written skeletons of these files that include required  libraries and functions, as well as the 'main.c' file that goes along with it. 
+
+To make this process faster and easier on the ARM Musca Board, we have implemented a platform file 'plc_platform.h' that has helper functions that the user can call to implement required behavior. Function names should match the functionality required by the LDmicro function prototypes.
+e.g. 'Write_U_b_Yled(v)' corrosponds to 'write_LED(color, v)', where the user chooses an LED color (r, g, b) and passes the original parameter 'v' to the helper function.
+
+*In general, edits need only be made in 'ladder.h' and 'ladder.c'*
+
+Application Folder structure:
+- live-update/apps/
+  - Application Folder/
+    - src/
+      - 'main.c'
+      - 'ladder.c' (*EDIT*)
+      - 'plc_platform.c' (may move this to a hidden folder)
+    - include/
+      - 'ladder.h' (*EDIT*)
+      - 'plc_platform.h' (may move this to different folder)
+    - 'Makefile'
+    - 'README.md' (you're reading this file)
+
+
+---
 
 ***Compiling and Flashing C Code to Musca***
 
