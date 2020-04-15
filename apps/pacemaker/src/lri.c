@@ -56,12 +56,3 @@ void aei_timer_expire_cb(struct k_timer *t) {
         observe(ATRIAL);
     }
 }
-
-/* Thread entry point */
-// void lri_entry() {
-    // Initialization
-    // k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
-    // k_timer_init(&aei_timer, aei_timer_expire_cb, aei_timer_stop_cb);
-
-    // ASed = 0;
-// }

@@ -63,7 +63,7 @@ void observe(EventType_t event) {
     if (event == VENTRICLE) {
         // The below function calls need to be chained together
         printk("\n");
-        printk("Observing Ventricle Event... \n");
+        printk("Now observing Ventricle Event... \n");
         VP_allowed = 0;
         k_timer_stop(&lri_timer);
         k_timer_stop(&avi_timer);
