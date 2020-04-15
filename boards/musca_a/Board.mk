@@ -40,6 +40,7 @@ LST_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).lst
 MAP_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).map
 
 VERSION_FILE = .lastVerNum.txt
+FLASHED_VERSION_FILE= $(BUILDDIR)lastFlashedNum.txt
 
 # Include supporting makefiles
 
@@ -61,13 +62,13 @@ $(BUILDDIR):
 	$(Q)mkdir -p $@/arm-tfm
 
 $(ZEPHYR_PRJ_CONFIG):
-	$(Q)cp $(BASE_DIR)/make/app-prj.conf $@
+	$(Q)python3 $(BASE_DIR)/make/gen_prj_conf.py $(BASE_DIR)/apps/$(PROJECT_NAME) > $@
 
 $(ZEPHYR_APP_LINKER_SCRIPT): $(BUILDDIR)
 	$(Q)cp $(BASE_DIR)/make/app-sections.ld $@
 
 $(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_APP_LINKER_SCRIPT) $(ZEPHYR_PRJ_CONFIG)
-	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
+	python3 $(BASE_DIR)/make/gen_zephyr_cmake.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
 		
 $(ELF_S): $(BUILDDIR)
 	$(Q)cmake $(ARM_TFM_DIR) -B $(BUILDDIR)arm-tfm -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DTARGET_PLATFORM=MUSCA_A -DCOMPILER=GNUARM	

@@ -6,6 +6,7 @@ import re
 import struct
 import sys
 import time
+import json
 
 from intelhex import IntelHex
 
@@ -44,18 +45,26 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', help='Timeout', type=int, default=None)
     args = parser.parse_args()
 
+    # check made and flashed versions, warn to remake if necessary
+    with open(args.app_folder + os.sep + '.lastVerNum.txt', 'r') as make_version_f:
+        with open(args.app_folder + os.sep + BUILD_DIR + os.sep + 'lastFlashedNum.txt', 'r') as flash_version_f:
+            make_partition = int(make_version_f.readline()[-1]) % 2
+            flash_partition = int(flash_version_f.readline()[-1]) % 2
+    
+            if make_partition == flash_partition:
+                print('Both flashed and currently compiled versions are linked to a conflicting partition, re-`make` app and rerun script')
+                exit(1)
+
+    with open(BUILD_DIR + os.sep + 'update.txt', 'r') as f:
+        data = json.load(f)
+
+        main_ptr_addr = int(data['main_ptr_addr'], base=16)
+        update_flag_addr = int(data['update_flag_addr'], base=16)
+
     symbols = dump_symbols(args.app_folder)
 
-    main_ptr_addr = get_symbol_address(symbols, 'main_ptr')
-    if not main_ptr_addr:
-        print('Could not locate main_ptr_addr, exiting...')
-        exit(1)
+    main_addr = get_symbol_address(symbols, '\smain$')
 
-    update_flag_addr = get_symbol_address(symbols, 'update_flag')
-    if not update_flag_addr:
-        print('Could not locate update_flag_addr, exiting...')
-        exit(1)
-    
     appflash_text_start = get_symbol_address(symbols, 'appflash_text_start')
     if not appflash_text_start:
         print('Could not locate appflash_text_start, exiting...')
@@ -71,49 +80,28 @@ if __name__ == '__main__':
         print('Could not locate appflash_text_rom_start, exiting...')
         exit(1)
 
-    update_text_start_addr = get_symbol_address(symbols, 'appflash_text_update_start')
-    if not update_text_start_addr:
-        print('Could not locate update_text_start_addr, exiting...')
-        exit(1)
-
-    update_text_rom_start_addr = get_symbol_address(symbols, 'appflash_text_update_rom_start')
-    if not update_text_rom_start_addr:
-        print('Could not locate update_text_rom_start_addr, exiting...')
-        exit(1)
-
-    update_text_size_addr = get_symbol_address(symbols, 'appflash_text_update_size')
-    if not update_text_size_addr:
-        print('Could not locate update_text_size_addr, exiting...')
-        exit(1)
-
     appflash_rodata_start = get_symbol_address(symbols, 'appflash_rodata_start')
-    if not appflash_rodata_start:
-        print('Could not locate appflash_rodata_start, exiting...')
-        exit(1)
-
     appflash_rodata_size = get_symbol_address(symbols, 'appflash_rodata_size')
-    if not appflash_rodata_size:
-        print('Could not locate appflash_rodata_size, exiting...')
-        exit(1)
-
     appflash_rodata_rom_start = get_symbol_address(symbols, 'appflash_rodata_rom_start')
-    if not appflash_rodata_rom_start:
-        print('Could not locate appflash_rodata_rom_start, exiting...')
+
+    if not appflash_rodata_start and not appflash_rodata_size and not appflash_rodata_rom_start: # just no rodata in update
+        appflash_rodata_start = 0x0
+        appflash_rodata_size = 0
+        appflash_rodata_rom_start = 0x0
+    elif not appflash_rodata_size or not appflash_rodata_start or not appflash_rodata_rom_start:
+        print('Could not locate appflash_rodata_size or appflash_rodata_start or appflash_rodata_rom_start, exiting...')
         exit(1)
 
-    update_rodata_start_addr = get_symbol_address(symbols, 'appflash_rodata_update_start')
-    if not update_rodata_start_addr:
-        print('Could not locate update_rodata, exiting...')
-        exit(1)
+    appram_bss_start = get_symbol_address(symbols, 'appram_bss_start')
+    appram_bss_size = get_symbol_address(symbols, 'appram_bss_size')
+    appram_bss_start_addr = get_symbol_address(symbols, 'appram_bss_update_start')
+    appram_bss_size_addr = get_symbol_address(symbols, 'appram_bss_update_size')
 
-    update_rodata_rom_start_addr = get_symbol_address(symbols, 'appflash_rodata_update_rom_start')
-    if not update_rodata_rom_start_addr:
-        print('Could not locate update_rodata_rom_start_addr, exiting...')
-        exit(1)
-
-    update_rodata_size_addr = get_symbol_address(symbols, 'appflash_rodata_update_size')
-    if not update_rodata_size_addr:
-        print('Could not locate update_rodata_size_addr, exiting...')
+    if not appram_bss_start and not appram_bss_size:
+        appram_bss_start = 0x0
+        appram_bss_size = 0
+    elif not appram_bss_start or not appram_bss_size:
+        print('Could not locate appram_bss_start or appram_bss_size, exiting...')
         exit(1)
 
     # look at symbols for appflash_text_rom_start, appflash_rodata_rom_start and sizes for both/
@@ -123,7 +111,8 @@ if __name__ == '__main__':
     app_text = bytes(ih[FLASH_BASE + appflash_text_rom_start: FLASH_BASE + appflash_text_rom_start + appflash_text_size].tobinarray())
     app_rodata = bytes(ih[FLASH_BASE + appflash_rodata_rom_start: FLASH_BASE + appflash_rodata_rom_start + appflash_rodata_size].tobinarray())
 
-    CURRENT_VERSION = 0x5
+    CURRENT_VERSION = 0x6
+
     '''
     Format for transfer: {
         'version' : <char>
@@ -132,57 +121,80 @@ if __name__ == '__main__':
         'update_flag' : <u32>
         'text_start' : <u32>
         'text_size' : <u32>
-        // 'update_text_start_addr' : <u32>
-        // 'update_text_rom_start_addr' : <u32>
-        // 'update_text_size_addr' : <u32>
         'rodata_start' : <u32>
         'rodata_size' : <u32>
-        // 'update_rodata_start_addr' : <u32>
-        // 'update_rodata_rom_start_addr' : <u32>
-        // 'update_rodata_size_addr' : <u32>
+        'bss_start': <u32>
+        'bss_size': <u32>
+        'bss_start_addr': <u32>
+        'bss_size_addr': <u32>
         'text' : <...>
         'rodata' : <...>
     }
     '''
 
-    header = struct.pack('IIIIIIII',
+    header_str = """
+    header = {{
+        version: {},
+        main_ptr_addr: {},
+        main_addr: {},
+        update_flag_addr: {},
+        appflash_text_start: {},
+        appflash_text_size: {},
+        appflash_rodata_start: {},
+        appflash_rodata_size: {},
+        appram_bss_start: {},
+        appram_bss_size: {},
+        appram_bss_start_addr: {},
+        appram_bss_size_addr: {}
+    }}
+    """.format(
+        CURRENT_VERSION,
+        hex(main_ptr_addr),
+        hex(main_addr | 0x1), # main ptr (w/ thumb)
+        hex(update_flag_addr),
+        hex(appflash_text_start),
+        hex(appflash_text_size),
+        hex(appflash_rodata_start),
+        hex(appflash_rodata_size),
+        hex(appram_bss_start),
+        hex(appram_bss_size),
+        hex(appram_bss_start_addr),
+        hex(appram_bss_size_addr)
+    )
+    print(header_str)
+
+    header = struct.pack('IIIIIIIIIIII',
         CURRENT_VERSION,
         main_ptr_addr,
-        appflash_text_start | 0x1, # main ptr (w/ thumb)
+        main_addr | 0x1, # main ptr (w/ thumb)
         update_flag_addr,
         appflash_text_start,
         appflash_text_size,
-        #update_text_start_addr,
-        #update_text_rom_start_addr,
-        #update_text_size_addr,
         appflash_rodata_start,
         appflash_rodata_size,
-        #update_rodata_start_addr,
-        #update_rodata_rom_start_addr,
-        #update_rodata_size_addr, 
+        appram_bss_start,
+        appram_bss_size,
+        appram_bss_start_addr,
+        appram_bss_size_addr
     )
 
     with serial.Serial(args.dev, args.baud, timeout=2) as ser:
-        while True:
-            data = ser.read(1024).decode('utf-8')
-            if not data:
-                break
-            print(data)
 
-        #print('sending {} byte payload:\n\tversion: {}\n\tmain_ptr_addr: {}\n\tmain_ptr: {}\n\tupdate_flag: {}\n\tflash_text_start: {}\n\tflash_text_size: {}\n\tflash_rodata_start: {}\n\tflash_rodata_size: {}\n\tapp_text: {} bytes\n\tapp_rodata: {} bytes\n'.format(len(header) + len(app_text) + len(app_rodata), CURRENT_VERSION, hex(main_ptr_addr), hex(appflash_text_start | 0x1), hex(update_flag_addr), hex(appflash_text_start), hex(appflash_text_size), hex(appflash_rodata_start), hex(appflash_rodata_size), len(app_text), len(app_rodata)))
-
+        print("sending header...")
         ser.write(header)
-        time.sleep(0.5)
+        time.sleep(1)
+        print("sending app_text...")
         ser.write(app_text)
-        time.sleep(0.5)
+        time.sleep(1)
+        print("sending rodata...")
         ser.write(app_rodata)
-        time.sleep(0.5)
+        time.sleep(1)
 
-        while True:
-            data = ser.read(1024).decode('utf-8')
-            if not data:
-                break
-            print(data)
+        #print("reading...")
+        #data = ser.read(1024)
+        #print(data.decode('utf-8'))
 
+    print("updating last flashed version number...")
+    os.system('cp ' + args.app_folder + os.sep + '.lastVerNum.txt ' + args.app_folder + os.sep + BUILD_DIR + os.sep + 'lastFlashedNum.txt')
     print('done')
 

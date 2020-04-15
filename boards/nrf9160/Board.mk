@@ -14,7 +14,7 @@ OUTPUT_NAME ?= $(PROJECT_NAME)
 ZEPHYR_BASE = $(BASE_DIR)/ext/ncs/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
 ZEPHYR_PRJ_CONFIG = prj.conf
-#ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
+ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
 ZEPHYR_BUILDDIR = $(ZEPHYR_BASE)/build
 
 MERGED_HEX = $(BUILDDIR)$(OUTPUT_NAME)_merged.hex
@@ -39,15 +39,13 @@ $(BUILDDIR):
 	$(Q)mkdir -p $@
 
 $(ZEPHYR_PRJ_CONFIG):
-	$(Q)cp $(BASE_DIR)/make/app-prj-no-linker.conf $@
+	$(Q)python3 $(BASE_DIR)/make/gen_prj_conf.py $(BASE_DIR)/apps/$(PROJECT_NAME) > $@
 
-#$(ZEPHYR_APP_LINKER_SCRIPT): $(BUILDDIR)
-#	$(Q)cp $(BASE_DIR)/make/app-sections.ld $@
+$(ZEPHYR_APP_LINKER_SCRIPT): $(BUILDDIR)
+	$(Q)cp $(BASE_DIR)/make/app-sections.ld $@
 
-#$(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_APP_LINKER_SCRIPT) $(ZEPHYR_PRJ_CONFIG)
-$(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_PRJ_CONFIG)
-	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES)" --include_dirs "$(APP_HEADER_PATHS)" --no_app_linker > $@
-		
+$(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_APP_LINKER_SCRIPT) $(ZEPHYR_PRJ_CONFIG)
+	$(Q)python3 $(BASE_DIR)/make/gen_zephyr_cmake.py $(PROJECT_NAME) "$(APP_SOURCES)" --include_dirs "$(APP_HEADER_PATHS)" > $@
 
 #VERSION_NUM = $(shell test -f ${VERSION_FILE} && tail -c 1 ${VERSION_FILE})
 #ifeq ($(VERSION_NUM),)
