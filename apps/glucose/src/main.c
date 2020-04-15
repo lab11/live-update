@@ -34,8 +34,9 @@ static void uart1_isr(struct device *x) {
 		printf("Set bolus to be %f\n", (float) value);
 	} else {
 		// Read in glucose
-		struct requested_temp *tmp = calculate_basal(rawtime, (float) value);
-		printf("Calculating temp basal: %f for %f\n", tmp->rate, tmp->duration);
+		float duration, rate;
+		calculate_basal(rawtime, (float) value, &duration, &rate);
+		printf("Calculating temp basal: %f for %f\n", rate, duration);
 	}
 }
 

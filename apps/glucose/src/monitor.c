@@ -12,6 +12,7 @@
 /* Defaults */
 #define MAX_IOB 0
 #define MAX_BASAL_PUMP 2
+#define MAX_READINGS 200
 
 /* MACROS */
 #define MIN(a, b) ((a)<(b)? (a) : (b))
@@ -34,63 +35,68 @@ struct treatment_list {
   struct treatment_list *prev;
 };
 
-struct requested_temp *current_temp_basal;
-struct requested_temp *current_scheduled_basal;
-struct treatment_list *iob_data_absolute;
-struct glucose_readings *glucose_data_absolute;
+struct requested_temp current_temp_basal;
+struct requested_temp current_scheduled_basal;
+struct treatment_list iob_data_absolute[MAX_READINGS];
+int starting_treatment, ending_treatment;
+struct glucose_readings glucose_data_absolute[MAX_READINGS];
+int starting_reading, ending_reading;
 
-void calculate_deltas(struct glucose_readings *, float *);
-struct requested_temp * determine_basal(float, float, float, float,
-  struct treatment_list *, float, float, float);
+void calculate_deltas(float *);
+void determine_basal(float, float, float, float, float, float, float);
 
 void init_monitor(void) {
-  glucose_data_absolute = NULL;
-  iob_data_absolute = NULL;
-  struct requested_temp *current_scheduled_basal = (struct requested_temp *)malloc(sizeof(struct requested_temp));
-  current_scheduled_basal->duration = 0.0f;
-  current_scheduled_basal->rate = 0.0f;
-  struct requested_temp *current_temp_basal = (struct requested_temp *)malloc(sizeof(struct requested_temp));
-  current_temp_basal->duration = 0.0f;
-  current_temp_basal->rate = 0.0f;
+  current_scheduled_basal.duration = 0.0f;
+  current_scheduled_basal.rate = 0.0f;
+  current_temp_basal.duration = 0.0f;
+  current_temp_basal.rate = 0.0f;
+
+  starting_treatment = 0;
+  ending_treatment = 0;
+  starting_reading = 0;
+  ending_reading = 0;
 }
 
-struct requested_temp *calculate_basal(time_t rawtime, float glucose) {
-  struct glucose_readings *new_data = (struct glucose_readings *)malloc(sizeof(struct glucose_readings));
+void calculate_basal(time_t rawtime, float glucose, float *duration, float *rate) {
   // Append new glucose reading data
-  new_data->time = rawtime;
-  new_data->glucose = glucose;
-  new_data->prev = glucose_data_absolute;
-  glucose_data_absolute = new_data;
+  glucose_data_absolute[ending_reading].time = rawtime;
+  glucose_data_absolute[ending_reading].glucose = glucose;
+  glucose_data_absolute[ending_reading].prev = glucose_data_absolute;
+  ending_reading = (ending_reading + 1) % MAX_READINGS;
+  if (ending_reading == starting_reading) {
+    starting_reading++;
+  }
+
   float glucose_deltas[3];
-  calculate_deltas(glucose_data_absolute, glucose_deltas);
-  current_temp_basal = determine_basal(glucose, current_temp_basal->rate,
-    current_temp_basal->duration, current_scheduled_basal->rate,
-    iob_data_absolute,
+  calculate_deltas(glucose_deltas);
+  determine_basal(glucose, current_temp_basal.rate,
+    current_temp_basal.duration, current_scheduled_basal.rate,
     glucose_deltas[0], glucose_deltas[1], glucose_deltas[2]);
-  return current_temp_basal;
+  *duration = current_temp_basal.duration;
+  *rate = current_temp_basal.rate;
 }
 
 void set_current_basal(float rate) {
-  struct requested_temp *new_data = (struct requested_temp *)malloc(sizeof(struct requested_temp));
-  new_data->duration = 0.0f; // NOT USED
-  new_data->rate = rate;
-  current_scheduled_basal = new_data;
+  current_scheduled_basal.duration = 0.0f; // NOT USED
+  current_scheduled_basal.rate = rate;
 }
 
 void add_treatment(time_t rawtime, float bolus_insulin) {
-  struct treatment_list *new_data = (struct treatment_list *)malloc(sizeof(struct treatment_list));
-  new_data->time = rawtime;
-  new_data->insulin = bolus_insulin;
-  new_data->prev = iob_data_absolute;
-  if (iob_data_absolute) {
-    new_data->minutes = (rawtime - iob_data_absolute->time) / 60;
+  iob_data_absolute[ending_treatment].time = rawtime;
+  iob_data_absolute[ending_treatment].insulin = bolus_insulin;
+  iob_data_absolute[ending_treatment].prev = iob_data_absolute;
+  if (ending_treatment > 0) {
+    iob_data_absolute[ending_treatment].minutes = (rawtime - iob_data_absolute[ending_treatment - 1].time) / 60;
   } else {
-    new_data->minutes = 0; // TODO: Check defaults
+    iob_data_absolute[ending_treatment].minutes = 0; // TODO: Check defaults
   }
-  iob_data_absolute = new_data;
+  ending_treatment = (ending_treatment + 1) % MAX_READINGS;
+  if (ending_treatment == starting_treatment) {
+    starting_treatment++;
+  }
 }
 
-void calculate_deltas(struct glucose_readings *glucose_data, float *deltas) {
+void calculate_deltas(float *deltas) {
   /*
   delta = change in BG between glucose (most recent BG) and an average of BG value from between 2.5 and 7.5 minutes ago (usually just a single BG value from 5 minutes ago)
   glucose = most recent BG
@@ -99,22 +105,22 @@ void calculate_deltas(struct glucose_readings *glucose_data, float *deltas) {
   */
   float avg_bg_delta = 0.0f, short_avg_delta = 0.0f, long_avg_delta = 0.0f;
   int short_num = 0, long_num = 0;
-  struct glucose_readings *current = glucose_data->prev;
+  int current_index = ending_treatment - 1;
   float current_difference;
-  while (current) {
-    current_difference = glucose_data->time - current->time;
+  do {
+    current_difference = glucose_data_absolute[ending_treatment - 1].time - glucose_data_absolute[current_index].time;
     if (2.5f * 60 <= current_difference && current_difference <= 7.5f * 60) {
-      avg_bg_delta += current->glucose;
-      short_avg_delta += (glucose_data->glucose) - (current->glucose);
+      avg_bg_delta += glucose_data_absolute[current_index].glucose;
+      short_avg_delta += (glucose_data_absolute[ending_treatment - 1].glucose) - (glucose_data_absolute[current_index].glucose);
       short_num++;
     } else if (17.5f * 60 <= current_difference && current_difference <= 42.5f * 60) {
-      long_avg_delta += (glucose_data->glucose) - (current->glucose);
+      long_avg_delta += (glucose_data_absolute[ending_treatment - 1].glucose) - (glucose_data_absolute[current_index].glucose);
       long_num++;
     } else {
-      current->prev = NULL; // Too far back so can forget about this glucose reading
+      starting_treatment = current_index - 1; // Too far back so can forget about this glucose reading
     }
-    current = current->prev;
-  }
+    current_index--;
+  } while (current_index != starting_treatment);
   deltas[0] = avg_bg_delta/short_num;
   deltas[1] = short_avg_delta/short_num;
   deltas[2] = long_avg_delta/long_num;
@@ -129,55 +135,54 @@ float get_activity_percentage (int minutes) {
 }
 
 /* sum for all insulin treatments in units of insulin used per minute */
-float calculate_activity (struct treatment_list * iob_data) {
+float calculate_activity () {
   int total_activity = 0;
-  struct treatment_list * iob_data_used = iob_data;
-  iob_data = iob_data -> prev; // Initial block is a sentinel
-  int cummulative_minutes = iob_data -> minutes;
-  while (DIA <= cummulative_minutes) {
-    total_activity += (iob_data -> insulin) * get_activity_percentage (cummulative_minutes);
-    iob_data_used = iob_data;
-    iob_data = iob_data -> prev;
+  int current_index = ending_treatment - 1;
+  int cummulative_minutes = iob_data_absolute[current_index].minutes;
+  while (current_index != (starting_treatment - 1 + MAX_READINGS) % MAX_READINGS && cummulative_minutes < DIA) {
+    total_activity += (iob_data_absolute[current_index].insulin) * get_activity_percentage (cummulative_minutes);
+    current_index = (current_index - 1 + MAX_READINGS) % MAX_READINGS;
+    cummulative_minutes += iob_data_absolute[current_index].minutes;
   }
-  iob_data_used -> prev = NULL;
+  if (cummulative_minutes >= DIA) {
+    starting_treatment = (current_index + 1) % MAX_READINGS;
+  }
   return total_activity;
 }
 
 /* sum for all insulin treatments in units of insulin remaining each minute */
-float calculate_iob (struct treatment_list * iob_data) {
+float calculate_iob () {
+  float total_iob = 0;
+  int current_index = ending_treatment - 1;
   int cummulative_minutes = 0;
-  int total_iob = 0;
-  while (iob_data) {
-    cummulative_minutes += iob_data -> minutes;
+  while (current_index != (starting_treatment - 1 + MAX_READINGS) % MAX_READINGS && cummulative_minutes < DIA) {
+    cummulative_minutes += iob_data_absolute[current_index].minutes;
     if (cummulative_minutes <= PEAK) {
-      total_iob += (iob_data -> insulin)
+      total_iob += (iob_data_absolute[current_index].insulin)
         * get_activity_percentage (cummulative_minutes)
         * cummulative_minutes * 0.5f;
     } else {
-      total_iob += (iob_data -> insulin)
+      total_iob += (iob_data_absolute[current_index].insulin)
         * (DIA - get_activity_percentage (cummulative_minutes)
         * (DIA - cummulative_minutes)) * 0.5f;
     }
-
-    iob_data = iob_data -> prev;
+    current_index = (current_index - 1 + MAX_READINGS) % MAX_READINGS;
   }
   return total_iob;
 }
 
 // All constants according to oref design
-struct requested_temp * determine_basal(float blood_glucose,
+void determine_basal(float blood_glucose,
   float current_basal, float current_duration, float scheduled_basal,
-  struct treatment_list * iob_data,
   float delta, float short_avgdelta, float long_avgdelta) {
-  struct requested_temp * rT = (struct requested_temp *) malloc (sizeof(struct requested_temp));
     if (blood_glucose <= 10 || blood_glucose == 38 ) {
         if (current_basal > scheduled_basal || (current_basal == 0 && current_duration > 30) ) {
           // high temp is running or shorten long zero temps to 30m
-            rT -> duration = 30;
-            rT -> rate = 0;
-            return rT;
+            current_temp_basal.duration = 30;
+            current_temp_basal.rate = 0;
+            return;
         } else { //do nothing.
-          return NULL;
+          return;
         }
     }
 
@@ -190,7 +195,7 @@ struct requested_temp * determine_basal(float blood_glucose,
     // TODO: compare currenttemp to lastTemp and cancel temp if they don't match
 
     //calculate BG impact: the amount BG "should" be rising or falling based on insulin activity alone
-    float activity = calculate_activity (iob_data);
+    float activity = calculate_activity ();
     float bgi = - activity * SENS * 5;
     // project deviations for 30 minutes
     float deviation = 30 / 5 * ( minDelta - bgi ) ;
@@ -203,7 +208,7 @@ struct requested_temp * determine_basal(float blood_glucose,
         }
     }
 
-    float iob = calculate_iob (iob_data);
+    float iob = calculate_iob ();
     // calculate the naive (bolus calculator math) eventual BG based on net IOB and sensitivity
     float naive_eventual_bg = blood_glucose - iob * SENS;
     // and adjust it for the deviation above
@@ -219,9 +224,9 @@ struct requested_temp * determine_basal(float blood_glucose,
     // TODO: add carb impact
 
     if ( blood_glucose < threshold) {
-      rT -> duration = 0;
-      rT -> rate = 0;
-      return rT;
+      current_temp_basal.duration = 0;
+      current_temp_basal.rate = 0;
+      return;
     }
 
     if (eventual_bg < TARGET_LOW) { // if eventual BG is below target:
@@ -229,16 +234,16 @@ struct requested_temp * determine_basal(float blood_glucose,
         if ( minDelta > expectedDelta && minDelta > 0 ) {
             // if naive_eventual_bg < 40, set a 30m zero temp (oref0-pump-loop will let any longer SMB zero temp run)
             if (naive_eventual_bg < 40) {
-              rT -> duration = 30;
-              rT -> rate = 0;
-              return rT;
+              current_temp_basal.duration = 30;
+              current_temp_basal.rate = 0;
+              return;
             }
             if (current_duration > 15 && current_basal == scheduled_basal) {
-              return NULL;
+              return;
             } else {
-              rT -> duration = 30;
-              rT -> rate = scheduled_basal;
-              return rT;
+              current_temp_basal.duration = 30;
+              current_temp_basal.rate = scheduled_basal;
+              return;
             }
         }
 
@@ -260,9 +265,9 @@ struct requested_temp * determine_basal(float blood_glucose,
         // by both normal and naive calculations, then raise the rate
         float minInsulinReq = MIN (insulinReq, naiveInsulinReq);
         if (insulinScheduled < minInsulinReq - scheduled_basal * 0.3f) {
-          rT -> duration = 30;
-          rT -> rate = rate;
-          return rT;
+          current_temp_basal.duration = 30;
+          current_temp_basal.rate = rate;
+          return;
         }
         // calculate a long enough zero temp to eventually correct back up to target
         if ( rate <= 0 ) {
@@ -275,25 +280,25 @@ struct requested_temp * determine_basal(float blood_glucose,
                 durationReq = MIN (120, 0 > durationReq? 0 : durationReq);
             }
             if (durationReq > 0) {
-              rT -> duration = durationReq;
-              rT -> rate = rate;
-              return rT;
+              current_temp_basal.duration = durationReq;
+              current_temp_basal.rate = rate;
+              return;
             }
         }
-        rT -> duration = 30;
-        rT -> rate = rate;
-        return rT;
+        current_temp_basal.duration = 30;
+        current_temp_basal.rate = rate;
+        return;
     }
 
     // eventual BG is at/above target
     // if iob is over max, just cancel any temps
-    if (iob_data->insulin > MAX_IOB) {
+    if (iob > MAX_IOB) {
         if (current_duration > 15 && current_basal == scheduled_basal) {
-            return NULL;
+            return;
         } else {
-          rT -> duration = 30;
-          rT -> rate = scheduled_basal;
-          return rT;
+          current_temp_basal.duration = 30;
+          current_temp_basal.rate = scheduled_basal;
+          return;
         }
     } else { // otherwise, calculate 30m high-temp required to get projected BG down to target
         //int minPredBG = (int) (MAX(39, minIOBPredBG) + 0.5f);
@@ -310,12 +315,12 @@ struct requested_temp * determine_basal(float blood_glucose,
         float insulinScheduled = current_duration * (current_basal - scheduled_basal) / 60;
         if (insulinScheduled >= insulinReq * 2 || current_duration <= 5 || rate > current_basal) {
           // if current temp would deliver >2x more than the required insulin, lower the rate
-          rT -> duration = 30;
-          rT -> rate = rate;
-          return rT;
+          current_temp_basal.duration = 30;
+          current_temp_basal.rate = rate;
+          return;
         } else {
           // if required temp <~ existing temp basal
-          return NULL;
+          return;
         }
     }
 
