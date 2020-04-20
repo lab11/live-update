@@ -43,6 +43,7 @@ if __name__ == '__main__':
     parser.add_argument('dev', help='Serial port')
     parser.add_argument('--baud', help='Baud rate', type=int, default=115200)
     parser.add_argument('--timeout', help='Timeout', type=int, default=None)
+    parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
     args = parser.parse_args()
 
     # check made and flashed versions, warn to remake if necessary
@@ -51,7 +52,7 @@ if __name__ == '__main__':
             make_partition = int(make_version_f.readline()[-1]) % 2
             flash_partition = int(flash_version_f.readline()[-1]) % 2
     
-            if make_partition == flash_partition:
+            if make_partition == flash_partition and not args.force:
                 print('Both flashed and currently compiled versions are linked to a conflicting partition, re-`make` app and rerun script')
                 exit(1)
 
