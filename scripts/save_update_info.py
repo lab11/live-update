@@ -46,12 +46,12 @@ if __name__ == '__main__':
 
     main_ptr_addr = get_symbol_address(symbols, 'main_ptr')
     if not main_ptr_addr:
-        print('Could not locate main_ptr_addr, exiting...')
+        print('save_update_info.py: Could not locate main_ptr_addr, exiting...')
         exit(1)
 
     update_flag_addr = get_symbol_address(symbols, 'update_flag')
     if not update_flag_addr:
-        print('Could not locate update_flag_addr, exiting...')
+        print('save_update_info.py: Could not locate update_flag_addr, exiting...')
         exit(1)
 
     with open(BUILD_DIR + os.sep + 'update.txt', 'w') as f:

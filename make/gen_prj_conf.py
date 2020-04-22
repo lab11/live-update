@@ -12,6 +12,7 @@ contents = \
 """
 CONFIG_UART_INTERRUPT_DRIVEN=y
 CONFIG_GPIO=y
+CONFIG_LIVE_UPDATE=y
 """
 
 relocation = \
