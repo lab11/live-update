@@ -12,7 +12,7 @@ from intelhex import IntelHex
 
 
 BUILD_DIR = '_build'
-SYMBOL_FILE = '/tmp/update.symbols'
+SYMBOL_FILE = BUILD_DIR + os.sep + 'flashed.symbols'
 
 
 def get_app_name(folder):
