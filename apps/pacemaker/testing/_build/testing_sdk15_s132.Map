@@ -2993,7 +2993,7 @@ END GROUP
                 0x000000000000b45c                CodeFlashUsed = (__etext - ORIGIN (FLASH))
                 0x000000000000c0ec                TotalFlashUsed = (CodeFlashUsed + DataInitFlashUsed)
                 0x0000000000000001                ASSERT ((TotalFlashUsed <= LENGTH (FLASH)), region FLASH overflowed with .data and user data)
-OUTPUT(_build/pacemaker_testing_sdk15_s132.elf elf32-littlearm)
+OUTPUT(_build/testing_sdk15_s132.elf elf32-littlearm)
 
 .ARM.attributes
                 0x0000000000000000       0x30

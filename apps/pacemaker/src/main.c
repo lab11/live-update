@@ -34,14 +34,32 @@ struct k_timer diagnostic_timer;
 
 /* Callbacks for GPIO interrupts */
 void ventricle_sense_cb(void) {
-    printk("Sensed ventricle event! \n");
+    tfm_gpio_set(LED);
+    tfm_gpio_clear(LED);
+    printk("Ve \n");
     observe(VENTRICLE);
 }
 
 void atrial_sense_cb(void) {
-    printk("Sensed atrial event! \n");
+    tfm_gpio_set(LED);
+    tfm_gpio_clear(LED);
+    printk("At \n");
     ASed = true;
     observe(ATRIAL);
+}
+
+void ventricle_pace() {
+    printk("Ventricle Pace! \n");
+    tfm_gpio_set(VENTRICLE_PACE_PIN);
+    observe(VENTRICLE);
+    tfm_gpio_clear(VENTRICLE_PACE_PIN);
+}
+
+void atrial_pace() {
+    printk("Atrial Pace! \n");
+    tfm_gpio_set(ATRIAL_PACE_PIN);
+    observe(ATRIAL);
+    tfm_gpio_clear(ATRIAL_PACE_PIN);
 }
 
 void notify_fsms(EventType_t event) {
@@ -62,16 +80,17 @@ void notify_fsms(EventType_t event) {
 void observe(EventType_t event) {
     if (event == VENTRICLE) {
         // The below function calls need to be chained together
-        printk("\n");
-        printk("Now observing Ventricle Event... \n");
+        // printk("\n");
+        // printk("Now observing Ventricle Event... \n");
         VP_allowed = 0;
         k_timer_stop(&lri_timer);
         k_timer_stop(&avi_timer);
         tfm_gpio_set(LED);
+        tfm_gpio_clear(LED);
         notify_fsms(event);
     } else if (event == ATRIAL) {
-        printk("\n");
-        printk("Observing Atrial Event... \n");
+        // printk("\n");
+        // printk("Observing Atrial Event... \n");
         notify_fsms(event);
     }
 }
@@ -83,19 +102,20 @@ void main(void) {
     tfm_gpio_enable_output(ATRIAL_PACE_PIN);
 
     // Enable gpio interrupts
-    gpio_int_config ventricle_cfg = {
-        .type = 0,
-        .polarity = 0,
+    gpio_int_config ventricle_sense_cfg = {
+        .type = 1,
+        .polarity = 1,
         .cb = ventricle_sense_cb
     };
-    tfm_gpio_interrupt_enable(VENTRICLE_SENSE_PIN, &ventricle_cfg);
+    tfm_gpio_interrupt_enable(VENTRICLE_SENSE_PIN, &ventricle_sense_cfg);
 
-    gpio_int_config atrial_cfg = {
+    gpio_int_config atrial_sense_cfg = {
         .type = 1,
         .polarity = 1,
         .cb = atrial_sense_cb
     };
-    tfm_gpio_interrupt_enable(ATRIAL_SENSE_PIN, &atrial_cfg);
+    tfm_gpio_interrupt_enable(ATRIAL_SENSE_PIN, &atrial_sense_cfg);
+
 
     // Initialize timers
     k_timer_init(&lri_timer, NULL, lri_timer_stop_cb);
@@ -105,9 +125,10 @@ void main(void) {
     k_timer_init(&vrp_timer, vrp_timer_expire_cb, NULL);
 
     // Used for diagnostic purposes to measure latency
-    k_timer_init(&diagnostic_timer, NULL, NULL);
+    // k_timer_init(&diagnostic_timer, NULL, NULL);
 
     // Uncomment to force ventricle event when no external inputs available
-    printk("Forcing Ventricle Event");
-    observe(VENTRICLE);
+    // printk("Forcing Ventricle Event");
+    // observe(VENTRICLE);
+
 }

@@ -19,7 +19,7 @@ extern struct k_timer vrp_timer;
 
 /* Watches for ventricle events*/
 void vrp_observe() {
-    printk("vrp_observe \n");
+    // printk("vrp_observe \n");
     VP_allowed = 0;
     k_timer_start(&vrp_timer, TVRP, 0);
 }
@@ -27,6 +27,6 @@ void vrp_observe() {
 // /* Timer expire callbacks */
 void vrp_timer_expire_cb(struct k_timer *t) {
     // Allow VP events to occur globally
-    printk("vrp timer expired \n");
+    // printk("vrp timer expired \n");
     VP_allowed = 1;
 }

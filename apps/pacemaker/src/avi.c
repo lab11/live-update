@@ -6,7 +6,6 @@
 #include <stddef.h>
 #include <string.h>
 #include "kernel.h"
-// #include "interface.h"
 #include "pacemaker.h"
 
 // Params
@@ -26,7 +25,7 @@ extern bool VSed;
 // When AVI timer expires, then as long as URI timer has expired and ventrical event has not been sensed, 
 // then ventrical pacing should occur.
 void avi_timer_expire_cb(struct k_timer *t) {
-    printk("avi timer expired \n");
+    // printk("avi timer expired \n");
     avi_expired = 1;
 
     if (VSed == 1) {
@@ -34,8 +33,9 @@ void avi_timer_expire_cb(struct k_timer *t) {
     } else {
         if (uri_expired == 1 && VP_allowed == 1) {
             // Notify parent thread that VP should be triggered
-            tfm_gpio_set(VENTRICLE_PACE_PIN);
-            observe(VENTRICLE);
+            // tfm_gpio_set(VENTRICLE_PACE_PIN);
+            // observe(VENTRICLE);
+            ventricle_pace();
         } else if (uri_expired == 0 && VP_allowed == 0) {
             // TODO: sleep?   
         }
@@ -46,7 +46,7 @@ void avi_timer_expire_cb(struct k_timer *t) {
 // When URI timer expires, then ventrical pacing events should be reenabled.
 void uri_timer_expire_cb(struct k_timer *t) {
     // k_continue(shock_expire_cb);
-    printk("uri timer expired \n");
+    // printk("uri timer expired \n");
     uri_expired = 1;
 
     if (k_timer_status_get(&vrp_timer) == 0) {
@@ -66,12 +66,12 @@ void uri_timer_expire_cb(struct k_timer *t) {
 }
 
 void avi_observe() {
-    printk("avi_observe \n");
+    // printk("avi_observe \n");
     k_timer_start(&avi_timer, TAVI, 0);
 }
 
 /* Watches for ventricle events*/
 void uri_observe() {
-    printk("uri_observe \n");
+    // printk("uri_observe \n");
     k_timer_start(&uri_timer, TURI, 0);
 }

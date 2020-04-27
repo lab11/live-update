@@ -36,6 +36,16 @@ def gen_arrhythmia_heart_test_str():
             test_trace += "A" + "," + str(time_elapsed + TAVI) + ";"
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
 
+def gen_sample_heart_test_str():
+    with open('test_cases1.h', mode='w') as test_file:
+        test_name = "SAMPLE_HEART_TEST_cum"
+        test_trace = ""
+        for _ in range(50):
+            test_trace += "V" + "," + str(1000) + ";"
+            test_trace += "A" + "," + str(1000) + ";"
+        test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
 # gen_normal_heart_test()
 # gen_normal_heart_test_str()
+# gen_arrhythmia_heart_test_str()
+# gen_sample_heart_test_str()
 gen_arrhythmia_heart_test_str()

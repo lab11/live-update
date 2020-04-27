@@ -3,10 +3,10 @@
 
 // Pins
 #define LED                 2
-#define VENTRICLE_SENSE_PIN 5 //Vget! action
-#define VENTRICLE_PACE_PIN  6 //VP!
+#define VENTRICLE_SENSE_PIN 6 //Vget! action
 #define ATRIAL_SENSE_PIN    7 //Aget! action
-#define ATRIAL_PACE_PIN     8 //AP!; the shocker
+#define VENTRICLE_PACE_PIN  8 //VP!
+#define ATRIAL_PACE_PIN     9 //AP!; the shocker
 
 typedef enum {
     VENTRICLE=0, 
@@ -26,3 +26,5 @@ void uri_timer_expire_cb(struct k_timer *t);
 void avi_timer_expire_cb(struct k_timer *t);
 void vrp_timer_expire_cb(struct k_timer *t);
 void notify_fsms_ventricle();
+void atrial_pace();
+void ventricle_pace();

@@ -83,4 +83,23 @@ _build/nrf_drv_clock.o: \
  ../..//sdk/nrf5_sdk_15.3.0/components/softdevice/s132/headers/nrf_sd_def.h \
  ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/nrfx_errors.h \
  ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_clock.h \
- ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/include/nrfx_power_clock.h
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/include/nrfx_power_clock.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/softdevice/common/nrf_sdh.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/experimental_section_vars/nrf_section_iter.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/experimental_section_vars/nrf_section.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/softdevice/common/nrf_sdh_soc.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/sdk_common.h \
+ /usr/local/gcc-arm-none-eabi-8-2018-q4-major/arm-none-eabi/include/string.h \
+ /usr/local/gcc-arm-none-eabi-8-2018-q4-major/arm-none-eabi/include/xlocale.h \
+ /usr/local/gcc-arm-none-eabi-8-2018-q4-major/arm-none-eabi/include/strings.h \
+ /usr/local/gcc-arm-none-eabi-8-2018-q4-major/arm-none-eabi/include/sys/string.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/sdk_os.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/app_util.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/sdk_macros.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries//log/nrf_log.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/experimental_section_vars/nrf_section.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/strerror/nrf_strerror.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries/log/src/nrf_log_internal.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries//log/nrf_log_instance.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries//log/nrf_log_types.h \
+ ../..//sdk/nrf5_sdk_15.3.0/components/libraries//log/nrf_log_types.h

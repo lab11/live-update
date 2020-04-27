@@ -1,5 +1,5 @@
 r
-loadfile _build/pacemaker_testing_sdk15_s132.hex 
+loadfile _build/testing_sdk15_s132.hex 
 r
 g
 exit

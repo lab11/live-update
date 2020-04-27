@@ -88,6 +88,11 @@ _build/main.o: main.c \
  ../..//sdk/nrf5_sdk_15.3.0/components/softdevice/s132/headers/nrf_sd_def.h \
  ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/nrfx_errors.h \
  ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_gpio.h \
+ ../..//sdk/nrf5_sdk_15.3.0/integration/nrfx/legacy/nrf_drv_gpiote.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/include/nrfx_gpiote.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_gpiote.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_gpio.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_gpiote.h \
  ../..//sdk/nrf5_sdk_15.3.0/components/libraries//log/nrf_log.h \
  ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/sdk_common.h \
  ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/sdk_os.h \
@@ -116,4 +121,10 @@ _build/main.o: main.c \
  ../..//sdk/nrf5_sdk_15.3.0/components/libraries/atomic/nrf_atomic.h \
  ../..//sdk/nrf5_sdk_15.3.0/components/libraries/timer/app_timer.h \
  ../..//sdk/nrf5_sdk_15.3.0/components/libraries/util/app_error.h \
- test_cases.h
+ ../..//sdk/nrf5_sdk_15.3.0/integration/nrfx/legacy/nrf_drv_clock.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/include/nrfx_clock.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_clock.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/drivers/include/nrfx_power_clock.h \
+ ../..//sdk/nrf5_sdk_15.3.0/modules/nrfx/hal/nrf_timer.h test_cases.h \
+ /usr/local/gcc-arm-none-eabi-8-2018-q4-major/arm-none-eabi/include/time.h \
+ /usr/local/gcc-arm-none-eabi-8-2018-q4-major/arm-none-eabi/include/machine/time.h
