@@ -77,9 +77,9 @@ BOOL read_LED(LED color) {
 
 void write_LED(LED color, BOOL v) {
 	if (v == 0) {
-		LED_on(color);
-	} else {
 		LED_off(color);
+	} else {
+		LED_on(color);
 	}
 }
 

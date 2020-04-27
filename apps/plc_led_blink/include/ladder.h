@@ -34,3 +34,7 @@ BOOL Read_U_b_Yled(void);
 
 void Write_U_b_Yled(BOOL v);
 
+BOOL Read_U_b_Ytx(void);
+
+void Write_U_b_Ytx(BOOL v);
+
