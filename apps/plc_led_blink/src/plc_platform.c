@@ -25,12 +25,12 @@ void enable_pin_output(uint8_t pin) {
 
 void read_in_table(void) {
 	gpio_in_table = tfm_gpio_read_all();
-	printk("%x\n", gpio_in_table);
+	// printk("%x\n", gpio_in_table);
 	return;
 }
 
 void write_out_table(void) {
-	printk("%x\n", gpio_out_table);
+	// printk("%x\n", gpio_out_table);
 	tfm_gpio_write_all(gpio_out_table);
 	return;
 }
