@@ -1,0 +1,30 @@
+{
+    "timers": {
+        "t": {
+            "stop_callback": null,
+            "expire_callback": "t_expire"
+        },
+        "backoff": {
+            "stop_callback": null,
+            "expire_callback": "backoff_expire"
+        }
+    },
+    "top_level_fns": {
+        "main": {
+            "timers_stopped": [],
+            "timers_started": ["t"]
+        },
+        "interrupt_handler": {
+            "timers_stopped": [],
+            "timers_started": ["backoff"]
+        },
+        "t_expire": {
+            "timers_stopped": [],
+            "timers_started": ["t"]
+        },
+        "backoff_expire": {
+            "timers_stopped": [],
+            "timers_started": []
+        }
+    }
+}
