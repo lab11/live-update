@@ -18,7 +18,8 @@
 #include "app_timer.h"
 #include "nrf_drv_clock.h"
 #include "nrf_timer.h"
-#include "test_cases.h"
+#include "tests/test_cases.h"
+#include "SEGGER_RTT.h"
 
 #include <time.h>
 
@@ -48,10 +49,9 @@ void in_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
     nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
     uint32_t elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
 
-    if (pin == GPIO4) printf("Atrial sense on pin %d \n", pin);
-    if (pin == GPIO3) printf("Ventricle sense on pin %d \n", pin);
+    if (pin == GPIO4) printf("AP,%lu \n", elapsed_time/16000);
+    if (pin == GPIO3) printf("VP,%lu \n", elapsed_time/16000);
 
-    printf("Elapsed Time (ms): %lu \n", elapsed_time/16000);
 }
 
 int main(void) {
@@ -65,29 +65,11 @@ int main(void) {
         APP_ERROR_CHECK(error_code);
     }
 
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
+    // NRF_LOG_DEFAULT_BACKENDS_INIT();
 
     // Configure Output
     nrf_gpio_cfg_output(GPIO1);
     nrf_gpio_cfg_output(GPIO2);
-
-    // Configure high frequency timer
-    nrf_timer_bit_width_set(NRF_TIMER1, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(NRF_TIMER1, NRF_TIMER_FREQ_16MHz);
-    nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_START);
-    nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE0);
-    
-    // Run loop for 10 seconds
-    for(int i = 0; i < 10; i++) {
-        printf("%d \n", i);
-        nrf_delay_ms(1000);
-    }
-
-    nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
-    uint32_t elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
-
-    // Check that the timer is working correctly
-    printf("Elapsed Time (seconds): %lu \n", elapsed_time/16000000);
 
     // Configure Inputs and Interrupts
     nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
@@ -102,24 +84,47 @@ int main(void) {
     APP_ERROR_CHECK(error_code);
     nrf_drv_gpiote_in_event_enable(GPIO4, true);
 
+    // 10 Second Setup period
+    for(int i = 0; i < 10; i++) {
+        printf("%d \n", i);
+        nrf_delay_ms(1000);
+    }
+
+    // Configure high frequency timer
+    nrf_timer_bit_width_set(NRF_TIMER1, NRF_TIMER_BIT_WIDTH_32);
+    nrf_timer_frequency_set(NRF_TIMER1, NRF_TIMER_FREQ_16MHz);
+    nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_START);
+    nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE0);
+    
+
+    // nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
+    // uint32_t elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
+
+    uint32_t elapsed_time;
+
     // Run an input trace
-    char *pChr = strtok (SAMPLE_HEART_TEST, ",;");
-    printf("Sending sense event: %s \n", pChr);
-    pChr = strtok (NULL, ",;");
+    char *pChr = strtok (ARR2_HEART_TEST, ",;");
+    printf("Initiating input trace... \n");
+    // pChr = strtok (NULL, ",;");
     while (pChr != NULL) {
         if (isdigit(pChr[0])){
-            printf("Waiting for %s ms \n", pChr);
             nrf_delay_ms(atoi(pChr));
             pChr = strtok (NULL, ",;");
             if (pChr[0] == 'V') {
+                nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
                 nrf_gpio_pin_write(GPIO1, 0);
-                printf("Sending V sense event: %s \n", pChr);
+                // printf("Sending V sense event: %s \n", pChr);
+                
+                elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
+                printf("VS,%lu \n", elapsed_time/16000);
                 nrf_gpio_pin_write(GPIO1, 1);
                 // nrf_gpio_pin_set(GPIO1);
                 // nrf_gpio_pin_clear(GPIO1);
-            } else {
+            } else if(pChr[0] == 'A') {
+                nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
                 nrf_gpio_pin_write(GPIO2, 0);
-                printf("Sending A sense event: %s \n", pChr);
+                elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
+                printf("AS,%lu \n", elapsed_time/16000);
                 nrf_gpio_pin_write(GPIO2, 1);
                 // nrf_gpio_pin_set(GPIO2);
                 // nrf_gpio_pin_clear(GPIO2);
@@ -128,8 +133,7 @@ int main(void) {
             pChr = strtok (NULL, ",;");
         }   
     }
-
-    while (1);
+    printf("Finished trace. \n");
 
     return 0;
 }

@@ -1,51 +1,63 @@
-import csv
+# import csv
+import random
+# def gen_normal_heart_test_csv():
+#     with open('tests/normal_heart_test.csv', mode='w') as test_file:
+#         test_file_writer = csv.writer(test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-def gen_normal_heart_test_csv():
-    with open('tests/normal_heart_test.csv', mode='w') as test_file:
-        test_file_writer = csv.writer(test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-        TLRI = 1000
-        TAVI = 150
-        for i in range(500):
-            test_file_writer.writerow(['V', "" + str(TLRI-TAVI)])
-            test_file_writer.writerow(['A', "" + str(TAVI)])
+#         TLRI = 1000
+#         TAVI = 150
+#         for i in range(500):
+#             test_file_writer.writerow(['V', "" + str(TLRI-TAVI)])
+#             test_file_writer.writerow(['A', "" + str(TAVI)])
 
 def gen_normal_heart_test_str():
     TLRI = 1000
     TAVI = 150
-    time_elapsed = 0
-    with open('test_cases1.h', mode='w') as test_file:
-        test_name = "NORMAL_HEART_TEST_cum"
-        test_trace = ""
+    with open('test_cases1.h', mode='a') as test_file:
+        test_name = "NORMAL_HEART_TEST"
+        test_trace = "NONE,0;"
         for _ in range(50):
-            test_trace += "V" + "," + str(time_elapsed + TLRI-TAVI) + ";"
-            time_elapsed = time_elapsed + TLRI-TAVI
-            test_trace += "A" + "," + str(time_elapsed + TAVI) + ";"
+            test_trace += "V" + "," + str(TLRI-TAVI) + ";"
+            test_trace += "A" + "," + str(TAVI) + ";"
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
+        test_file.write("\n")
 
-def gen_arrhythmia_heart_test_str():
+def gen_arrhythmia1_heart_test_str():
     TLRI = 1000
-    TAVI = 200
-    time_elapsed = 0
-    with open('test_cases2.h', mode='w') as test_file:
-        test_name = "ARRHYTHMIA_HEART_TEST"
-        test_trace = ""
+    TAVI = 100
+    with open('test_cases1.h', mode='a') as test_file:
+        test_name = "ARR1_HEART_TEST"
+        test_trace = "NONE,0;"
         for _ in range(50):
-            test_trace += "V" + "," + str(time_elapsed + TLRI-TAVI) + ";"
-            time_elapsed = time_elapsed + TLRI-TAVI
-            test_trace += "A" + "," + str(time_elapsed + TAVI) + ";"
+            test_trace += "V" + "," + str(TLRI-TAVI) + ";"
+            test_trace += "A" + "," + str(TAVI) + ";"
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
+        test_file.write("\n")
 
-def gen_sample_heart_test_str():
-    with open('test_cases1.h', mode='w') as test_file:
-        test_name = "SAMPLE_HEART_TEST_cum"
-        test_trace = ""
+def gen_arrhythmia2_heart_test_str():
+    TLRI = 1000
+    TAVI = 150
+    with open('test_cases1.h', mode='a') as test_file:
+        test_name = "ARR2_HEART_TEST"
+        test_trace = "NONE,0;"
         for _ in range(50):
-            test_trace += "V" + "," + str(1000) + ";"
-            test_trace += "A" + "," + str(1000) + ";"
+            rand_val = random.randint(-10,10)
+            test_trace += "V" + "," + str(TLRI-TAVI+rand_val) + ";"
+            rand_val = random.randint(-10,10)
+            test_trace += "A" + "," + str(TAVI+rand_val) + ";"
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
-# gen_normal_heart_test()
+        test_file.write("\n")
+
+# def gen_sample_heart_test_str():
+#     with open('test_cases1.h', mode='w') as test_file:
+#         test_name = "SAMPLE_HEART_TEST_cum"
+#         test_trace = ""
+#         for _ in range(50):
+#             test_trace += "V" + "," + str(1000) + ";"
+#             test_trace += "A" + "," + str(1000) + ";"
+#         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
+
+
 # gen_normal_heart_test_str()
-# gen_arrhythmia_heart_test_str()
-# gen_sample_heart_test_str()
-gen_arrhythmia_heart_test_str()
+# gen_arrhythmia1_heart_test_str()
+gen_arrhythmia2_heart_test_str()
