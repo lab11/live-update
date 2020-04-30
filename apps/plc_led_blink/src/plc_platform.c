@@ -11,7 +11,7 @@ void enable_pin_outputs(uint8_t* pins, uint8_t num_pins) {
 	for (uint8_t i = 0; i < num_pins; i++) {
 		out |= (1 << pins[i]);
 	}
-	printk("%x\n", out);
+	printk("Enabling Outputs: %x\n", out);
 	tfm_gpio_enable_outputs(out);
 	return;
 }
