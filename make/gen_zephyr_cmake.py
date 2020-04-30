@@ -41,5 +41,18 @@ if not args.no_app_relocation:
         contents += "zephyr_code_relocate({} APPFLASH_TEXT_RODATA)\n".format(c_src)
         contents += "zephyr_code_relocate({} APPRAM_DATA_BSS)\n".format(c_src)
 
+contents += "\n\n"
+contents += """
+get_target_property(SOURCE_LIST app SOURCES)
+
+get_target_property(INCLUDE_LIST app INCLUDE_DIRECTORIES)
+list(TRANSFORM INCLUDE_LIST PREPEND "-I")
+
+get_target_property(Z_INCLUDE_LIST zephyr_interface INTERFACE_INCLUDE_DIRECTORIES)
+list(TRANSFORM Z_INCLUDE_LIST PREPEND "-I")
+
+add_custom_command(TARGET app POST_BUILD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND clang -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility ${INCLUDE_LIST} ${Z_INCLUDE_LIST} ${SOURCE_LIST} > _build/ast_test.txt 2> /dev/null || (exit 0))
+"""
+
 print(contents)
 

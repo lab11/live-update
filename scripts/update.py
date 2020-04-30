@@ -10,7 +10,7 @@ import json
 
 from intelhex import IntelHex
 
-CURRENT_VERSION = 0x7
+CURRENT_VERSION = 0x8
 FLASH_BASE = 0x200000
 
 LAST_VERSION_NAME = '.lastVerNum.txt'
@@ -77,6 +77,65 @@ def validate_binary(app_dir, build_dir, force):
                 exit(1)
 
 
+# TODO make better
+def parse_ast(f):
+
+    ast = [l.strip() for l in f.readlines()]
+
+    # find all the timer declarations
+    timers = {}
+    mode = 'init' # init, timer, expiry, stop
+    current_timer = None
+
+    for l in ast:
+        m = re.search('-VarDecl.*used\s(.*)\s\'struct k_timer', l)
+        if m:
+            if m.group(1) not in timers:
+                timers[m.group(1)] = {}
+            continue
+
+        if mode == 'init':
+            m = re.search('.*Function.*\'k_timer_init\'', l)
+            if m:
+                mode = 'timer'
+                continue
+
+        if mode == 'timer':
+            m = re.search('\'struct k_timer\':.*\s\'(.*)\'\s\'struct k_timer', l)
+            if m:
+                current_timer = m.group(1)
+                mode = 'expiry'
+                continue
+
+        if mode == 'expiry':
+            m = re.search('void \(struct k_timer \*\).*\s\'(.*)\'\s.void \(struct k_timer \*\)', l)
+            if m:
+                timers[current_timer]['expire_callback'] = m.group(1)
+                mode = 'stop'
+                continue
+
+            if 'k_timer_expiry_t' in l and 'NullToPointer' in l:
+                timers[current_timer]['expire_callback'] = None
+                mode = 'stop'
+                continue
+
+        if mode == 'stop':
+            m = re.search('void \(struct k_timer \*\).*\s\'(.*)\'\s.void \(struct k_timer \*\)', l)
+            if m:
+                timers[current_timer]['stop_callback'] = m.group(1)
+                mode = 'init'
+                continue
+
+            if 'k_timer_stop_t' in l and 'NullToPointer' in l:
+                timers[current_timer]['stop_callback'] = None
+                mode = 'init'
+                continue
+
+    return {
+        'timers': timers
+    }
+    
+
 def generate_update_header(app_dir, build_dir, update_metadata_filename, update_symbols_filename, flashed_symbols_filename):
 
     header = {}
@@ -91,6 +150,23 @@ def generate_update_header(app_dir, build_dir, update_metadata_filename, update_
     dump_symbols(elf_filename, update_symbols_filename)
     update_symbols = update_symbols_filename
     flashed_symbols = flashed_symbols_filename
+
+    with open(os.path.join(build_dir, 'ast_test.txt'), 'r') as f:
+        ast_metadata = parse_ast(f)
+        header['init_size'] = 3 * len(ast_metadata['timers']) * 4
+
+    '''
+    print('\nTimer callbacks:')
+    for t in ast_metadata['timers']:
+        t_dict = ast_metadata['timers'][t]
+        print("    {} ({}):".format(t, hex(get_symbol_address(update_symbols, t))))
+        print("      expiry: {}".format(
+            hex(get_symbol_address(update_symbols, t_dict['expire_callback'])) if t_dict['expire_callback'] else '0x0'
+        ))
+        print("      stop: {}".format(
+            hex(get_symbol_address(update_symbols, t_dict['stop_callback'])) if t_dict['stop_callback'] else '0x0'
+        ))
+    '''
 
     header['main_addr'] = get_symbol_address(update_symbols, '\smain$')
 
@@ -167,6 +243,7 @@ def generate_update_payloads(app_dir, build_dir, update_symbols_filename, flashe
 
     syms = [s for s in syms if get_symbol_size(update_symbols, s + '$') != 0]
 
+    print('\nTransfer payload:')
     transfer_triples = []
     for s in syms:
         size = get_symbol_size(update_symbols, s + '$') 
@@ -180,6 +257,30 @@ def generate_update_payloads(app_dir, build_dir, update_symbols_filename, flashe
     triples_size = len(syms) * 3
     header['triples_bytes'] = triples_size * 4 # 3 values per memory region, each 4 bytes
     payloads['transfer'] = struct.pack('I' * triples_size, *transfer_triples)
+
+    with open(os.path.join(build_dir, 'ast_test.txt'), 'r') as f:
+        ast_metadata = parse_ast(f)
+    init_address_value_triples = []
+
+    print('\nInit payload:')
+    for t in ast_metadata['timers']:
+        t_dict = ast_metadata['timers'][t]
+
+        t_addr = get_symbol_address(update_symbols, t + '$')
+        t_expiry = get_symbol_address(update_symbols, t_dict['expire_callback']) | 0x1 if t_dict['expire_callback'] else 0x0
+        t_stop = get_symbol_address(update_symbols, t_dict['stop_callback']) | 0x1 if t_dict['stop_callback'] else 0x0
+
+        init_address_value_triples += [t_addr, t_expiry, t_stop]
+
+        print("    {} ({}):".format(t, hex(get_symbol_address(update_symbols, t + '$'))))
+        print("      expiry: {}".format(
+            hex(get_symbol_address(update_symbols, t_dict['expire_callback'])) if t_dict['expire_callback'] else '0x0'
+        ))
+        print("      stop: {}".format(
+            hex(get_symbol_address(update_symbols, t_dict['stop_callback'])) if t_dict['stop_callback'] else '0x0'
+        ))
+        
+    payloads['init'] = struct.pack('I' * len(ast_metadata['timers']) * 3, *init_address_value_triples)
 
     return payloads
 
@@ -201,7 +302,8 @@ def serialize_header(header, payloads):
         appram_bss_size: {},
         appram_bss_start_addr: {},
         appram_bss_size_addr: {},
-        transfer_triples_size: {}
+        transfer_triples_size: {},
+        init_size: {}
     }}
     total size (expected): {}
     total size (actual): {}
@@ -219,12 +321,13 @@ def serialize_header(header, payloads):
         hex(header['appram_bss_start_addr']),
         hex(header['appram_bss_size_addr']),
         hex(header['triples_bytes']),
-        4 * len(header) + header['appflash_text_size'] + header['appflash_rodata_size'] + header['triples_bytes'],
-        4 * len(header) + len(payloads['text']) + len(payloads['rodata']) + len(payloads['transfer'])
+        hex(header['init_size']),
+        4 * len(header) + header['appflash_text_size'] + header['appflash_rodata_size'] + header['triples_bytes'] + header['init_size'],
+        4 * len(header) + sum(len(payloads[x]) for x in payloads)
     )
     print(header_str)
 
-    return struct.pack('IIIIIIIIIIIII',
+    return struct.pack('IIIIIIIIIIIIII',
         CURRENT_VERSION,
         header['main_ptr_addr'],
         header['main_addr'] | 0x1, # make sure main ptr is thumb!
@@ -238,6 +341,7 @@ def serialize_header(header, payloads):
         header['appram_bss_start_addr'],
         header['appram_bss_size_addr'],
         header['triples_bytes'],
+        header['init_size']
     )
 
 
@@ -249,6 +353,7 @@ if __name__ == '__main__':
     parser.add_argument('--baud', help='Baud rate', type=int, default=115200)
     parser.add_argument('--timeout', help='Timeout', type=int, default=None)
     parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
+    parser.add_argument('--dry_run', help='Does not attempt serial communication', action='store_true', default=False)
     args = parser.parse_args()
 
     # important paths
@@ -274,33 +379,38 @@ if __name__ == '__main__':
         flashed_symbol_filename,
         update_header
     )
-
+    
     serialized_update_header = serialize_header(update_header, update_payloads)
 
-    with serial.Serial(args.dev, args.baud, timeout=2) as ser:
+    if not args.dry_run:
+        with serial.Serial(args.dev, args.baud, timeout=2) as ser:
 
-        print("sending header...")
-        ser.write(serialized_update_header)
+            print("sending header...")
+            ser.write(serialized_update_header)
 
-        time.sleep(1)
-        print("sending app_text...")
-        ser.write(update_payloads['text'])
+            time.sleep(1)
+            print("sending app_text...")
+            ser.write(update_payloads['text'])
 
-        time.sleep(1)
-        print("sending rodata...")
-        ser.write(update_payloads['rodata'])
+            time.sleep(1)
+            print("sending rodata...")
+            ser.write(update_payloads['rodata'])
 
-        time.sleep(1)
-        print("sending transfer data...")
-        ser.write(update_payloads['transfer'])
+            time.sleep(1)
+            print("sending transfer data...")
+            ser.write(update_payloads['transfer'])
 
-    print("updating last flashed version number...")
-    last_version_filename = os.path.join(args.app_folder, LAST_VERSION_NAME)
-    last_flashed_filename = os.path.join(args.app_folder, build_dir, FLASHED_VERSION_NAME)
-    os.system('cp ' + last_version_filename + ' ' + last_flashed_filename)
+            time.sleep(1)
+            print("sending init data...")
+            ser.write(update_payloads['init'])
 
-    print("updating last flashed symbol file...")
-    os.system('cp ' + update_symbol_filename + ' ' + flashed_symbol_filename)
+        print("updating last flashed version number...")
+        last_version_filename = os.path.join(args.app_folder, LAST_VERSION_NAME)
+        last_flashed_filename = os.path.join(args.app_folder, build_dir, FLASHED_VERSION_NAME)
+        os.system('cp ' + last_version_filename + ' ' + last_flashed_filename)
+
+        print("updating last flashed symbol file...")
+        os.system('cp ' + update_symbol_filename + ' ' + flashed_symbol_filename)
 
     print('done')
 
