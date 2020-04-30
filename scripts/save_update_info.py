@@ -10,21 +10,12 @@ import json
 
 from intelhex import IntelHex
 
-
-BUILD_DIR = '_build'
-SYMBOL_FILE = BUILD_DIR + os.sep + 'flashed.symbols'
-
-
 def get_app_name(folder):
     return os.path.basename(os.path.abspath(folder))
 
 
-def dump_symbols(folder):
-    # hardcoded for now
-    filename = SYMBOL_FILE
-
-    os.system('arm-none-eabi-objdump -t ' + folder + os.sep + BUILD_DIR + os.sep + get_app_name(folder) + '_ns.elf > ' + filename)
-    return filename
+def dump_symbols(elf, dest):
+    os.system('arm-none-eabi-objdump -t ' + elf + ' > ' + dest)
 
 
 def get_symbol_address(filename, symbol_re):
@@ -42,7 +33,11 @@ if __name__ == '__main__':
     parser.add_argument('app_folder', help='Application folder')
     args = parser.parse_args()
 
-    symbols = dump_symbols(args.app_folder)
+    build_dir = os.path.join(args.app_folder, '_build')
+
+    elf_filename = os.path.join(build_dir, get_app_name(args.app_folder) + '_ns.elf')
+    symbols = os.path.join(build_dir, 'flashed.symbols')
+    dump_symbols(elf_filename, symbols)
 
     main_ptr_addr = get_symbol_address(symbols, 'main_ptr')
     if not main_ptr_addr:
@@ -54,7 +49,7 @@ if __name__ == '__main__':
         print('save_update_info.py: Could not locate update_flag_addr, exiting...')
         exit(1)
 
-    with open(BUILD_DIR + os.sep + 'update.txt', 'w') as f:
+    with open(os.path.join(build_dir, 'update.txt'), 'w') as f:
         json.dump({
                 'main_ptr_addr': hex(main_ptr_addr),
                 'update_flag_addr': hex(update_flag_addr)
