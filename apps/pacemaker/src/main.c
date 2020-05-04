@@ -36,14 +36,14 @@ struct k_timer diagnostic_timer;
 void ventricle_sense_cb(void) {
     tfm_gpio_set(LED);
     tfm_gpio_clear(LED);
-    printk("Ve \n");
+    printk("V \n");
     observe(VENTRICLE);
 }
 
 void atrial_sense_cb(void) {
     tfm_gpio_set(LED);
     tfm_gpio_clear(LED);
-    printk("At \n");
+    printk("A \n");
     ASed = true;
     observe(ATRIAL);
 }
@@ -60,6 +60,7 @@ void atrial_pace() {
     tfm_gpio_set(ATRIAL_PACE_PIN);
     observe(ATRIAL);
     tfm_gpio_clear(ATRIAL_PACE_PIN);
+    
 }
 
 void notify_fsms(EventType_t event) {
@@ -85,8 +86,8 @@ void observe(EventType_t event) {
         VP_allowed = 0;
         k_timer_stop(&lri_timer);
         k_timer_stop(&avi_timer);
-        tfm_gpio_set(LED);
-        tfm_gpio_clear(LED);
+        // tfm_gpio_set(LED);
+        // tfm_gpio_clear(LED);
         notify_fsms(event);
     } else if (event == ATRIAL) {
         // printk("\n");
@@ -130,5 +131,6 @@ void main(void) {
     // Uncomment to force ventricle event when no external inputs available
     // printk("Forcing Ventricle Event");
     // observe(VENTRICLE);
+    printk("start1");
 
 }
