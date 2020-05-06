@@ -44,7 +44,7 @@ static float vs_slope15; // REAL(4), SAVE                :: VS_Slope15          
 static float vs_slope25; // REAL(4), SAVE                :: VS_Slope25                                      ! Torque/speed slope of region 2 1/2 induction generator, N-m/(rad/s).
 static float vs_sy_sp; // REAL(4), SAVE                :: VS_SySp                                         ! Synchronous speed of region 2 1/2 induction generator, rad/s.
 
-void discon(float[] avrSWAP, int *aviFAIL, char *accINFILE, char *avcOUTNAME, char *avcMSG ) {
+void discon(float *avrSWAP, int *aviFAIL, char *accINFILE, char *avcOUTNAME, char *avcMSG ) {
 
   *aviFAIL = 0; // INTEGER(C_INT),         INTENT(INOUT) :: aviFAIL                        ! A flag used to indicate the success of this DLL call set as follows: 0 if the DLL call was successful, >0 if the DLL call was successful but cMessage should be issued as a warning messsage, <0 if the DLL call was unsuccessful or for any other reason the simulation is to be stopped at this point with cMessage as the error message. // aviFAIL      = 0
 
@@ -57,10 +57,12 @@ void discon(float[] avrSWAP, int *aviFAIL, char *accINFILE, char *avcOUTNAME, ch
   float alpha; // REAL(4)                      :: Alpha                                           ! Current coefficient in the recursive, single-pole, low-pass filter, (-).
   float bl_pitch[3]; // REAL(4)                      :: BlPitch   (3)                                   ! Current values of the blade pitch angles, rad.
   float elap_time; // REAL(4)                      :: ElapTime                                        ! Elapsed time since the last call to the controller, sec.
-  float gen_speed = avr_swap(20); // REAL(4)                      :: GenSpeed                                        ! Current  HSS (generator) speed, rad/s. // GenSpeed     =       avrSWAP(20)
+  //float gen_speed = avr_swap(20); // REAL(4)                      :: GenSpeed                                        ! Current  HSS (generator) speed, rad/s. // GenSpeed     =       avrSWAP(20)
+  float gen_speed = avrSWAP[20];
   float gen_trq; // REAL(4)                      :: GenTrq                                          ! Electrical generator torque, N-m.
   float gain_correction; // REAL(4)                      :: GK                                              ! Current value of the gain correction factor, used in the gain scheduling law of the pitch controller, (-).
-  float hor_wind_v = avr_swap(27); //REAL(4)                      :: HorWindV                                        ! Horizontal hub-heigh wind speed, m/s. // HorWindV     =       avrSWAP(27)
+  //float hor_wind_v = avr_swap(27); //REAL(4)                      :: HorWindV                                        ! Horizontal hub-heigh wind speed, m/s. // HorWindV     =       avrSWAP(27)
+  float hor_wind_v = avrSWAP[27];
   float int_spd_err; // REAL(4), SAVE                :: IntSpdErr                                       ! Current integral of speed error w.r.t. time, rad.
   float pit_com_i; // REAL(4)                      :: PitComI                                         ! Integral term of command pitch, rad.
   float pit_com_p; // REAL(4)                      :: PitComP                                         ! Proportional term of command pitch, rad.
@@ -71,7 +73,7 @@ void discon(float[] avrSWAP, int *aviFAIL, char *accINFILE, char *avcOUTNAME, ch
   float curr_time = avrSWAP[1]; // REAL(4)                      :: Time                                            ! Current simulation time, sec. // Time         =       avrSWAP( 2)
   float trq_rate; // REAL(4)                      :: TrqRate                                         ! Torque rate based on the current and last torque commands, N-m/s.
 
-  int i_status = (int)(avrSWAP[0] + 0.5) // INTEGER(4)                   :: iStatus                                         ! A status flag set by the simulation as follows: 0 if this is the first call, 1 for all subsequent time steps, -1 if this is the final call at the end of the simulation. // iStatus      = NINT( avrSWAP( 1) )
+  int i_status = (int)(avrSWAP[0] + 0.5); // INTEGER(4)                   :: iStatus                                         ! A status flag set by the simulation as follows: 0 if this is the first call, 1 for all subsequent time steps, -1 if this is the final call at the end of the simulation. // iStatus      = NINT( avrSWAP( 1) )
   int k; // INTEGER(4)                   :: K                                               ! Loops through blades.
   int num_bl = (int)(avrSWAP[60] + 0.5); // INTEGER(4)                   :: NumBl                                           ! Number of blades, (-). // NumBl        = NINT( avrSWAP(61) )
   int err_stat; // INTEGER(4)                   :: ErrStat
@@ -80,7 +82,7 @@ void discon(float[] avrSWAP, int *aviFAIL, char *accINFILE, char *avcOUTNAME, ch
 
   bl_pitch[0] = avrSWAP[3]; // BlPitch  (1) =       avrSWAP( 4)
   bl_pitch[1] = avrSWAP[32]; // BlPitch  (2) =       avrSWAP(33)
-  bl_pitch[2] = avrSWAP[33]'' // BlPitch  (3) =       avrSWAP(34)
+  bl_pitch[2] = avrSWAP[33]; // BlPitch  (3) =       avrSWAP(34)
 
   // ! Read any External Controller Parameters specified in the User Interface
   // !   and initialize variables:
@@ -128,7 +130,7 @@ void discon(float[] avrSWAP, int *aviFAIL, char *accINFILE, char *avcOUTNAME, ch
   if (i_status >= 0 && *aviFAIL >= 0 ) { // IF ( ( iStatus >= 0 ) .AND. ( aviFAIL >= 0 ) )  THEN  ! Only compute control calculations if no error has occured and we are not on the last time step
     // ! Abort if the user has not requested a pitch angle actuator (See Appendix A
     // !   of Bladed User's Guide):
-    if ( (int)(avr_swap(10) + 0.5) != 0 ) { // IF ( NINT(avrSWAP(10)) /= 0 )  THEN ! .TRUE. if a pitch angle actuator hasn't been requested
+    if ( (int)(avrSWAP[10] + 0.5) != 0 ) { // IF ( NINT(avrSWAP(10)) /= 0 )  THEN ! .TRUE. if a pitch angle actuator hasn't been requested
       *aviFAIL = -1;
       err_msg = "Pitch angle actuator not requested"; // ErrMsg  = 'Pitch angle actuator not requested.'
     } // ENDIF
