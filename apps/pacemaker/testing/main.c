@@ -18,7 +18,7 @@
 #include "app_timer.h"
 #include "nrf_drv_clock.h"
 #include "nrf_timer.h"
-#include "tests/test_cases.h"
+#include "tests/test_cases1.h"
 #include "SEGGER_RTT.h"
 
 #include <time.h>
@@ -103,9 +103,8 @@ int main(void) {
     uint32_t elapsed_time;
 
     // Run an input trace
-    char *pChr = strtok (ARR6_HEART_TEST, ",;");
+    char *pChr = strtok (ARR9_HEART_TEST, ",;");
     printf("Initiating input trace... \n");
-    // pChr = strtok (NULL, ",;");
     while (pChr != NULL) {
         if (isdigit(pChr[0])){
             nrf_delay_ms(atoi(pChr));
@@ -113,21 +112,16 @@ int main(void) {
             if (pChr[0] == 'V') {
                 nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
                 nrf_gpio_pin_write(GPIO1, 0);
-                // printf("Sending V sense event: %s \n", pChr);
-                
                 elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
                 printf("VS,%lu \n", elapsed_time/16);
                 nrf_gpio_pin_write(GPIO1, 1);
-                // nrf_gpio_pin_set(GPIO1);
-                // nrf_gpio_pin_clear(GPIO1);
+
             } else if(pChr[0] == 'A') {
                 nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
                 nrf_gpio_pin_write(GPIO2, 0);
                 elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
                 printf("AS,%lu \n", elapsed_time/16);
                 nrf_gpio_pin_write(GPIO2, 1);
-                // nrf_gpio_pin_set(GPIO2);
-                // nrf_gpio_pin_clear(GPIO2);
             }
         } else {
             pChr = strtok (NULL, ",;");

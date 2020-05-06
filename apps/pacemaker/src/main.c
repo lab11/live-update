@@ -131,6 +131,6 @@ void main(void) {
     // Uncomment to force ventricle event when no external inputs available
     // printk("Forcing Ventricle Event");
     // observe(VENTRICLE);
-    printk("start1");
+    printk("start5");
 
 }

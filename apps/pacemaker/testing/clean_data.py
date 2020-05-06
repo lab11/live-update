@@ -26,6 +26,7 @@ def clean(file_name):
 def compute_event_intervals(file_name):
     ventricle_intervals = []
     atrial_intervals = []
+    ventricle_atrial_intervals = []
 
     last_ventricle = None
     last_atrial = None
@@ -46,47 +47,48 @@ def compute_event_intervals(file_name):
     # print("atrial_intervals: ", atrial_intervals)
     return ventricle_intervals, atrial_intervals
 
-
+def reject_outliers_2(data, m=2.):
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    s = d / (mdev if mdev else 1.)
+    return data[s < m]
 
 def plot_histogram(trace, type, seen_intervals, exp_intervals):
     # N_points = 100000
     # n_bins = 20
 
-    # # Generate a normal distribution, center at x=0 and y=5
-    # x = np.random.randn(N_points)
-    # y = .4 * x + np.random.randn(100000) + 5
-
     fig, axs = plt.subplots(1, sharey=True, tight_layout=True)
     axs.set_ylabel('Count')
     axs.set_xlabel("Deviation from Expected Interval Between Subsequent " + type + " Events (microseconds)")
-    # # We can set the number of bins with the `bins` kwarg
-    # axs[0].hist(x, bins=n_bins)
-    # axs[1].hist(y, bins=n_bins)
-    v_error = np.abs(np.array(seen_intervals) - np.array(exp_intervals))
-    # v_error = [val for val in v_error if val < 1000]
-    # plt.figure(1)
+
+    errors = np.abs(np.array(seen_intervals) - np.array(exp_intervals))
+    errors = reject_outliers_2(errors, 5)
+
     w = 15
-    n = math.ceil((max(v_error) - min(v_error))/w)
+    n = math.ceil((max(errors) - min(errors))/w)
     
-    plt.hist(v_error, bins=n)
+    plt.hist(errors, bins=n)
 
     min_ylim, max_ylim = plt.ylim()
-    plt.axvline(np.mean(v_error), color='k', linestyle='dashed', linewidth=1)
-    plt.text(np.mean(v_error)*1.1, max_ylim*0.9, 'Mean: {:.2f}'.format(np.mean(v_error)))
+    plt.axvline(np.mean(errors), color='k', linestyle='dashed', linewidth=1)
+    plt.text(np.mean(errors)*1.1, max_ylim*0.9, 'Mean: {:.2f}'.format(np.mean(errors)))
     # plt.show()
     plt.savefig("./output_graphs/"+type+"_"+trace+".png")
 
 
    
 def main():
-    trace = "arr6_trace"
-    clean(trace+".log")
-    ventricle_intervals, atrial_intervals = compute_event_intervals("clean_arr6_trace.log")
-    exp_ventricle_intervals = [(ventricle_intervals[i]/10000)*10000 for i in range(len(ventricle_intervals))]
+    traces = ["arr6_trace"]
 
-    exp_atrial_intervals = [(atrial_intervals[i]/10000)*10000 for i in range(len(atrial_intervals))]
-
-    plot_histogram(trace, "ventricle", ventricle_intervals, exp_ventricle_intervals)
+    for trace in traces:
+        filename = trace + ".log"
+        clean(filename)
+        ventricle_intervals, atrial_intervals = compute_event_intervals("clean_"+filename)
+        exp_ventricle_intervals = [(ventricle_intervals[i]/10000)*10000 for i in range(len(ventricle_intervals))]
+        exp_atrial_intervals = [(atrial_intervals[i]/10000)*10000 for i in range(len(atrial_intervals))]
+        plot_histogram(trace, "ventricle", ventricle_intervals, exp_ventricle_intervals)
+        # plot_histogram(trace, "atrial", ventricle_intervals, exp_ventricle_intervals)
+        # plot_histogram(trace, "atrial_ventricle", ventricle_intervals, exp_ventricle_intervals)
 
 
 
