@@ -8,10 +8,11 @@
 
 #define PLC_SCAN_TIME 10
 
-K_TIMER_DEFINE(scan_timer, plc_callback, NULL);
+struct k_timer scan_timer;
 
 void main(void) {
 	init_plc();
+    k_timer_init(&scan_timer, plc_callback, NULL);
 
     // gpio veneer tests
     // tfm_gpio_write_all(0xBEEF);

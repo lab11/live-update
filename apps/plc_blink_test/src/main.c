@@ -33,6 +33,7 @@
 #define MUSCA_INPUT 24		 			// gpio pin to read input from musca 
 #define LED1 17							// specify LED pin
 #define TIMER_PERIOD_MS 5432			// desired timer period in milliseconds
+#define NRF_BUTTON 13					// Button 1 on nrf52
 
 ret_code_t error_code;          		// error checking - variously used 
 nrfx_err_t nrfx_err_code;				// error checking for nrfx libraries
@@ -43,13 +44,17 @@ uint32_t tx_time;						// time signal sent to musca
 uint32_t rx_time;						// time signal received by nrf
 uint32_t res_time;						// approximate response time
 
-nrfx_gpiote_in_config_t input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
+nrfx_gpiote_in_config_t musca_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
+nrfx_gpiote_in_config_t button_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
 
 nrfx_timer_t button_timer = NRFX_TIMER_INSTANCE(1);					// Timer Instance
 nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG;		// Default Timer Configuration
 
 static void sim_push_button(void);
 static void musca_input_callback(void);
+static void button_input_callback(void);
+static void dummy_callback(nrf_timer_event_t thing1, void* thing2);
+static void release_button(void);
 
 APP_TIMER_DEF(BSIM_TIMER);
 
@@ -68,11 +73,16 @@ void gpio_init(void) {
 	printf("Initializing GPIO and GPIOTE peripherals...\n");
 
 	nrfx_gpiote_init();
+
 	nrfx_gpiote_in_init(MUSCA_INPUT, 
-				&input_config, 
+				&musca_input_config, 
 				(nrfx_gpiote_evt_handler_t) musca_input_callback);
+	nrfx_gpiote_in_init(NRF_BUTTON,
+				&button_input_config,
+				(nrfx_gpiote_evt_handler_t) button_input_callback);
 
 	nrfx_gpiote_in_event_enable(MUSCA_INPUT, true);
+	nrfx_gpiote_in_event_enable(NRF_BUTTON, true);
 
 	nrf_gpio_cfg_output(BUTTON_SIM);
 	nrf_gpio_cfg_output(LED1);
@@ -87,6 +97,7 @@ void timer_init(void) {
 	printf("Initializing APP_TIMER Module...\n");
 
 	// initialize clock
+
 	error_code = nrf_drv_clock_init();
 	APP_ERROR_CHECK(error_code);
 	nrf_drv_clock_lfclk_request(NULL);
@@ -94,25 +105,25 @@ void timer_init(void) {
 	error_code = app_timer_init();
 	APP_ERROR_CHECK(error_code);
 
-	error_code = app_timer_create(&BSIM_TIMER, APP_TIMER_MODE_REPEATED, sim_push_button);
+	error_code = app_timer_create(&BSIM_TIMER, APP_TIMER_MODE_SINGLE_SHOT, release_button);
 	APP_ERROR_CHECK(error_code);
 
 	printf("Initializing NRFX 16MHz High Frequency Timer...\n");
 
-	timer_config.interrupt_priority = 5;
+	timer_config.interrupt_priority = 7;
 	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
 	nrfx_timer_init(&button_timer, 
 					&timer_config, 
-					(nrfx_timer_event_handler_t) sim_push_button);
+					(nrfx_timer_event_handler_t) dummy_callback);
 
-	// uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&button_timer, TIMER_PERIOD_MS);
-	// printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+	uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&button_timer, TIMER_PERIOD_MS);
+	printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
 
-	// nrfx_timer_extended_compare(&button_timer,
-	// 							NRF_TIMER_CC_CHANNEL0,
-	// 							timer_period_ticks,
-	// 							NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-	// 							true);
+	nrfx_timer_extended_compare(&button_timer,
+								NRF_TIMER_CC_CHANNEL0,
+								timer_period_ticks,
+								NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+								true);
 
 	printf("Timer Initialized!\n"); // Remember to enable the timer in main
 }
@@ -123,13 +134,25 @@ float timer_16MHz_ticks_to_ms(uint32_t ticks) {
 	return ((float) ticks) / 16000;
 }
 
+static void dummy_callback(nrf_timer_event_t thing1, void* thing2) {
+	sim_push_button();
+	return;
+}
+
 static void sim_push_button(void) {
 	printf("Simulate Button Press...\n");
-	nrf_gpio_pin_clear(BUTTON_SIM);
-
-	nrf_delay_ms(50);
+	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), NULL);
+	APP_ERROR_CHECK(error_code);
 
 	tx_time = nrfx_timer_capture(&button_timer, 1);
+	nrf_gpio_pin_clear(BUTTON_SIM);
+
+	// nrf_delay_ms(25);
+
+	// nrf_gpio_pin_set(BUTTON_SIM);
+}
+
+static void release_button(void) {
 	nrf_gpio_pin_set(BUTTON_SIM);
 }
 
@@ -142,6 +165,12 @@ static void musca_input_callback(void) {
 	// printf("Response Time: %d ticks\n", res_time);
 	printf("Res Time: %f ms\n\n", timer_16MHz_ticks_to_ms(res_time));
 }
+
+static void button_input_callback(void) {
+	printf("Simulate Button Press...\n");
+	tx_time = nrfx_timer_capture(&button_timer, 1);
+}
+
 
 /************************************************/
 
@@ -165,8 +194,9 @@ int main(void) {
 	printf("HF Timer Enabled!\n");
 	nrfx_timer_enable(&button_timer);
 
-	printf("Button Simulator Enabled!\n");
-	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(5333), NULL);
+	// printf("Button Simulator Enabled!\n");
+	// error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(TIMER_PERIOD_MS), NULL);
+
 	// nrf_delay_ms(1000);
 	// res_time = nrfx_timer_capture(&button_timer, 1);
 	// printf("Test - timer_capture_get: %d\n", res_time);

@@ -38,25 +38,46 @@ void init_plc(void) {
 
 /**************** Define Auto-Generated Functions Below ****************/
 
-BOOL Read_U_b_Xbutton(void) {
-	BOOL state = (BOOL) read_button(PIN7);
-	state = state ? 0 : 1;		// swapping because button is active low
-	// printk("Button State: %d\n", state);
-	return state;
+BOOL Read_U_b_XMStart(void) {
+	return read_button(PIN6);
 }
 
-BOOL Read_U_b_Yled(void) {
-	return (BOOL) read_LED(B);
+BOOL Read_U_b_XStop(void) {
+	return read_button(PIN7);
 }
 
-void Write_U_b_Yled(BOOL v) {
-	write_LED(B, v);
+BOOL Read_U_b_YOut0(void) {
+	return read_pin(PIN8);
 }
 
-BOOL Read_U_b_Ytx(void) {
-	return (BOOL) read_LED(G);
+void Write_U_b_YOut0(BOOL v) {
+	write_pin(PIN8, v);
 }
 
-void Write_U_b_Ytx(BOOL v) {
-	write_LED(G, v);
+BOOL Read_U_b_YOut1(void) {
+	return read_pin(PIN9);
 }
+
+void Write_U_b_YOut1(BOOL v) {
+	write_pin(PIN9, v);
+}
+
+BOOL Read_U_b_YOut2(void){
+	return read_pin(PIN10);
+}
+
+void Write_U_b_YOut2(BOOL v) {
+	write_pin(PIN10, v);
+}
+
+BOOL Read_U_b_YOut3(void) {
+	return read_pin(PIN11);
+}
+
+void Write_U_b_YOut3(BOOL v) {
+	write_pin(PIN11, v);
+}
+
+
+
+
