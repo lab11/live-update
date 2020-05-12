@@ -13,17 +13,13 @@ from intelhex import IntelHex
 CURRENT_VERSION = 0x8
 FLASH_BASE = 0x200000
 
-LAST_VERSION_NAME = '.lastVerNum.txt'
 FLASHED_VERSION_NAME = 'lastFlashedNum.txt'
+FLASHED_SYMBOLS_NAME = 'flashed.symbols'
 
 # -- Utility functions --
 
 def get_app_name(folder):
     return os.path.basename(os.path.abspath(folder))
-
-
-def dump_symbols(elf, dest):
-    os.system('arm-none-eabi-objdump -t ' + elf + ' > ' + dest)
 
 
 def search_symbols(filename, pattern, cb):
@@ -58,23 +54,6 @@ def get_symbol_size(filename, symbol_re):
         size = int(l.split()[-2], base=16)
     search_symbols(filename, symbol_re, cb)
     return size
-
-
-# check made and flashed versions, warn to remake if necessary
-def validate_binary(app_dir, build_dir, force):
-
-    make_version_filename = os.path.join(app_dir, LAST_VERSION_NAME)
-
-    with open(make_version_filename, 'r') as make_version_f:
-
-        flash_version_filename = os.path.join(build_dir, FLASHED_VERSION_NAME)
-        with open(flash_version_filename, 'r') as flash_version_f:
-            make_partition = int(make_version_f.readline()[-1]) % 2
-            flash_partition = int(flash_version_f.readline()[-1]) % 2
-    
-            if make_partition == flash_partition and not force:
-                print('Both flashed and current compiled versions are linked to a conflicting partition, re-`make` app')
-                exit(1)
 
 
 # TODO make better
@@ -136,22 +115,26 @@ def parse_ast(f):
     }
     
 
-def generate_update_header(app_dir, build_dir, update_metadata_filename, update_symbols_filename, flashed_symbols_filename):
+def generate_update_header(manifest, update_folder):
 
     header = {}
 
-    with open(update_metadata_filename, 'r') as f:
-        metadata = json.load(f)
+    flashed_symbols = os.path.join(update_folder, manifest['flashed_symbols'])
+    update_symbols = os.path.join(update_folder, manifest['update_symbols'])
 
-        header['main_ptr_addr'] = int(metadata['main_ptr_addr'], base=16)
-        header['update_flag_addr'] = int(metadata['update_flag_addr'], base=16)
+    main_ptr_addr = get_symbol_address(flashed_symbols, 'main_ptr')
+    if not main_ptr_addr:
+        print('Could not locate main_ptr_addr, exiting...')
+        exit(1)
+    header['main_ptr_addr'] = main_ptr_addr
 
-    elf_filename = os.path.join(build_dir, get_app_name(app_dir) + '_ns.elf')
-    dump_symbols(elf_filename, update_symbols_filename)
-    update_symbols = update_symbols_filename
-    flashed_symbols = flashed_symbols_filename
+    update_flag_addr = get_symbol_address(flashed_symbols, 'update_flag')
+    if not update_flag_addr:
+        print('Could not locate update_flag_addr, exiting...')
+        exit(1)
+    header['update_flag_addr'] = update_flag_addr
 
-    with open(os.path.join(build_dir, 'ast_test.txt'), 'r') as f:
+    with open(os.path.join(update_folder, manifest['update_ast']), 'r') as f:
         ast_metadata = parse_ast(f)
         header['init_size'] = 3 * len(ast_metadata['timers']) * 4
 
@@ -192,9 +175,9 @@ def generate_update_header(app_dir, build_dir, update_metadata_filename, update_
     if not header['appflash_rodata_start'] and \
        not header['appflash_rodata_size'] and \
        not header['appflash_rodata_rom_start']: # there's just no rodata in update, that's ok
-        appflash_rodata_start = 0x0
-        appflash_rodata_size = 0
-        appflash_rodata_rom_start = 0x0
+        header['appflash_rodata_start'] = 0x0
+        header['appflash_rodata_size'] = 0
+        header['appflash_rodata_rom_start'] = 0x0
     elif not header['appflash_rodata_size'] or \
          not header['appflash_rodata_start'] or \
          not header['appflash_rodata_rom_start']:
@@ -207,8 +190,10 @@ def generate_update_header(app_dir, build_dir, update_metadata_filename, update_
     header['appram_bss_size_addr'] = get_symbol_address(update_symbols, 'appram_bss_update_size')
 
     if not header['appram_bss_start'] and not header['appram_bss_size']:
-        appram_bss_start = 0x0
-        appram_bss_size = 0
+        header['appram_bss_start'] = 0x0
+        header['appram_bss_size'] = 0
+        header['appram_bss_start_addr'] = 0x0
+        header['appram_bss_size_addr'] = 0x0
     elif not header['appram_bss_start'] or not header['appram_bss_size']:
         print('Could not locate appram_bss_start or appram_bss_size but did locate the other, exiting...')
         exit(1)
@@ -216,12 +201,12 @@ def generate_update_header(app_dir, build_dir, update_metadata_filename, update_
     return header
 
 
-def generate_update_payloads(app_dir, build_dir, update_symbols_filename, flashed_symbols_filename, header):
+def generate_update_payloads(header, manifest, update_folder):
 
     payloads = {}
 
     # look at symbols for appflash_text_rom_start, appflash_rodata_rom_start and sizes for both
-    hex_filename = os.path.join(build_dir, get_app_name(app_dir) + '_merged.hex')
+    hex_filename = os.path.join(update_folder, manifest['update_hex'])
     ih = IntelHex(hex_filename)
 
     # extract .text segment
@@ -233,10 +218,8 @@ def generate_update_payloads(app_dir, build_dir, update_symbols_filename, flashe
         ih[FLASH_BASE + header['appflash_rodata_rom_start']: FLASH_BASE + header['appflash_rodata_rom_start'] + header['appflash_rodata_size']].tobinarray())
 
     # generate state transfer information
-    elf_filename = os.path.join(build_dir, get_app_name(app_dir) + '_ns.elf')
-    dump_symbols(elf_filename, update_symbols_filename)
-    update_symbols = update_symbols_filename
-    flashed_symbols = flashed_symbols_filename
+    flashed_symbols = os.path.join(update_folder, manifest['flashed_symbols'])
+    update_symbols = os.path.join(update_folder, manifest['update_symbols'])
 
     syms = get_symbols_in_section(update_symbols, '\.app_data')
     syms += get_symbols_in_section(update_symbols, '\.app_bss')
@@ -258,7 +241,7 @@ def generate_update_payloads(app_dir, build_dir, update_symbols_filename, flashe
     header['triples_bytes'] = triples_size * 4 # 3 values per memory region, each 4 bytes
     payloads['transfer'] = struct.pack('I' * triples_size, *transfer_triples)
 
-    with open(os.path.join(build_dir, 'ast_test.txt'), 'r') as f:
+    with open(os.path.join(update_folder, manifest['update_ast']), 'r') as f:
         ast_metadata = parse_ast(f)
     init_address_value_triples = []
 
@@ -348,69 +331,70 @@ def serialize_header(header, payloads):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Primary control script for the live update process.')
-    parser.add_argument('app_folder', help='Application folder')
+    parser.add_argument('app_folder', help='App folder')
     parser.add_argument('dev', help='Serial port')
+    parser.add_argument('--update_folder', help='Specify specific update package folder instead of deriving from app location', default=None)
     parser.add_argument('--baud', help='Baud rate', type=int, default=115200)
-    parser.add_argument('--timeout', help='Timeout', type=int, default=None)
+    parser.add_argument('--timeout', help='Timeout', type=int, default=2)
     parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
     parser.add_argument('--dry_run', help='Does not attempt serial communication', action='store_true', default=False)
     args = parser.parse_args()
 
-    # important paths
-    build_dir = os.path.join(args.app_folder, '_build')
-    update_symbol_filename = os.path.join(build_dir, 'update.symbols')
-    update_metadata_filename = os.path.join(build_dir, 'update.txt')
-    flashed_symbol_filename = os.path.join(build_dir, 'flashed.symbols')
+    if args.update_folder:
+        update_folder = args.update_folder
+    else:
+        update_folder = os.path.join(args.app_folder, '_build', 'update')
 
-    validate_binary(args.app_folder, build_dir, args.force)
+    with open(os.path.join(update_folder, 'manifest.json'), 'r') as f:
+        manifest = json.load(f)
 
-    update_header = generate_update_header(
-        args.app_folder,
-        build_dir,
-        update_metadata_filename,
-        update_symbol_filename,
-        flashed_symbol_filename
-    )
+    if not manifest['valid']:
+        print('Error: update not valid: {}', manifest['reason'])
     
-    update_payloads = generate_update_payloads(
-        args.app_folder,
-        build_dir,
-        update_symbol_filename,
-        flashed_symbol_filename,
-        update_header
-    )
+    else:
+        update_header = generate_update_header(
+            manifest,
+            update_folder
+        )
     
-    serialized_update_header = serialize_header(update_header, update_payloads)
+        update_payloads = generate_update_payloads(
+            update_header,
+            manifest,
+            update_folder
+        )
+    
+        serialized_update_header = serialize_header(update_header, update_payloads)
 
-    if not args.dry_run:
-        with serial.Serial(args.dev, args.baud, timeout=2) as ser:
+        if not args.dry_run:
+            with serial.Serial(args.dev, args.baud, timeout=args.timeout) as ser:
 
-            print("sending header...")
-            ser.write(serialized_update_header)
+                print("sending header...")
+                ser.write(serialized_update_header)
 
-            time.sleep(1)
-            print("sending app_text...")
-            ser.write(update_payloads['text'])
+                time.sleep(1)
+                print("sending app_text...")
+                ser.write(update_payloads['text'])
 
-            time.sleep(1)
-            print("sending rodata...")
-            ser.write(update_payloads['rodata'])
+                time.sleep(1)
+                print("sending rodata...")
+                ser.write(update_payloads['rodata'])
 
-            time.sleep(1)
-            print("sending transfer data...")
-            ser.write(update_payloads['transfer'])
+                time.sleep(1)
+                print("sending transfer data...")
+                ser.write(update_payloads['transfer'])
 
-            time.sleep(1)
-            print("sending init data...")
-            ser.write(update_payloads['init'])
+                time.sleep(1)
+                print("sending init data...")
+                ser.write(update_payloads['init'])
 
-        print("updating last flashed version number...")
-        last_version_filename = os.path.join(args.app_folder, LAST_VERSION_NAME)
-        last_flashed_filename = os.path.join(args.app_folder, build_dir, FLASHED_VERSION_NAME)
-        os.system('cp ' + last_version_filename + ' ' + last_flashed_filename)
+            print("updating last flashed version number...")
+            flashed_version_filename = os.path.join(args.app_folder, '_build', FLASHED_VERSION_NAME)
+            os.system('echo {} > {}'.format(manifest['update_version'], flashed_version_filename))
 
-        print("updating last flashed symbol file...")
-        os.system('cp ' + update_symbol_filename + ' ' + flashed_symbol_filename)
-
-    print('done')
+            print("updating last flashed symbol file...")
+            flashed_symbols_filename = os.path.join(args.app_folder, '_build', FLASHED_SYMBOLS_NAME)
+            os.system('cp {} {}'.format(
+                os.path.join(args.app_folder, '_build', 'update', manifest['update_symbols']),
+                flashed_symbols_filename
+            ))
 
