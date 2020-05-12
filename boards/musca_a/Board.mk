@@ -11,7 +11,7 @@ SECURE_SUFFIX = _s
 DEBUG_SUFFIX = _debug
 
 ARM_TFM_DIR = $(BASE_DIR)/ext/trusted-firmware-m
-ZEPHYR_BASE = $(BASE_DIR)/zephyros/zephyr
+ZEPHYR_BASE = $(BASE_DIR)/ext/zephyros/zephyr
 ZEPHYR_CMAKELISTS = CMakeLists.txt
 ZEPHYR_PRJ_CONFIG = prj.conf
 ZEPHYR_APP_LINKER_SCRIPT = $(BUILDDIR)app-sections.ld
@@ -40,6 +40,11 @@ LST_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).lst
 MAP_S = $(BUILDDIR)$(OUTPUT_NAME)$(SECURE_SUFFIX).map
 
 VERSION_FILE = .lastVerNum.txt
+FLASHED_VERSION_FILE= $(BUILDDIR)lastFlashedNum.txt
+
+UPDATE_DIR = $(BUILDDIR)update
+FLASHED_SYMBOLS = $(BUILDDIR)flashed.symbols
+AST_DUMP = $(BUILDDIR)ast_dump.txt
 
 # Include supporting makefiles
 
@@ -48,7 +53,23 @@ include $(BASE_DIR)/boards/$(BOARD)/Program.mk
 # --- Rules for building apps ---
 
 .PHONY: all
-all: $(BIN_S) $(BIN) $(MERGED_HEX)
+all: init_zephyr_env $(BIN_S) $(BIN) $(MERGED_HEX) $(UPDATE_DIR)
+
+.PHONY: init_zephyr_env
+init_zephyr_env:
+	$(shell export ZEPHYR_BASE=$(ZEPHYR_BASE))
+	$(shell source $(ZEPHYR_BASE)/zephyr-env.sh)
+
+.PHONY: $(UPDATE_DIR)
+$(UPDATE_DIR): $(BUILDDIR)
+	$(TRACE_DIR)
+	$(Q)mkdir -p $@
+	$(Q)rm -f $@/*
+	$(Q)arm-none-eabi-objdump -t $(ELF) > $@/update.symbols
+	$(Q)cp $(AST_DUMP) $@/update_ast.txt
+	$(Q)cp $(ELF) $@/update_ns.elf
+	$(Q)cp $(MERGED_HEX) $@/update.hex
+	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json
 
 $(BUILDDIR):
 	$(TRACE_DIR)
@@ -56,13 +77,13 @@ $(BUILDDIR):
 	$(Q)mkdir -p $@/arm-tfm
 
 $(ZEPHYR_PRJ_CONFIG):
-	$(Q)cp $(BASE_DIR)/make/app-prj.conf $@
+	$(Q)python3 $(BASE_DIR)/make/gen_prj_conf.py $(BASE_DIR)/apps/$(PROJECT_NAME) > $@
 
 $(ZEPHYR_APP_LINKER_SCRIPT): $(BUILDDIR)
 	$(Q)cp $(BASE_DIR)/make/app-sections.ld $@
 
 $(ZEPHYR_CMAKELISTS): Makefile $(ZEPHYR_APP_LINKER_SCRIPT) $(ZEPHYR_PRJ_CONFIG)
-	$(Q)python3 $(BASE_DIR)/make/zephyr_cmake_gen.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
+	$(Q)python3 $(BASE_DIR)/make/gen_zephyr_cmake.py $(PROJECT_NAME) "$(APP_SOURCES) ./_build/arm-tfm/install/export/tfm/veneers/s_veneers.o" --include_dirs "$(APP_HEADER_PATHS) ./_build/arm-tfm/install/export/tfm/inc" > $@
 		
 $(ELF_S): $(BUILDDIR)
 	$(Q)cmake $(ARM_TFM_DIR) -B $(BUILDDIR)arm-tfm -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DTARGET_PLATFORM=MUSCA_A -DCOMPILER=GNUARM	
@@ -72,7 +93,7 @@ $(ELF_S): $(BUILDDIR)
 
 VERSION_NUM = $(shell test -f ${VERSION_FILE} && tail -c 1 ${VERSION_FILE})
 ifeq ($(VERSION_NUM),)
-	VERSION_NUM = 0
+	VERSION_NUM = 1
 endif
 PARTITION = $(shell echo ${VERSION_NUM}%2 | bc)
 
@@ -106,7 +127,7 @@ $(BIN): $(ELF) | $(BUILDDIR)
 
 .PHONY: $(MERGED_BIN)
 $(MERGED_BIN): $(BIN_S) $(BIN) 
-	python3 $(ARM_TFM_DIR)/bl2/ext/mcuboot/scripts/assemble.py \
+	$(Q)python3 $(ARM_TFM_DIR)/bl2/ext/mcuboot/scripts/assemble.py \
 		-l $(ARM_TFM_DIR)/platform/ext/target/musca_a/partition/flash_layout.h \
 		-s $(BIN_S) \
 		-n $(BIN) \

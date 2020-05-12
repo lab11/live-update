@@ -8,14 +8,14 @@ export PATH=/usr/local/bin:"$PATH"
 apt-get update
 apt-get install -y g++
 
-# Install CMake v3.16.4, if it's not there already
-if [[ ! $(cmake --version) =~ "3.16.4" ]]
+# Install CMake v3.17.0, if it's not there already
+if [[ ! $(cmake --version) =~ "3.17.0" ]]
 then
     pushd .
     cd /tmp
-    wget https://github.com/Kitware/CMake/releases/download/v3.16.4/cmake-3.16.4.tar.gz
-    tar -xzvf cmake-3.16.4.tar.gz
-    cd cmake-3.16.4
+    wget https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0.tar.gz
+    tar -xzvf cmake-3.17.0.tar.gz
+    cd cmake-3.17.0
     ./bootstrap
     make -j4
     make install
@@ -39,6 +39,20 @@ else
     arm-none-eabi-gcc --version
 fi
 
+# Install JLink and nRF command line tools
+if ! nrfjprog
+then
+    pushd .
+    cd /tmp
+
+    wget --post-data="accept_license_agreement=accepted&submit=Download&nbspsoftware" "https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb"
+    dpkg -i JLink_Linux_x86_64.deb
+
+    wget https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz
+    tar -xzvf nRFCommandLineTools1030Linuxamd64tar.gz
+    dpkg -i --force-overwrite nRF-Command-Line-Tools_10_3_0_Linux-amd64.deb
+fi
+
 # Install python libraries
 apt-get install -y python3-pip
 pip3 install pycryptodome
@@ -55,13 +69,21 @@ then
     echo 'export PATH=/usr/local/bin:"$PATH"' >> /home/vagrant/.bashrc
 
     pushd .
-    cd /vagrant/zephyros
-    west init
+    cd /vagrant/ext
+    mkdir ncs
+    mkdir zephyros
+    cd ncs
+    west init -m https://github.com/jlwatson/fw-nrfconnect-nrf
+    west update
+    cd ../zephyros
+    west init -m https://github.com/jlwatson/zephyr
     west update
     popd
 fi
 
-pip3 install -r /vagrant/zephyros/zephyr/scripts/requirements.txt
+pip3 install -r /vagrant/ext/ncs/zephyr/scripts/requirements.txt
+pip3 install -r /vagrant/ext/ncs/nrf/scripts/requirements.txt
+pip3 install -r /vagrant/ext/ncs/bootloader/mcuboot/scripts/requirements.txt
 
 if [[ ! $(cat /home/vagrant/.bashrc) =~ "ZEPHYR_TOOLCHAIN_VARIANT" ]]
 then
@@ -73,38 +95,19 @@ then
     echo 'export GNUARMEMB_TOOLCHAIN_PATH=/usr/local/gcc-arm-none-eabi-9-2019-q4-major' >> /home/vagrant/.bashrc
 fi
 
-if [[ ! $(cat /home/vagrant/.bashrc) =~ "ZEPHYR_BASE" ]]
-then
-    echo 'export ZEPHYR_BASE=/vagrant/zephyros/zephyr' >> /home/vagrant/.bashrc
-fi
-
 if [[ ! $(cat /home/vagrant/.bashrc) =~ "ZEPHYR_SDK_INSTALL_DIR" ]]
 then
-    wget -O /tmp/sdk_setup.run https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.10.3/zephyr-sdk-0.10.3-setup.run
+    wget -O /tmp/sdk_setup.run https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.2/zephyr-sdk-0.11.2-setup.run
     chmod u+x /tmp/sdk_setup.run
     /tmp/sdk_setup.run -- -d /usr/local/zephyr_sdk
     echo 'export ZEPHYR_SDK_INSTALL_DIR=/usr/local/zephyr_sdk' >> /home/vagrant/.bashrc
     echo 'export PATH=/usr/local/zephyr_sdk/sysroots/x86_64-pokysdk-linux/usr/bin:"$PATH"' >> /home/vagrant/.bashrc
-fi
-
-# USB device rules
-wget -O /tmp/60-openocd.rules https://sf.net/p/openocd/code/ci/master/tree/contrib/60-openocd.rules?format=raw
-cp /tmp/60-openocd.rules /etc/udev/rules.d
-udevadm control --reload
-
-if [[ ! $(cat /home/vagrant/.bashrc) =~ "zephyr-env.sh" ]]
-then
-    echo 'source /vagrant/zephyros/zephyr/zephyr-env.sh' >> /home/vagrant/.bashrc
+    echo 'export CMAKE_PREFIX_PATH=/usr/local/zephyr_sdk/sysroots/x86_64-pokysdk-linux/usr' >> /home/vagrant/.bashrc
 fi
 
 pip3 install pyelftools
 apt-get install -y srecord python-serial
 
-# OpenFAST packages
-apt-get install -y gfortran libopenblas-dev libhdf5-openmpi-dev libyaml-cpp-dev libopenmpi-dev libxml2-dev
-
-#addgroup vboxusers
-#adduser vagrant vboxusers
-#mkdir /media/musca
-#mount /dev/sdb /media/musca
+# Uncomment to install OpenFAST packages
+# apt-get install -y gfortran libopenblas-dev libhdf5-openmpi-dev libyaml-cpp-dev libopenmpi-dev libxml2-dev
 
