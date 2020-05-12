@@ -51,7 +51,7 @@ if __name__ == '__main__':
         current_partition = (int(current_version_number.split('+')[1]) + 1) % 2
 
         if flashed_partition == current_partition:
-            manifest = gen_failed_manifest('Current version partition ({} for version {}) conflicts with flashed version partition({} for version {}), re-run `make` to resolve to different partition.'.format(current_partition, current_version_number, flashed_partition, flashed_version_number))
+            manifest = gen_failed_manifest('Current version partition ({} for version {}) conflicts with flashed version partition ({} for version {}), re-run `make` to resolve to different partition.'.format(current_partition, current_version_number, flashed_partition, flashed_version_number))
 
         elif not os.path.exists(os.path.join(args.dir, FLASHED_SYMBOL_FILE)):
             manifest = gen_failed_manifest('Could not file update payload file ' + os.path.join(args.dir, FLASHED_SYMBOL_FILE))

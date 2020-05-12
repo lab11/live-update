@@ -352,7 +352,7 @@ if __name__ == '__main__':
         manifest = json.load(f)
 
     if not manifest['valid']:
-        print('Error: update not valid: {}', manifest['reason'])
+        print('Error: update not valid: {}'.format(manifest['reason']))
     
     else:
         update_header = generate_update_header(
