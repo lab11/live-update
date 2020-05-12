@@ -65,12 +65,11 @@ $(UPDATE_DIR): $(BUILDDIR)
 	$(TRACE_DIR)
 	$(Q)mkdir -p $@
 	$(Q)rm -f $@/*
-	$(Q)(test -f $(FLASHED_SYMBOLS) && cp $(FLASHED_SYMBOLS) $@/flashed.symbols) || true
 	$(Q)arm-none-eabi-objdump -t $(ELF) > $@/update.symbols
 	$(Q)cp $(AST_DUMP) $@/update_ast.txt
 	$(Q)cp $(ELF) $@/update_ns.elf
 	$(Q)cp $(MERGED_HEX) $@/update.hex
-	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(FLASHED_VERSION_FILE) $(VERSION_FILE) > $@/manifest.json
+	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json
 
 $(BUILDDIR):
 	$(TRACE_DIR)

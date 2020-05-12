@@ -56,6 +56,25 @@ def get_symbol_size(filename, symbol_re):
     return size
 
 
+def valid_partition(app_folder, manifest):
+    flashed_version_filename = os.path.join(app_folder, '_build', FLASHED_VERSION_NAME)
+
+    if not os.path.exists(flashed_version_filename):
+        print('Flashed version number not found at', flashed_version_filename)
+        return False
+
+    with open(flashed_version_filename, 'r') as f:
+        flashed_version_number = f.readlines()[0]
+
+    flashed_partition = (int(flashed_version_number.split('+')[1]) + 1) % 2
+
+    if flashed_partition == manifest['update_partition']:
+        print('Current version partition ({} for version {}) conflicts with flashed version partition ({} for version {}), re-run `make` to resolve to different partition.'.format(manifest['update_partition'], manifest['update_version'], flashed_partition, flashed_version_number))
+        return False
+
+    return True
+
+
 # TODO make better
 def parse_ast(f):
 
@@ -115,11 +134,11 @@ def parse_ast(f):
     }
     
 
-def generate_update_header(manifest, update_folder):
+def generate_update_header(manifest, app_folder, update_folder):
 
     header = {}
 
-    flashed_symbols = os.path.join(update_folder, manifest['flashed_symbols'])
+    flashed_symbols = os.path.join(app_folder, '_build', FLASHED_SYMBOLS_NAME)
     update_symbols = os.path.join(update_folder, manifest['update_symbols'])
 
     main_ptr_addr = get_symbol_address(flashed_symbols, 'main_ptr')
@@ -201,7 +220,7 @@ def generate_update_header(manifest, update_folder):
     return header
 
 
-def generate_update_payloads(header, manifest, update_folder):
+def generate_update_payloads(header, manifest, app_folder, update_folder):
 
     payloads = {}
 
@@ -218,8 +237,15 @@ def generate_update_payloads(header, manifest, update_folder):
         ih[FLASH_BASE + header['appflash_rodata_rom_start']: FLASH_BASE + header['appflash_rodata_rom_start'] + header['appflash_rodata_size']].tobinarray())
 
     # generate state transfer information
-    flashed_symbols = os.path.join(update_folder, manifest['flashed_symbols'])
+    flashed_symbols = os.path.join(app_folder, '_build', FLASHED_SYMBOLS_NAME)
     update_symbols = os.path.join(update_folder, manifest['update_symbols'])
+
+    flashed_ram = get_symbol_address(flashed_symbols, '_appram_mpu_ro_region_start')
+    update_ram = get_symbol_address(update_symbols, '_appram_mpu_ro_region_start')
+
+    if flashed_ram == update_ram:
+        print('Error: flashed image and update image both using the same RAM section: {} (flashed) {} (update)'.format(hex(flashed_ram), hex(update_ram)))
+        exit(1)
 
     syms = get_symbols_in_section(update_symbols, '\.app_data')
     syms += get_symbols_in_section(update_symbols, '\.app_bss')
@@ -351,18 +377,17 @@ if __name__ == '__main__':
     with open(os.path.join(update_folder, 'manifest.json'), 'r') as f:
         manifest = json.load(f)
 
-    if not manifest['valid']:
-        print('Error: update not valid: {}'.format(manifest['reason']))
-    
-    else:
+    if manifest['valid'] and valid_partition(args.app_folder, manifest):
         update_header = generate_update_header(
             manifest,
+            args.app_folder,
             update_folder
         )
     
         update_payloads = generate_update_payloads(
             update_header,
             manifest,
+            args.app_folder,
             update_folder
         )
     
@@ -396,8 +421,9 @@ if __name__ == '__main__':
 
             print("updating last flashed symbol file...")
             flashed_symbols_filename = os.path.join(args.app_folder, '_build', FLASHED_SYMBOLS_NAME)
+
             os.system('cp {} {}'.format(
-                os.path.join(args.app_folder, '_build', 'update', manifest['update_symbols']),
+                os.path.join(update_folder, manifest['update_symbols']),
                 flashed_symbols_filename
             ))
 
