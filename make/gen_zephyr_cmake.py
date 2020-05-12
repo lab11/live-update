@@ -51,7 +51,7 @@ list(TRANSFORM INCLUDE_LIST PREPEND "-I")
 get_target_property(Z_INCLUDE_LIST zephyr_interface INTERFACE_INCLUDE_DIRECTORIES)
 list(TRANSFORM Z_INCLUDE_LIST PREPEND "-I")
 
-add_custom_command(TARGET app POST_BUILD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND clang -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility ${INCLUDE_LIST} ${Z_INCLUDE_LIST} ${SOURCE_LIST} > _build/ast_test.txt 2> /dev/null || (exit 0))
+add_custom_command(TARGET app POST_BUILD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND clang -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility ${INCLUDE_LIST} ${Z_INCLUDE_LIST} ${SOURCE_LIST} > _build/ast_dump.txt 2> /dev/null || (exit 0))
 """
 
 print(contents)

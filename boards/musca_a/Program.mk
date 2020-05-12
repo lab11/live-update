@@ -12,7 +12,7 @@ GDB_PORT_NUMBER ?= 2331
 .PHONY: flash
 flash:
 	$(Q)cp $(VERSION_FILE) $(FLASHED_VERSION_FILE)
-	$(Q)python3 $(BASE_DIR)/scripts/save_update_info.py $(BASE_DIR)/apps/$(PROJECT_NAME)
+	$(Q)arm-none-eabi-objdump -t $(ELF) > $(FLASHED_SYMBOLS)
 	$(Q)cp $(MERGED_HEX) /Volumes/MUSCA/
 
 .PHONY: serial
