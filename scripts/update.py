@@ -234,6 +234,9 @@ def generate_update_payloads(header, manifest, update_folder):
         update_addr = get_symbol_address(update_symbols, s + '$')
         flashed_addr = get_symbol_address(flashed_symbols, s + '$')
 
+        if not flashed_addr: # symbol not in old version, so no transfer generated
+            continue
+
         print('    {} -> {} ({} bytes)'.format(hex(flashed_addr), hex(update_addr), size))
         transfer_triples += [flashed_addr, update_addr, size]
 
