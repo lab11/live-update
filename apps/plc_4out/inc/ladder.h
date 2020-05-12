@@ -10,7 +10,7 @@ typedef unsigned char BOOL;
 #define USE_LED 0					/* true if the program uses on-board LEDs. false otherwise */
 
 #define NUM_PINS 4					/* Number of pins to use as outputs */
-static uint8_t output_pins[] = {PIN8, PIN9, PIN10, PIN11};	/* List pins to use as outputs as {PIN0, PIN1, ...} */
+static uint8_t output_pins[] __attribute__((section(".rodata"))) = {PIN8, PIN9, PIN10, PIN11};	/* List pins to use as outputs as {PIN0, PIN1, ...} */
 
 /************** DO NOT EDIT THESE FUNCTIONS **************/
 

@@ -28,18 +28,18 @@ void enable_pin_output(uint8_t pin) {
 
 void read_in_table(void) {
 	gpio_in_table = tfm_gpio_read_all();
-	if (((gpio_in_table >> 7) & 1) == 0) {
-        cntr = *(uint32_t *) 0xE000E018;
-    }
+	// if (((gpio_in_table >> 7) & 1) == 0) {
+ //        cntr = *(uint32_t *) 0xE000E018;
+ //    }
 	// printk("%x\n", gpio_in_table);
 	return;
 }
 
 void write_out_table(void) {
-	if (((gpio_out_table >> 3) & 1) == 0) {
-        uint32_t tmp = *(uint32_t *) 0xE000E018;
-        printk("Elapsed Time from Cycle Counter: %d\n\n", cntr - tmp);
-    }
+	// if (((gpio_out_table >> 3) & 1) == 0) {
+ //        uint32_t tmp = *(uint32_t *) 0xE000E018;
+ //        printk("Elapsed Time from Cycle Counter: %d\n\n", cntr - tmp);
+ //    }
 	// printk("%x\n", gpio_out_table);
 	tfm_gpio_write_all(gpio_out_table);
 	return;
@@ -93,7 +93,7 @@ void write_LED(LED color, BOOL v) {
 	}
 }
 
-BOOL read_button(uint8_t pin) {
-	return read_pin(pin);
+BOOL read_button_active_low(uint8_t pin) {
+	return read_pin(pin) ? 0 : 1;
 }
 

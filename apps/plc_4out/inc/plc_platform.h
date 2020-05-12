@@ -54,4 +54,4 @@ BOOL read_LED(LED color);
 
 void write_LED(LED color, BOOL v);
 
-BOOL read_button(uint8_t pin);
+BOOL read_button_active_low(uint8_t pin);

@@ -31,14 +31,14 @@
 
 #define MUSCA_ON 25						// gpio pin that starts outputs			(output)
 #define MUSCA_OFF 24		 			// gpio pin that stops outputs			(output)	(use NRF_BUTTON)
-#define MUSCA_OUT3 19					// gpio pin to read out3 from musca		(input)
-#define MUSCA_OUT2 20					// gpio pin to read out2 from musca		(input)
-#define MUSCA_OUT1 22					// gpio pin to read out1 from musca		(input)
-#define MUSCA_OUT0 23					// gpio pin to read out0 from musca		(input)
+#define MUSCA_OUT3 17					// gpio pin to read out3 from musca		(input)
+#define MUSCA_OUT2 18					// gpio pin to read out2 from musca		(input)
+#define MUSCA_OUT1 19					// gpio pin to read out1 from musca		(input)
+#define MUSCA_OUT0 20					// gpio pin to read out0 from musca		(input)
 
 #define LED1 17							// specify LED pin
 
-#define TIMER_PERIOD_MS 10000			// desired timer period in milliseconds
+#define TIMER_PERIOD_MS 23000			// desired timer period in milliseconds
 #define NRF_BUTTON 13					// Button 1 on nrf52
 
 ret_code_t error_code;          		// error checking - variously used 
@@ -50,7 +50,10 @@ uint32_t tx_time;						// time signal sent to musca
 uint32_t rx_time;						// time signal received by nrf
 uint32_t res_time;						// approximate response time
 
-nrfx_gpiote_in_config_t musca_out_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
+nrfx_gpiote_in_config_t musca_out0_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
+nrfx_gpiote_in_config_t musca_out1_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
+nrfx_gpiote_in_config_t musca_out2_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
+nrfx_gpiote_in_config_t musca_out3_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
 
 nrfx_gpiote_in_config_t musca_stop_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
 
@@ -92,30 +95,46 @@ void gpio_init(void) {
 	 * MUSCA_OUT2
 	 * MUSCA_OUT3
 	 */ 
-	printf("Configuring Inputs...");
+	printf("Configuring Inputs...\n");
 
 	nrfx_gpiote_init();
 
+	// printf("Configure NRF_BUTTON...\n");
 	nrfx_gpiote_in_init(NRF_BUTTON, 
 				&musca_stop_config, 
 				(nrfx_gpiote_evt_handler_t) musca_stop);
+
+	// printf("Configure MUSCA_OUT0...\n");
 	nrfx_gpiote_in_init(MUSCA_OUT0,
-				&musca_out_config,
-				(nrfx_gpiote_evt_handler_t) musca_out_cb);
-	nrfx_gpiote_in_init(MUSCA_OUT1,
-				&musca_out_config,
-				(nrfx_gpiote_evt_handler_t) musca_out_cb);
-	nrfx_gpiote_in_init(MUSCA_OUT2,
-				&musca_out_config,
-				(nrfx_gpiote_evt_handler_t) musca_out_cb);
-	nrfx_gpiote_in_init(MUSCA_OUT3,
-				&musca_out_config,
+				&musca_out0_config,
 				(nrfx_gpiote_evt_handler_t) musca_out_cb);
 
-	nrfx_gpiote_in_event_enable(MUSCA_OFF, true);
+	// printf("Configure MUSCA_OUT1...\n");
+	nrfx_gpiote_in_init(MUSCA_OUT1,
+				&musca_out1_config,
+				(nrfx_gpiote_evt_handler_t) musca_out_cb);
+
+	// printf("Configure MUSCA_OUT2...\n");
+	nrfx_gpiote_in_init(MUSCA_OUT2,
+				&musca_out2_config,
+				(nrfx_gpiote_evt_handler_t) musca_out_cb);
+	
+	// printf("Configure MUSCA_OUT3...\n");
+	nrfx_gpiote_in_init(MUSCA_OUT3,
+				&musca_out3_config,
+				(nrfx_gpiote_evt_handler_t) musca_out_cb);
+
+	// printf("Enabling inputs...\n");
+
+	// printf("Enabling MUSCA_OFF...\n");
+	nrfx_gpiote_in_event_enable(NRF_BUTTON, true);
+	// printf("Enabling MUSCA_OUT0...\n");
 	nrfx_gpiote_in_event_enable(MUSCA_OUT0, true);
+	// printf("Enabling MUSCA_OUT1...\n");
 	nrfx_gpiote_in_event_enable(MUSCA_OUT1, true);
+	// printf("Enabling MUSCA_OUT2...\n");
 	nrfx_gpiote_in_event_enable(MUSCA_OUT2, true);
+	// printf("Enabling MUSCA_OUT3...\n");
 	nrfx_gpiote_in_event_enable(MUSCA_OUT3, true);
 
 	/* Configure Outputs:
@@ -180,7 +199,7 @@ float timer_16MHz_ticks_to_ms(uint32_t ticks) {
 }
 
 static void musca_start(nrf_timer_event_t evt_type, void* p_context) {
-	printf("Starting 4 Ouputs Now...");
+	printf("Starting 4 Ouputs Now...\n");
 	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), NULL);
 	APP_ERROR_CHECK(error_code);
 
@@ -202,12 +221,15 @@ static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
 	switch(pin) {
 		case MUSCA_OUT0 :
 			printf("OUT0 Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
 			break;
 		case MUSCA_OUT1 :
 			printf("OUT1 Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
 			break;
 		case MUSCA_OUT2 :
 			printf("OUT2 Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
 			break;
 		case MUSCA_OUT3 :
 			printf("OUT3 Res Time: %f ms\n\n", timer_16MHz_ticks_to_ms(res_time));

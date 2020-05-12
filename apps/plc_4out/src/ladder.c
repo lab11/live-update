@@ -22,6 +22,9 @@ void plc_callback(struct k_timer *t) {
 }
 
 void init_plc(void) {
+	for(int i = 0; i < NUM_PINS; i++) {
+		printk("Using PIN%d\n", output_pins[i]);
+	}
 	enable_pin_outputs(output_pins, NUM_PINS);
 
 
@@ -38,12 +41,32 @@ void init_plc(void) {
 
 /**************** Define Auto-Generated Functions Below ****************/
 
+/* Debugging Variables */
+BOOL master_state = 0;
+BOOL out0_state = 0;
+BOOL out1_state = 0;
+BOOL out2_state = 0;
+BOOL out3_state = 0;
+/* */
+
+BOOL readStart;
+
 BOOL Read_U_b_XMStart(void) {
-	return read_button(PIN6);
+	readStart = read_button_active_low(PIN4);
+	// printk("%d\n", readStart);
+
+	if (master_state != readStart) {
+		master_state = readStart;
+		if (readStart) {
+			time_old = k_uptime_get_32();
+			printk("4 Output Started...\n");			
+		}
+	} 
+	return readStart;
 }
 
 BOOL Read_U_b_XStop(void) {
-	return read_button(PIN7);
+	return read_button_active_low(PIN7);
 }
 
 BOOL Read_U_b_YOut0(void) {
@@ -51,6 +74,13 @@ BOOL Read_U_b_YOut0(void) {
 }
 
 void Write_U_b_YOut0(BOOL v) {
+	if (out0_state != v) {
+		out0_state = v;
+		if (v) {
+			time_cnt = k_uptime_get_32();
+			printk("Output 0 Enabled at %d ms\n", time_cnt - time_old);			
+		}
+	}
 	write_pin(PIN8, v);
 }
 
@@ -59,14 +89,28 @@ BOOL Read_U_b_YOut1(void) {
 }
 
 void Write_U_b_YOut1(BOOL v) {
+	if (out1_state != v) {
+		out1_state = v;
+		if (v) {
+			time_cnt = k_uptime_get_32();
+			printk("Output 1 Enabled at %d ms\n", time_cnt - time_old);			
+		}
+	}
 	write_pin(PIN9, v);
 }
 
-BOOL Read_U_b_YOut2(void){
+BOOL Read_U_b_YOut2(void) {
 	return read_pin(PIN10);
 }
 
 void Write_U_b_YOut2(BOOL v) {
+	if (out2_state != v) {
+		out2_state = v;
+		if (v) {
+			time_cnt = k_uptime_get_32();
+			printk("Output 2 Enabled at %d ms\n", time_cnt - time_old);			
+		}
+	}
 	write_pin(PIN10, v);
 }
 
@@ -75,6 +119,13 @@ BOOL Read_U_b_YOut3(void) {
 }
 
 void Write_U_b_YOut3(BOOL v) {
+	if (out3_state != v) {
+		out3_state = v;
+		if (v) {
+			time_cnt = k_uptime_get_32();
+			printk("Output 3 Enabled at %d ms\n", time_cnt - time_old);			
+		}
+	}
 	write_pin(PIN11, v);
 }
 
