@@ -8,10 +8,10 @@ parser.add_argument('--no_app_relocation', action='store_true', help='Don\'t rel
 
 args = parser.parse_args()
 
+#CONFIG_GPIO=y
 contents = \
 """
 CONFIG_UART_INTERRUPT_DRIVEN=y
-CONFIG_GPIO=y
 CONFIG_LIVE_UPDATE=y
 CONFIG_LIVE_UPDATE_FUTURE=y
 """
