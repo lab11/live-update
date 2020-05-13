@@ -10,7 +10,7 @@ import json
 
 from intelhex import IntelHex
 
-CURRENT_VERSION = 0x8
+CURRENT_VERSION = 0x9
 FLASH_BASE = 0x200000
 
 FLASHED_VERSION_NAME = 'lastFlashedNum.txt'
@@ -217,6 +217,10 @@ def generate_update_header(manifest, app_folder, update_folder):
         print('Could not locate appram_bss_start or appram_bss_size but did locate the other, exiting...')
         exit(1)
 
+    # XXX TODO TEMPORARY REMOVE
+    header['ventricle_int_handler'] = get_symbol_address(update_symbols, 'ventricle_sense_cb') | 1
+    header['atrial_int_handler'] = get_symbol_address(update_symbols, 'atrial_sense_cb') | 1
+
     return header
 
 
@@ -316,6 +320,8 @@ def serialize_header(header, payloads):
         appram_bss_size_addr: {},
         transfer_triples_size: {},
         init_size: {}
+        ventricle_int_cb: {}
+        atrial_int_cb: {}
     }}
     total size (expected): {}
     total size (actual): {}
@@ -334,12 +340,14 @@ def serialize_header(header, payloads):
         hex(header['appram_bss_size_addr']),
         hex(header['triples_bytes']),
         hex(header['init_size']),
+        hex(header['ventricle_int_handler']),
+        hex(header['atrial_int_handler']),
         4 * len(header) + header['appflash_text_size'] + header['appflash_rodata_size'] + header['triples_bytes'] + header['init_size'],
-        4 * len(header) + sum(len(payloads[x]) for x in payloads)
+        4 * len(header) + sum(len(payloads[x]) for x in payloads),
     )
     print(header_str)
 
-    return struct.pack('IIIIIIIIIIIIII',
+    return struct.pack('IIIIIIIIIIIIIIII',
         CURRENT_VERSION,
         header['main_ptr_addr'],
         header['main_addr'] | 0x1, # make sure main ptr is thumb!
@@ -353,7 +361,9 @@ def serialize_header(header, payloads):
         header['appram_bss_start_addr'],
         header['appram_bss_size_addr'],
         header['triples_bytes'],
-        header['init_size']
+        header['init_size'],
+        header['ventricle_int_handler'],
+        header['atrial_int_handler'],
     )
 
 
