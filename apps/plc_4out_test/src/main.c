@@ -29,8 +29,8 @@
 
 /******************* GLOBALS ********************/
 
-#define MUSCA_ON 25						// gpio pin that starts outputs			(output)
-#define MUSCA_OFF 24		 			// gpio pin that stops outputs			(output)	(use NRF_BUTTON)
+#define MUSCA_ON 25						// gpio pin that starts outputs			(output)	(use NRF_BUTTON2 for testing)
+#define MUSCA_OFF 24		 			// gpio pin that stops outputs			(output)	(use NRF_BUTTON1)
 #define MUSCA_OUT3 17					// gpio pin to read out3 from musca		(input)
 #define MUSCA_OUT2 18					// gpio pin to read out2 from musca		(input)
 #define MUSCA_OUT1 19					// gpio pin to read out1 from musca		(input)
@@ -39,7 +39,8 @@
 #define LED1 17							// specify LED pin
 
 #define TIMER_PERIOD_MS 23000			// desired timer period in milliseconds
-#define NRF_BUTTON 13					// Button 1 on nrf52
+#define NRF_BUTTON1 13					// Button 1 on nrf52
+#define NRF_BUTTON2 14					// Button 2 on nrf52
 
 ret_code_t error_code;          		// error checking - variously used 
 nrfx_err_t nrfx_err_code;				// error checking for nrfx libraries
@@ -55,7 +56,7 @@ nrfx_gpiote_in_config_t musca_out1_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1
 nrfx_gpiote_in_config_t musca_out2_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
 nrfx_gpiote_in_config_t musca_out3_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
 
-nrfx_gpiote_in_config_t musca_stop_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
+nrfx_gpiote_in_config_t musca_btn_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
 
 nrfx_timer_t musca_start_timer = NRFX_TIMER_INSTANCE(1);					// Timer Instance
 nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG;		// Default Timer Configuration
@@ -67,7 +68,7 @@ static void musca_start(nrf_timer_event_t evt_type, void* p_context);
 /* NRFX GPIOTE Callback Functions */
 static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
-static void musca_stop(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
+static void musca_btn(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
 /* App Timer Callback Function */
 static void release_button(void * p_context);
@@ -99,10 +100,15 @@ void gpio_init(void) {
 
 	nrfx_gpiote_init();
 
-	// printf("Configure NRF_BUTTON...\n");
-	nrfx_gpiote_in_init(NRF_BUTTON, 
-				&musca_stop_config, 
-				(nrfx_gpiote_evt_handler_t) musca_stop);
+	// printf("Configure NRF_BUTTON1...\n");
+	nrfx_gpiote_in_init(NRF_BUTTON1, 
+				&musca_btn_config, 
+				(nrfx_gpiote_evt_handler_t) musca_btn);
+
+		// printf("Configure NRF_BUTTON2...\n");
+	nrfx_gpiote_in_init(NRF_BUTTON2, 
+				&musca_btn_config, 
+				(nrfx_gpiote_evt_handler_t) musca_btn);
 
 	// printf("Configure MUSCA_OUT0...\n");
 	nrfx_gpiote_in_init(MUSCA_OUT0,
@@ -126,8 +132,10 @@ void gpio_init(void) {
 
 	// printf("Enabling inputs...\n");
 
-	// printf("Enabling MUSCA_OFF...\n");
-	nrfx_gpiote_in_event_enable(NRF_BUTTON, true);
+	// printf("Enabling NRF_BUTTON1...\n");
+	nrfx_gpiote_in_event_enable(NRF_BUTTON1, true);
+	// printf("Enabling NRF_BUTTON2...\n");
+	nrfx_gpiote_in_event_enable(NRF_BUTTON2, true);
 	// printf("Enabling MUSCA_OUT0...\n");
 	nrfx_gpiote_in_event_enable(MUSCA_OUT0, true);
 	// printf("Enabling MUSCA_OUT1...\n");
@@ -178,14 +186,16 @@ void timer_init(void) {
 					&timer_config, 
 					(nrfx_timer_event_handler_t) musca_start);
 
-	uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&musca_start_timer, TIMER_PERIOD_MS);
-	printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+	/* Uncomment to trigger application periodically. */
 
-	nrfx_timer_extended_compare(&musca_start_timer,
-								NRF_TIMER_CC_CHANNEL0,
-								timer_period_ticks,
-								NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-								true);
+	// uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&musca_start_timer, TIMER_PERIOD_MS);
+	// printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+
+	// nrfx_timer_extended_compare(&musca_start_timer,
+	// 							NRF_TIMER_CC_CHANNEL0,
+	// 							timer_period_ticks,
+	// 							NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+	// 							true);
 
 	printf("Timer Initialized!\n"); // Remember to enable the timer in main
 }
@@ -221,15 +231,15 @@ static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
 	switch(pin) {
 		case MUSCA_OUT0 :
 			printf("OUT0 Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
-			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
+			// tx_time = nrfx_timer_capture(&musca_start_timer, 1);
 			break;
 		case MUSCA_OUT1 :
 			printf("OUT1 Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
-			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
+			// tx_time = nrfx_timer_capture(&musca_start_timer, 1);
 			break;
 		case MUSCA_OUT2 :
 			printf("OUT2 Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
-			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
+			// tx_time = nrfx_timer_capture(&musca_start_timer, 1);
 			break;
 		case MUSCA_OUT3 :
 			printf("OUT3 Res Time: %f ms\n\n", timer_16MHz_ticks_to_ms(res_time));
@@ -238,8 +248,22 @@ static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
 	return;
 }
 
-static void musca_stop(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
-	printf("Stopped 4 Ouputs.\n\n");
+static void musca_btn(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
+	switch(pin) {
+
+		case NRF_BUTTON1 : // Stop Button
+			printf("Stopped 4 Ouputs.\n\n");
+			break;
+
+		case NRF_BUTTON2 : // Start Case
+			printf("Starting 4 Ouputs Now...\n");
+			error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), NULL);
+			APP_ERROR_CHECK(error_code);
+
+			tx_time = nrfx_timer_capture(&musca_start_timer, 1);
+			nrf_gpio_pin_clear(MUSCA_ON);
+			break;
+	}
 }
 
 /***********************************************/

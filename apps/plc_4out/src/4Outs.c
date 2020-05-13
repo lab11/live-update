@@ -171,7 +171,7 @@ void PlcCycle(void)
     }
     
     if(Read_I_b_rung_top()) {
-        if(U_i_T0 < 499) {
+        if(U_i_T0 < 500) {
             U_i_T0++;
             Write_I_b_rung_top(0);
         }
@@ -190,7 +190,7 @@ void PlcCycle(void)
     Write_I_b_parThis_0001(Read_I_b_rung_top());
     /* start series [ */
     if(Read_I_b_parThis_0001()) {
-        if(U_i_T1 < 499) {
+        if(U_i_T1 < 500) {
             U_i_T1++;
             Write_I_b_parThis_0001(0);
         }
@@ -209,7 +209,7 @@ void PlcCycle(void)
     Write_I_b_parThis_0002(Read_I_b_parThis_0001());
     /* start series [ */
     if(Read_I_b_parThis_0002()) {
-        if(U_i_T2 < 499) {
+        if(U_i_T2 < 500) {
             U_i_T2++;
             Write_I_b_parThis_0002(0);
         }
@@ -228,7 +228,7 @@ void PlcCycle(void)
     Write_I_b_parThis_0003(Read_I_b_parThis_0002());
     /* start series [ */
     if(Read_I_b_parThis_0003()) {
-        if(U_i_T3 < 499) {
+        if(U_i_T3 < 500) {
             U_i_T3++;
             Write_I_b_parThis_0003(0);
         }

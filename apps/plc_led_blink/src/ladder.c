@@ -15,10 +15,13 @@ void plc_callback(struct k_timer *t) {
 	// time_old = time_cnt;
 	// time_cnt = k_uptime_get_32();
 	// printk("elapsed time since last callback: %d\n", time_cnt - time_old);
-
+	// printk("Reading...\n");
 	read_in_table();
+	// printk("Executing...\n");
 	PlcCycle();
+	// printk("Writing...\n");
 	write_out_table();
+	printk("Scan Complete.\n");
 }
 
 void init_plc(void) {

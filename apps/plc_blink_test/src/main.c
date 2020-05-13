@@ -32,7 +32,7 @@
 #define BUTTON_SIM 25					// gpio pin that simulates button press
 #define MUSCA_INPUT 24		 			// gpio pin to read input from musca 
 #define LED1 17							// specify LED pin
-#define TIMER_PERIOD_MS 5432			// desired timer period in milliseconds
+#define TIMER_PERIOD_MS 5431			// desired timer period in milliseconds
 #define NRF_BUTTON 13					// Button 1 on nrf52
 
 ret_code_t error_code;          		// error checking - variously used 
