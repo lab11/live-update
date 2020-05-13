@@ -1,3 +1,11 @@
+## Application Pin Mapping for LED_Blink
+
+Musca - nrf
+PIN3 -> PIN24
+PIN7 -> PIN25
+GND -> GND
+3V3 -> VDD
+
 ***The Ladder Logic Programming Pipeline***
 Assuming you already know how to program in ladder logic, use LDmicro to write your program,
 then compile yout program as an ANSI C file by going to 'Settings -> Microcontroller' and selecting C code.
