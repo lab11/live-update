@@ -6,7 +6,7 @@
 
 #define PIN 7
 
-#define PLC_SCAN_TIME 20
+#define PLC_SCAN_TIME 10
 
 struct k_timer scan_timer;
 
