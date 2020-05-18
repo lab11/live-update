@@ -198,7 +198,7 @@ void PlcCycle(void)
     }
     
     if(Read_I_b_rung_top()) {
-        if(U_i_Tkill_delay < 99) {
+        if(U_i_Tkill_delay < 49) {
             U_i_Tkill_delay++;
             Write_I_b_rung_top(0);
         }
