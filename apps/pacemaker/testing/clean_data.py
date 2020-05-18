@@ -59,23 +59,24 @@ def reject_outliers_2(data, m=2.):
     s = d / (mdev if mdev else 1.)
     return data[s < m]
 
-def plot_histogram(trace, type, seen_intervals, exp_intervals):
+def plot_histogram(trace, type, seen_intervals):
     # N_points = 100000
     # n_bins = 20
 
     fig, axs = plt.subplots(1, sharey=True, tight_layout=False)
     if type == "Ventricle" or type == "Atrial":
-        axs.set_title('Deviation from Expected Interval Between Subsequent ' + type + ' Events', y=1.05)
+        axs.set_title('Measured Intervals Between Subsequent ' + type + ' Events', y=1.05)
     else:
         types = type.split("-")
         first = types[0]
         second = types[1]
-        axs.set_title('Deviation from Expected Interval Between ' + first + ' and ' + second + ' Events', y=1.05)
+        axs.set_title('Measured Intervals Between ' + first + ' and ' + second + ' Events', y=1.05)
     axs.set_ylabel('Count')
     axs.set_xlabel("Deviation (microseconds)")
 
     # errors = np.abs(np.array(seen_intervals) - np.array(exp_intervals))
     errors = np.array(seen_intervals)
+    print(trace + " " + type + " errors: ", errors)
     errors = reject_outliers_2(errors, 10)
     # print("erorrrs", errors)
     iqr = np.subtract(*np.percentile(errors, [75, 25]))
@@ -111,15 +112,23 @@ def main():
         clean(filename)
         ventricle_intervals, atrial_intervals, ventricle_atrial_intervals, atrial_ventricle_intervals = compute_event_intervals("clean_"+filename)
 
-        exp_ventricle_intervals = [1000000 for i in range(len(ventricle_intervals))]
-        exp_atrial_intervals = [1000000 for i in range(len(atrial_intervals))]
-        exp_ventricle_atrial_intervals = [150000 for i in range(len(ventricle_atrial_intervals))]
-        exp_atrial_ventricle_intervals = [850000 for i in range(len(atrial_ventricle_intervals))]
+        # exp_ventricle_intervals = [1000000 for i in range(len(ventricle_intervals))]
+        # exp_atrial_intervals = [1000000 for i in range(len(atrial_intervals))]
+        # exp_ventricle_atrial_intervals = [150000 for i in range(len(ventricle_atrial_intervals))]
+        # exp_atrial_ventricle_intervals = [850000 for i in range(len(atrial_ventricle_intervals))]
 
-        plot_histogram(trace, "Ventricle", ventricle_intervals, exp_ventricle_intervals)
-        plot_histogram(trace, "Atrial", atrial_intervals, exp_atrial_intervals)
-        plot_histogram(trace, "Ventricle-Atrial", ventricle_atrial_intervals, exp_ventricle_atrial_intervals)
-        plot_histogram(trace, "Atrial-Ventricle", atrial_ventricle_intervals, exp_atrial_ventricle_intervals)
+        # plot_histogram(trace, "Ventricle", ventricle_intervals, exp_ventricle_intervals)
+        # plot_histogram(trace, "Atrial", atrial_intervals, exp_atrial_intervals)
+        # plot_histogram(trace, "Ventricle-Atrial", ventricle_atrial_intervals, exp_ventricle_atrial_intervals)
+        # plot_histogram(trace, "Atrial-Ventricle", atrial_ventricle_intervals, exp_atrial_ventricle_intervals)
+
+        if trace in ("normal_trace", "arr9_trace"):
+            plot_histogram(trace, "Ventricle", ventricle_intervals)
+            plot_histogram(trace, "Atrial", atrial_intervals)
+        elif trace in ("arr7_trace"):
+            plot_histogram(trace, "Ventricle-Atrial", ventricle_atrial_intervals)
+        elif trace in ("arr8_trace"):
+            plot_histogram(trace, "Atrial-Ventricle", atrial_ventricle_intervals)
 
 
 

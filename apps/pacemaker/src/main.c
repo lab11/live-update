@@ -19,10 +19,10 @@
 #define TPVAB   50
 
 
-bool VP_allowed;
-bool VS_allowed;
-bool VSed;
-bool ASed;
+bool VP_allowed = 1;
+bool VS_allowed = 1;
+bool VSed = 0;
+bool ASed = 0;
 
 // Timers
 struct k_timer avi_timer;
@@ -36,27 +36,28 @@ struct k_timer diagnostic_timer;
 void ventricle_sense_cb(void) {
     tfm_gpio_set(LED);
     tfm_gpio_clear(LED);
-    printk("V \n");
+    printk("Ve \n");
+    VSed = 1;
     observe(VENTRICLE);
 }
 
 void atrial_sense_cb(void) {
     tfm_gpio_set(LED);
     tfm_gpio_clear(LED);
-    printk("A \n");
-    ASed = true;
+    printk("At \n");
+    ASed = 1;
     observe(ATRIAL);
 }
 
 void ventricle_pace() {
-    printk("Ventricle Pace! \n");
+    printk("Ventricle Pacing! \n");
     tfm_gpio_set(VENTRICLE_PACE_PIN);
     observe(VENTRICLE);
     tfm_gpio_clear(VENTRICLE_PACE_PIN);
 }
 
 void atrial_pace() {
-    printk("Atrial Pace! \n");
+    printk("Atrial Pacing! \n");
     tfm_gpio_set(ATRIAL_PACE_PIN);
     observe(ATRIAL);
     tfm_gpio_clear(ATRIAL_PACE_PIN);
@@ -129,8 +130,7 @@ void main(void) {
     // k_timer_init(&diagnostic_timer, NULL, NULL);
 
     // Uncomment to force ventricle event when no external inputs available
-    // printk("Forcing Ventricle Event");
-    // observe(VENTRICLE);
-    printk("start5");
+    printk("start9");
+    // printk("Forcing Ventricle Event");    
 
 }
