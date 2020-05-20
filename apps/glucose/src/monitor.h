@@ -6,6 +6,7 @@ struct requested_temp {
 };
 
 void init_monitor(void);
-void calculate_basal(time_t, float, float *, float *);
+void add_reading(time_t, float);
 void set_current_basal(float);
 void add_treatment(time_t, float);
+void calculate_basal(float *, float *);

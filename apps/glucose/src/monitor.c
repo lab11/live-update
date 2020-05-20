@@ -23,14 +23,13 @@
 float PEAK = DIA * 75.0f / 180;
 
 struct glucose_readings {
-  time_t time; /* Represents the absolute time as seconds from Jan 17, 1970. */
+  time_t time; /* Represents the absolute time as seconds from initialization. */
   float glucose;
-  struct glucose_readings *prev;
 };
 
 struct treatment_list {
-  time_t time; /* Represents the absolute time as seconds from Jan 17, 1970. */
-  int minutes; /* Represents minutes between the next treatment and the current. */
+  time_t time; /* Represents the absolute time as seconds from initialization. */
+  float minutes; /* Represents minutes between the next treatment and the current. */
   float insulin;
   struct treatment_list *prev;
 };
@@ -38,9 +37,9 @@ struct treatment_list {
 struct requested_temp current_temp_basal;
 struct requested_temp current_scheduled_basal;
 struct treatment_list iob_data_absolute[MAX_READINGS];
-int starting_treatment, ending_treatment;
+int iob_data_size;
 struct glucose_readings glucose_data_absolute[MAX_READINGS];
-int starting_reading, ending_reading;
+int glucose_size;
 
 void calculate_deltas(float *);
 void determine_basal(float, float, float, float, float, float, float);
@@ -51,29 +50,25 @@ void init_monitor(void) {
   current_temp_basal.duration = 0.0f;
   current_temp_basal.rate = 0.0f;
 
-  starting_treatment = 0;
-  ending_treatment = 0;
-  starting_reading = 0;
-  ending_reading = 0;
+  iob_data_size = 0;
+  glucose_size = 0;
 }
 
-void calculate_basal(time_t rawtime, float glucose, float *duration, float *rate) {
-  // Append new glucose reading data
-  glucose_data_absolute[ending_reading].time = rawtime;
-  glucose_data_absolute[ending_reading].glucose = glucose;
-  glucose_data_absolute[ending_reading].prev = glucose_data_absolute;
-  ending_reading = (ending_reading + 1) % MAX_READINGS;
-  if (ending_reading == starting_reading) {
-    starting_reading++;
-  }
-
+void calculate_basal(float *duration, float *rate) {
   float glucose_deltas[3];
   calculate_deltas(glucose_deltas);
-  determine_basal(glucose, current_temp_basal.rate,
+  determine_basal(glucose_data_absolute[glucose_size - 1].glucose, current_temp_basal.rate,
     current_temp_basal.duration, current_scheduled_basal.rate,
     glucose_deltas[0], glucose_deltas[1], glucose_deltas[2]);
   *duration = current_temp_basal.duration;
   *rate = current_temp_basal.rate;
+}
+
+void add_reading(time_t rawtime, float glucose) {
+  // Append new glucose reading data
+  glucose_data_absolute[glucose_size].time = rawtime;
+  glucose_data_absolute[glucose_size].glucose = glucose;
+  glucose_size++;
 }
 
 void set_current_basal(float rate) {
@@ -82,18 +77,15 @@ void set_current_basal(float rate) {
 }
 
 void add_treatment(time_t rawtime, float bolus_insulin) {
-  iob_data_absolute[ending_treatment].time = rawtime;
-  iob_data_absolute[ending_treatment].insulin = bolus_insulin;
-  iob_data_absolute[ending_treatment].prev = iob_data_absolute;
-  if (ending_treatment > 0) {
-    iob_data_absolute[ending_treatment].minutes = (rawtime - iob_data_absolute[ending_treatment - 1].time) / 60;
+  iob_data_absolute[iob_data_size].time = rawtime;
+  iob_data_absolute[iob_data_size].insulin = bolus_insulin;
+  iob_data_absolute[iob_data_size].prev = iob_data_absolute;
+  if (iob_data_size > 0) {
+    iob_data_absolute[iob_data_size].minutes = (rawtime - iob_data_absolute[iob_data_size - 1].time) / 60;
   } else {
-    iob_data_absolute[ending_treatment].minutes = 0; // TODO: Check defaults
+    iob_data_absolute[iob_data_size].minutes = 0; // TODO: Check defaults
   }
-  ending_treatment = (ending_treatment + 1) % MAX_READINGS;
-  if (ending_treatment == starting_treatment) {
-    starting_treatment++;
-  }
+  iob_data_size++;
 }
 
 void calculate_deltas(float *deltas) {
@@ -105,22 +97,18 @@ void calculate_deltas(float *deltas) {
   */
   float avg_bg_delta = 0.0f, short_avg_delta = 0.0f, long_avg_delta = 0.0f;
   int short_num = 0, long_num = 0;
-  int current_index = ending_treatment - 1;
   float current_difference;
-  do {
-    current_difference = glucose_data_absolute[ending_treatment - 1].time - glucose_data_absolute[current_index].time;
+  for (int index = glucose_size - 1; index >= 0; index--) {
+    current_difference = glucose_data_absolute[glucose_size - 1].time - glucose_data_absolute[index].time;
     if (2.5f * 60 <= current_difference && current_difference <= 7.5f * 60) {
-      avg_bg_delta += glucose_data_absolute[current_index].glucose;
-      short_avg_delta += (glucose_data_absolute[ending_treatment - 1].glucose) - (glucose_data_absolute[current_index].glucose);
+      avg_bg_delta += glucose_data_absolute[index].glucose;
+      short_avg_delta += (glucose_data_absolute[glucose_size - 1].glucose) - (glucose_data_absolute[index].glucose);
       short_num++;
     } else if (17.5f * 60 <= current_difference && current_difference <= 42.5f * 60) {
-      long_avg_delta += (glucose_data_absolute[ending_treatment - 1].glucose) - (glucose_data_absolute[current_index].glucose);
+      long_avg_delta += (glucose_data_absolute[glucose_size - 1].glucose) - (glucose_data_absolute[index].glucose);
       long_num++;
-    } else {
-      starting_treatment = current_index - 1; // Too far back so can forget about this glucose reading
     }
-    current_index--;
-  } while (current_index != starting_treatment);
+  }
   deltas[0] = avg_bg_delta/short_num;
   deltas[1] = short_avg_delta/short_num;
   deltas[2] = long_avg_delta/long_num;
@@ -137,15 +125,11 @@ float get_activity_percentage (int minutes) {
 /* sum for all insulin treatments in units of insulin used per minute */
 float calculate_activity () {
   int total_activity = 0;
-  int current_index = ending_treatment - 1;
-  int cummulative_minutes = iob_data_absolute[current_index].minutes;
-  while (current_index != (starting_treatment - 1 + MAX_READINGS) % MAX_READINGS && cummulative_minutes < DIA) {
-    total_activity += (iob_data_absolute[current_index].insulin) * get_activity_percentage (cummulative_minutes);
-    current_index = (current_index - 1 + MAX_READINGS) % MAX_READINGS;
-    cummulative_minutes += iob_data_absolute[current_index].minutes;
-  }
-  if (cummulative_minutes >= DIA) {
-    starting_treatment = (current_index + 1) % MAX_READINGS;
+  int cummulative_minutes = 0;
+  for (int i = iob_data_size - 1; i >= 0; i--) {
+    if (cummulative_minutes >= DIA) { break; }
+    cummulative_minutes += iob_data_absolute[i].minutes;
+    total_activity += (iob_data_absolute[i].insulin) * get_activity_percentage (cummulative_minutes);
   }
   return total_activity;
 }
@@ -153,20 +137,19 @@ float calculate_activity () {
 /* sum for all insulin treatments in units of insulin remaining each minute */
 float calculate_iob () {
   float total_iob = 0;
-  int current_index = ending_treatment - 1;
   int cummulative_minutes = 0;
-  while (current_index != (starting_treatment - 1 + MAX_READINGS) % MAX_READINGS && cummulative_minutes < DIA) {
-    cummulative_minutes += iob_data_absolute[current_index].minutes;
-    if (cummulative_minutes <= PEAK) {
-      total_iob += (iob_data_absolute[current_index].insulin)
+  for (int i = iob_data_size - 1; i >= 0; i--) {  //(current_index != (starting_treatment - 1 + MAX_READINGS) % MAX_READINGS && cummulative_minutes < DIA) {
+    cummulative_minutes += iob_data_absolute[i].minutes;
+    if (cummulative_minutes >= DIA) { break; }
+    else if (cummulative_minutes <= PEAK) {
+      total_iob += (iob_data_absolute[i].insulin)
         * get_activity_percentage (cummulative_minutes)
         * cummulative_minutes * 0.5f;
     } else {
-      total_iob += (iob_data_absolute[current_index].insulin)
+      total_iob += (iob_data_absolute[i].insulin)
         * (DIA - get_activity_percentage (cummulative_minutes)
         * (DIA - cummulative_minutes)) * 0.5f;
     }
-    current_index = (current_index - 1 + MAX_READINGS) % MAX_READINGS;
   }
   return total_iob;
 }

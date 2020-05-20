@@ -1,72 +1,33 @@
 #include "monitor.h"
-#include <stdio.h>
+#include "data.h"
 #include "sys/printk.h"
 #include <zephyr.h>
-#include <drivers/uart.h>
-
-#define BUF_MAXSIZE	256
-#define SLEEP_TIME	500
-
-static struct device *uart1_dev;
-static u8_t rx_buf[BUF_MAXSIZE];
-static u8_t tx_buf[BUF_MAXSIZE];
-
-static void uart1_isr(struct device *x) {
-	int len = uart_fifo_read(uart1_dev, rx_buf, BUF_MAXSIZE);
-	ARG_UNUSED(x);
-	// read in glucose, bolus, scheduled_basal
-	char type = rx_buf[0];
-	int value = 0;
-	int curr;
-	for (int i = 1; i < len && i < 32; i++) {
-		curr = rx_buf[i];
-		value = (value << 1) + curr;
-	}
-	time_t rawtime = 0;
-	//time(&rawtime);
-	if (type == 'A') {
-		// Read in scheduled_basal
-		set_current_basal((float) value);
-		printf("Set scheduled basal at %f\n", (float) value);
-	} else if (type == 'B') {
-		// Read in bolus
-		add_treatment(rawtime, (float) value);
-		printf("Set bolus to be %f\n", (float) value);
-	} else {
-		// Read in glucose
-		float duration, rate;
-		calculate_basal(rawtime, (float) value, &duration, &rate);
-		printf("Calculating temp basal: %f for %f\n", rate, duration);
-	}
-}
-
-static void uart1_init(void) {
-	uart1_dev = device_get_binding("UART_1");
-
-	uart_irq_callback_set(uart1_dev, uart1_isr);
-	uart_irq_rx_enable(uart1_dev);
-
-	printk("uart1_init done\n");
-}
 
 void main(void) {
-	uart1_init();
 	init_monitor();
-	// Move to nrf52x?
-	float *tx;
-	// Test setting scheduled basal
-	tx_buf[0] = 0x41;
-	tx = (float *) (&tx_buf[1]);
-	*tx = 15.0f;
-	uart_fifo_fill(uart1_dev, tx_buf, sizeof(u32_t));
-	// Test setting bolus
-	tx_buf[0] = 0x42;
-	tx = (float *) (&tx_buf[1]);
-	*tx = 1.85f;
-	uart_fifo_fill(uart1_dev, tx_buf, sizeof(u32_t));
-	// Test calculating basal
-	tx_buf[0] = 0x43;
-	tx = (float *) (&tx_buf[1]);
-	*tx = 128.0f;
-	uart_fifo_fill(uart1_dev, tx_buf, sizeof(u32_t));
+	float duration, rate;
+	int off_zero = 0, total_num = 0;
+	float percentage_diff = 0;
+	for (int i = 0; i < SIZE; i++) {
+		if (data[i].type == BG_Check) {
+			add_reading(data[i].time, data[i].glucose);
+		} else if (data[i].type == Temp_Basal) {
+			calculate_basal(&duration, &rate);
+			printk("Calculated duration and rate: %d.%d & %d.%d ", (int)duration, (int)(duration*1000000)%1000000, (int)rate, (int)(rate*1000000)%1000000);
+			printk("Versus real duration and rate: %d.%d & %d.%d\n", (int)(data[i].duration), (int)(data[i].duration*1000000)%1000000, (int)(data[i].rate), (int)(data[i].rate*1000000)%1000000);
+			if (data[i].rate == 0 && rate != 0) {
+				off_zero++;
+			} else if (data[i].rate != 0) {
+				percentage_diff += (rate - data[i].rate < 0? data[i].rate - rate : rate - data[i].rate) / data[i].rate;
+			}
+			total_num++;
+		} else if (data[i].type == Correction_Bolus) {
+			add_treatment(data[i].time, data[i].insulin);
+		} else if (data[i].type == Scheduled_Basal) {
+			set_current_basal(data[i].rate);
+		}
+	}
+	percentage_diff /= total_num;
+	printk("Average percentage diff: %d percent \n", (int)(percentage_diff * 100));
+	printk("Off zero: %d times out of %d \n", off_zero, total_num);
 }
