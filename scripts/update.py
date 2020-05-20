@@ -141,7 +141,7 @@ def generate_update_header(manifest, app_folder, update_folder):
     flashed_symbols = os.path.join(app_folder, '_build', FLASHED_SYMBOLS_NAME)
     update_symbols = os.path.join(update_folder, manifest['update_symbols'])
 
-    main_ptr_addr = get_symbol_address(flashed_symbols, 'main_ptr')
+    main_ptr_addr = get_symbol_address(flashed_symbols, 'rodata.*main_ptr')
     if not main_ptr_addr:
         print('Could not locate main_ptr_addr, exiting...')
         exit(1)
@@ -353,7 +353,7 @@ def serialize_header(header, payloads):
         header['appram_bss_start_addr'],
         header['appram_bss_size_addr'],
         header['triples_bytes'],
-        header['init_size']
+        header['init_size'],
     )
 
 
