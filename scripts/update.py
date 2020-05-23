@@ -1,12 +1,14 @@
 import argparse
-import serial
+import json
+import networkx as nx
 import os
+import pprint
 import random
 import re
+import serial
 import struct
 import sys
 import time
-import json
 
 from intelhex import IntelHex
 
@@ -357,12 +359,175 @@ def serialize_header(header, payloads):
     )
 
 
+def is_updatable_event(G_u, src_state_u, dst_state_u, e_event_u, start_state_u, src_state_f, dst_state_f, e_event_f):
+
+    if e_event_u['event'] != e_event_f['event']:
+        return False
+
+    # Memory: if known, same name needs same values, else needs init values of update
+    src_mem_u = src_state_u[0]
+    src_mem_f = src_state_f[0]
+
+    for data in src_mem_u:
+        if data in src_mem_f and src_mem_u[data] != src_mem_f[data]:
+            return False # skip edge, data doesn't match between flashed and updated
+        elif data not in src_mem_f and src_mem_u[data] != start_state_u[data]:
+            return False # skip edge, data doesn't match updated initial state
+
+    # Timers:
+    
+    src_timers_u = src_state_u[1]
+    dst_timers_u = dst_state_u[1]
+
+    src_timers_f = src_state_f[1]
+    dst_timers_f = dst_state_f[1]
+
+    # if a timer is active in the flashed version, and exists by name in the
+    # update, look for a state where it's also active in the update
+    for src_active_t_f in src_timers_f['active']:
+        if src_active_t_f in src_timers_u['timers'] and src_active_t_f not in src_timers_u['active']:
+            return False    
+
+    # if a timer is active in the updated version, and exists by name in the
+    # flash, check it's also active in the flash
+    for src_active_t_u in src_timers_u['active']:
+        if src_active_t_u in src_timers_f['timers'] and src_active_t_u not in src_timers_f['active']:
+            return False    
+
+    # can update if no timers are currently running
+    timers_quiescent = len(src_timers_f) == 0 and len(dst_timers_f) == 0 and len(src_timers_u) == 0
+
+    # can update if all active timers reset by event in both flashed and updated versions
+    #    intersection of {update,flashed} {src,dst} active timers is 0
+    timers_reset = True
+    for src_active_t_f in src_timers_f['active']:
+        if src_active_t_f in dst_timers_f['active'] and src_active_t_f not in e_event_f['reset']:
+            timers_reset = False
+            break
+
+    for src_active_t_u in src_timers_u['active']:
+        if src_active_t_u in dst_timers_u['active'] and src_active_t_u not in e_event_u['reset']:
+            timers_reset = False
+            break
+
+    if not (timers_quiescent or timers_reset):
+        return False
+
+    # GPIO: output pins need to be the same
+    src_gpio_u = src_state_u[2]
+    src_gpio_f = src_state_f[2]
+
+    if src_gpio_f['set'] != src_gpio_u['set']:
+        return False
+
+    return True
+
+
+def find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f):
+
+    # Find update main, get initial state vals
+    start_state_u = None
+    for e in G_u.edges():
+        dst_state_u = json.loads(e[1])
+        e_events_u = G_u.get_edge_data(e[0], e[1])['label']
+
+        for event in e_events_u:
+            if event['event'] == 'main':
+                start_state_u = dst_state_u
+                break
+
+        if start_state_u:
+            break
+
+    if not start_state_u:
+        print('Couldn\'t find update initial state, exiting')
+        exit(1)
+
+    potential_events = [] 
+    for e_u in G_u.edges():
+
+        src_state_u, dst_state_u = json.loads(e_u[0]), json.loads(e_u[1])
+        e_events_u = G_u.get_edge_data(e_u[0], e_u[1])['label']
+
+        for e_event_u in e_events_u:
+            if (is_updatable_event(G_u, \
+                    src_state_u, dst_state_u, e_event_u, start_state_u, \
+                    src_state_f, dst_state_f, e_event_f)):
+                potential_events.append((src_state_u, dst_state_u, e_event_u))
+
+    reachable_events = []
+    for potential_e in potential_events:
+        src_u = json.dumps(potential_e[0])
+        unreachable_nodes = set(G_u.nodes).difference(nx.ancestors(G_u, src_u))
+
+        if len(unreachable_nodes) == 1 and src_u in unreachable_nodes:
+            reachable_events.append(potential_e)
+
+    if len(reachable_events) == 0:
+        return None
+    elif len(reachable_events) > 1:
+        print('Warning, found more than 1 potential/reachable update event, exiting...')
+        exit(1)
+    return reachable_events[0] # return the only event
+
+    '''
+    print('EVENT_F:')
+    pprint.pprint(e_event_f)
+    print('SRC_STATE_F:')
+    pprint.pprint(src_state_f)
+    #print('DST_STATE_F:')
+    #pprint.pprint(dst_state_f)
+    print()
+    print()
+
+    for r in reachable_events:
+        print(r[2]['event'])
+        print('event:')
+        pprint.pprint(r[2]) 
+        print('src:')
+        pprint.pprint(r[0]) 
+        print()
+    '''
+
+
+def test_graph(update_manifest, flashed_manifest, update_dir, flashed_dir):
+
+    G_u = nx.read_gpickle(
+        os.path.join(update_dir, update_manifest['update_graph']))
+    G_f = nx.read_gpickle(
+        os.path.join(flashed_dir, flashed_manifest['update_graph']))
+
+    update_points = []
+    for e in G_f.edges():
+        src_state_f, dst_state_f = json.loads(e[0]), json.loads(e[1])
+        e_events_f = G_f.get_edge_data(e[0], e[1])['label']
+
+        for e_event_f in e_events_f:
+            match = find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f)
+            if match:
+                src_state_u, dst_state_u, e_event_u = match
+                update_points.append({
+                    'src_state_f': src_state_f,
+                    'dst_state_f': dst_state_f,
+                    'src_state_u': src_state_u,
+                    'dst_state_u': dst_state_u,
+                    'e_event_f': e_event_f,
+                    'e_event_u': e_event_u,
+                })
+
+    for p in update_points:
+        print(p['e_event_f']['event'], p['e_event_u']['event'])
+
+    exit(0)
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Primary control script for the live update process.')
     parser.add_argument('app_folder', help='App folder')
     parser.add_argument('dev', help='Serial port')
     parser.add_argument('--update_folder', help='Specify specific update package folder instead of deriving from app location', default=None)
+    parser.add_argument('--flashed_folder', help='Specify specific flashed package folder instead of deriving from app location', default=None)
     parser.add_argument('--baud', help='Baud rate', type=int, default=115200)
     parser.add_argument('--timeout', help='Timeout', type=int, default=2)
     parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
@@ -374,10 +539,21 @@ if __name__ == '__main__':
     else:
         update_folder = os.path.join(args.app_folder, '_build', 'update')
 
+    if args.flashed_folder:
+        flashed_folder = args.flashed_folder
+    else:
+        flashed_folder = os.path.join(args.app_folder, '_build', 'flashed')
+
     with open(os.path.join(update_folder, 'manifest.json'), 'r') as f:
         manifest = json.load(f)
 
-    if manifest['valid'] and valid_partition(args.app_folder, manifest):
+    with open(os.path.join(flashed_folder, 'manifest.json'), 'r') as f:
+        flashed_manifest = json.load(f)
+
+    if manifest['valid'] and flashed_manifest['valid'] and valid_partition(args.app_folder, manifest):
+
+        test_graph(manifest, flashed_manifest, update_folder, flashed_folder)
+
         update_header = generate_update_header(
             manifest,
             args.app_folder,
@@ -425,5 +601,13 @@ if __name__ == '__main__':
             os.system('cp {} {}'.format(
                 os.path.join(update_folder, manifest['update_symbols']),
                 flashed_symbols_filename
+            ))
+
+            print("updating last flashed folder...")
+            os.system('rm -rf {}'.format(
+                flashed_folder
+            ))
+            os.system('cp -r {}'.format(
+                update_folder
             ))
 

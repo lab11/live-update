@@ -15,6 +15,7 @@ FLASHED_UPDATE_DIR = $(BUILDDIR)flashed
 flash:
 	$(Q)cp $(VERSION_FILE) $(FLASHED_VERSION_FILE)
 	$(Q)arm-none-eabi-objdump -t $(ELF) > $(FLASHED_SYMBOLS)
+	$(Q)rm -rf $(FLASHED_UPDATE_DIR)
 	$(Q)cp -r $(UPDATE_DIR) $(FLASHED_UPDATE_DIR)
 	$(Q)cp $(MERGED_HEX) /Volumes/MUSCA/
 
