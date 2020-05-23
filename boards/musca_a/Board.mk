@@ -53,12 +53,28 @@ include $(BASE_DIR)/boards/$(BOARD)/Program.mk
 # --- Rules for building apps ---
 
 .PHONY: all
-all: init_zephyr_env $(BIN_S) $(BIN) $(MERGED_HEX) $(UPDATE_DIR)
+all: $(BIN_S) $(BIN) $(MERGED_HEX) $(UPDATE_DIR)
+#all: init_zephyr_env $(BIN_S) $(BIN) $(MERGED_HEX) $(UPDATE_DIR)
 
-.PHONY: init_zephyr_env
-init_zephyr_env:
-	$(shell export ZEPHYR_BASE=$(ZEPHYR_BASE))
-	$(shell source $(ZEPHYR_BASE)/zephyr-env.sh)
+#.PHONY: init_zephyr_env
+#init_zephyr_env:
+# 	$(shell export ZEPHYR_BASE=$(ZEPHYR_BASE))
+# 	$(shell source $(ZEPHYR_BASE)/zephyr-env.sh)
+
+CLANG_ANALYSIS_FLAGS = -Xclang -analyze -Xclang -analyzer-checker=core.LiveUpdate -fsyntax-only
+CLANG_COMPILE_FLAGS = -ffreestanding -fno-common -Wall -Wformat -Wformat-security -Wno-format-zero-length -Wno-main -Wno-address-of-packed-member -Wno-pointer-sign -Wpointer-arith -Werror=implicit-int -ffunction-sections -fdata-sections -std=c99
+CLANG_INCLUDE_DIRS = -imacros$(ZEPHYR_BASE)/include/toolchain/zephyr_stdint.h \
+					 -imacros$(ZEPHYR_BUILDDIR)/zephyr/include/generated/autoconf.h \
+					 -I./include \
+					 -I$(BUILDDIR)arm-tfm/install/export/tfm/inc \
+					 -I$(ZEPHYR_BASE)/include \
+					 -I$(ZEPHYR_BUILDDIR)/zephyr/include/generated \
+					 -I$(ZEPHYR_BASE)/soc/arm/arm/musca_a \
+					 -I$(ZEPHYR_BASE)/ext/hal/cmsis/Core/Include \
+					 -isystem $(ZEPHYR_BASE)/lib/libc/minimal/include \
+					 -isystem /usr/local/gcc-arm-none-eabi-9-2019-q4-major/bin/../lib/gcc/arm-none-eabi/9.2.1/include \
+					 -isystem /usr/local/gcc-arm-none-eabi-9-2019-q4-major/bin/../lib/gcc/arm-none-eabi/9.2.1/include-fixed
+
 
 .PHONY: $(UPDATE_DIR)
 $(UPDATE_DIR): $(BUILDDIR)
@@ -66,9 +82,12 @@ $(UPDATE_DIR): $(BUILDDIR)
 	$(Q)mkdir -p $@
 	$(Q)rm -f $@/*
 	$(Q)arm-none-eabi-objdump -t $(ELF) > $@/update.symbols
+	$(Q)(arm-none-eabi-objdump -D -s -j.app_data $(ELF) > $@/update.data 2> /dev/null || touch $@/update.data)
 	$(Q)cp $(AST_DUMP) $@/update_ast.txt
 	$(Q)cp $(ELF) $@/update_ns.elf
 	$(Q)cp $(MERGED_HEX) $@/update.hex
+	$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2> $@/analysis.json
+	$(Q)python3 $(BASE_DIR)/scripts/gen_app_graph.py $@/update.symbols $(ELF) $@/analysis.json $@/update.graph --dump_image $@/update.graph.png
 	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json
 
 $(BUILDDIR):
