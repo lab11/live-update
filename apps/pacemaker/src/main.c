@@ -20,7 +20,6 @@
 
 
 bool VP_allowed = 1;
-bool VS_allowed = 1;
 bool VSed = 0;
 bool ASed = 0;
 
@@ -61,7 +60,6 @@ void atrial_pace() {
     tfm_gpio_set(ATRIAL_PACE_PIN);
     observe(ATRIAL);
     tfm_gpio_clear(ATRIAL_PACE_PIN);
-    
 }
 
 void notify_fsms(EventType_t event) {
@@ -85,10 +83,9 @@ void observe(EventType_t event) {
         // printk("\n");
         // printk("Now observing Ventricle Event... \n");
         VP_allowed = 0;
+
         k_timer_stop(&lri_timer);
         k_timer_stop(&avi_timer);
-        // tfm_gpio_set(LED);
-        // tfm_gpio_clear(LED);
         notify_fsms(event);
     } else if (event == ATRIAL) {
         // printk("\n");
@@ -129,8 +126,12 @@ void main(void) {
     // Used for diagnostic purposes to measure latency
     // k_timer_init(&diagnostic_timer, NULL, NULL);
 
+    printk("start");
+    
     // Uncomment to force ventricle event when no external inputs available
-    printk("start9");
-    // printk("Forcing Ventricle Event");    
+    // printk("Forcing Ventricle Event");
+    // observe(VENTRICLE);
+    
+        
 
 }

@@ -27,9 +27,6 @@ extern bool VSed;
 // then ventrical pacing should occur.
 void avi_timer_expire_cb(struct k_timer *t) {
     avi_expired = 1;
-    // printk("AVI Expired \n");
-    // printk("VSed: %d \n", VSed);
-    // printk("uri exp? %d vp all? %d \n", uri_expired, VP_allowed);
     if (VSed == 1) {
         return;
     } else {
@@ -48,21 +45,17 @@ void avi_timer_expire_cb(struct k_timer *t) {
 void uri_timer_expire_cb(struct k_timer *t) {
     uri_expired = 1;
 
-    if (k_timer_status_get(&vrp_timer) == 0) {
-        VP_allowed = 1;
-    }
-
     if (avi_extended == 1) {
         // printk("VP in URI");
         ventricle_pace();
         avi_extended = 0;
     }
-
     return;
     
 }
 
 void avi_observe() {
+    VSed = 0;
     k_timer_start(&avi_timer, TAVI, 0);
 }
 
