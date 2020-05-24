@@ -12,7 +12,7 @@ import time
 
 from intelhex import IntelHex
 
-CURRENT_VERSION = 0x8
+CURRENT_VERSION = 10
 FLASH_BASE = 0x200000
 
 FLASHED_VERSION_NAME = 'lastFlashedNum.txt'
@@ -77,66 +77,7 @@ def valid_partition(app_folder, manifest):
     return True
 
 
-# TODO make better
-def parse_ast(f):
-
-    ast = [l.strip() for l in f.readlines()]
-
-    # find all the timer declarations
-    timers = {}
-    mode = 'init' # init, timer, expiry, stop
-    current_timer = None
-
-    for l in ast:
-        m = re.search('-VarDecl.*used\s(.*)\s\'struct k_timer', l)
-        if m:
-            if m.group(1) not in timers:
-                timers[m.group(1)] = {}
-            continue
-
-        if mode == 'init':
-            m = re.search('.*Function.*\'k_timer_init\'', l)
-            if m:
-                mode = 'timer'
-                continue
-
-        if mode == 'timer':
-            m = re.search('\'struct k_timer\':.*\s\'(.*)\'\s\'struct k_timer', l)
-            if m:
-                current_timer = m.group(1)
-                mode = 'expiry'
-                continue
-
-        if mode == 'expiry':
-            m = re.search('void \(struct k_timer \*\).*\s\'(.*)\'\s.void \(struct k_timer \*\)', l)
-            if m:
-                timers[current_timer]['expire_callback'] = m.group(1)
-                mode = 'stop'
-                continue
-
-            if 'k_timer_expiry_t' in l and 'NullToPointer' in l:
-                timers[current_timer]['expire_callback'] = None
-                mode = 'stop'
-                continue
-
-        if mode == 'stop':
-            m = re.search('void \(struct k_timer \*\).*\s\'(.*)\'\s.void \(struct k_timer \*\)', l)
-            if m:
-                timers[current_timer]['stop_callback'] = m.group(1)
-                mode = 'init'
-                continue
-
-            if 'k_timer_stop_t' in l and 'NullToPointer' in l:
-                timers[current_timer]['stop_callback'] = None
-                mode = 'init'
-                continue
-
-    return {
-        'timers': timers
-    }
-    
-
-def generate_update_header(manifest, app_folder, update_folder):
+def generate_update_header(manifest, app_folder, update_folder, predicates, transfers):
 
     header = {}
 
@@ -154,23 +95,6 @@ def generate_update_header(manifest, app_folder, update_folder):
         print('Could not locate update_flag_addr, exiting...')
         exit(1)
     header['update_flag_addr'] = update_flag_addr
-
-    with open(os.path.join(update_folder, manifest['update_ast']), 'r') as f:
-        ast_metadata = parse_ast(f)
-        header['init_size'] = 3 * len(ast_metadata['timers']) * 4
-
-    '''
-    print('\nTimer callbacks:')
-    for t in ast_metadata['timers']:
-        t_dict = ast_metadata['timers'][t]
-        print("    {} ({}):".format(t, hex(get_symbol_address(update_symbols, t))))
-        print("      expiry: {}".format(
-            hex(get_symbol_address(update_symbols, t_dict['expire_callback'])) if t_dict['expire_callback'] else '0x0'
-        ))
-        print("      stop: {}".format(
-            hex(get_symbol_address(update_symbols, t_dict['stop_callback'])) if t_dict['stop_callback'] else '0x0'
-        ))
-    '''
 
     header['main_addr'] = get_symbol_address(update_symbols, '\smain$')
 
@@ -219,10 +143,207 @@ def generate_update_header(manifest, app_folder, update_folder):
         print('Could not locate appram_bss_start or appram_bss_size but did locate the other, exiting...')
         exit(1)
 
+    # event_handler_addr, gpio_interrupt_enabled, gpio_out_enabled, and gpio_out_set have fixed
+    # size of 4 bytes each per predicate, so calculate that here
+    predicates_size = (4 * 4) * len(predicates)
+
+    # every predicate gets a size when serialized
+    predicates_size += 4 * len(predicates)
+    for p in predicates:
+        predicates_size += 4 # num memory checks
+        for m in p['memory_checks']:
+            _, size, _ = m
+            predicates_size += (2 * 4) + size
+
+        predicates_size += 4 # num active timers
+        predicates_size += (3 * 4) * len(p['active_timers'])
+
+        predicates_size += 4 # num interrupt cbs
+        predicates_size += (2 * 4) * len(p['gpio_interrupt_callbacks'])
+
+    header['predicates_size'] = predicates_size
+    header['n_predicates'] = len(predicates)
+
+    # event_handler_addr, gpio_interrupt_enabled, gpio_out_enabled, and gpio_out_set have
+    # fixed size of 4 bytes each per transfer, so calculate that here
+    transfers_size = (4 * 4) * len(transfers)
+
+    # every transfer gets a size when serialized
+    transfers_size += 4 * len(transfers)
+    for t in transfers:
+        transfers_size += 4 # number memory items
+        transfers_size += (3 * 4) * len(t['memory'])
+
+        transfers_size += 4 # number init items
+        for i in t['init_memory']:
+            _, size, _ = i
+            transfers_size += (2 * 4) + size
+            
+        transfers_size += 4 # number timer items
+        transfers_size += (3 * 4) * len(t['timers'])
+
+        transfers_size += 4 # number active timer items
+        transfers_size += (3 * 4) * len(t['active_timers'])
+
+        transfers_size += 4 # number gpio interrupt cbs
+        transfers_size += (2 * 4) * len(t['gpio_interrupt_callbacks'])
+
+    header['transfers_size'] = transfers_size
+
     return header
 
 
-def generate_update_payloads(header, manifest, app_folder, update_folder):
+def generate_predicate(manifest, update_folder, flashed_symbols, point):
+
+    predicate = {
+        'memory_checks': [], # (address, size, value bytes) triples
+        'active_timers': [], # (timer base address, duration, period) triples
+        'gpio_interrupt_enabled': 0, # bit vector for gpio interrupts
+        'gpio_interrupt_callbacks': [], # (pin, address) triples
+        'gpio_out_enabled': 0, # bit vector for gpio output enabled
+        'gpio_out_set': 0, # bit vector for gpio output set value
+        'event_handler_addr': 0, # address of handler for predicate event
+    }
+
+    expected_mem, expected_timers, expected_gpio = point['src_state_f']
+    # fix duplicates in active timers
+    expected_timers['active'] = list(set(expected_timers['active']))
+
+    predicate['event_handler_addr'] = get_symbol_address(flashed_symbols, point['e_event_f']['event'] + '$')
+
+    for var in expected_mem:
+        addr = get_symbol_address(flashed_symbols, var+'$')
+        size = get_symbol_size(flashed_symbols, var+'$')
+        value = expected_mem[var].to_bytes(size, byteorder='little')
+
+        predicate['memory_checks'].append((addr, size, value))
+
+    for active_timer in expected_timers['active']:
+
+        duration = expected_timers['timers'][active_timer]['duration_ms']
+        period = expected_timers['timers'][active_timer]['period_ms']
+
+        # strip the leading & if necessary to get address
+        if active_timer[0] == '&':
+            active_timer = active_timer[1:]
+        addr = get_symbol_address(flashed_symbols, active_timer+'$')
+
+        predicate['active_timers'].append((addr, duration, period))
+
+    predicate['gpio_interrupt_enabled'] = expected_gpio['interrupt_enabled']
+    predicate['gpio_out_enabled'] = expected_gpio['output_enabled']
+    predicate['gpio_out_set'] = expected_gpio['set']
+
+    for pin, cb in expected_gpio['interrupts'].items():
+        addr = get_symbol_address(flashed_symbols, cb+'$')
+        predicate['gpio_interrupt_callbacks'].append((pin, addr))
+
+    return predicate
+
+
+def generate_update_predicates(manifest, app_folder, update_folder, update_points):
+
+    predicates = []
+
+    flashed_symbols = os.path.join(app_folder, '_build', FLASHED_SYMBOLS_NAME)
+
+    for p in update_points:
+        predicates.append(generate_predicate(manifest, update_folder, flashed_symbols, p))
+
+    return predicates
+
+
+def generate_transfer(manifest, flashed_symbols, update_symbols, point):
+
+    transfer = {
+        'memory': [], # (address, dest, size) triples
+        'init_memory': [], # (address, size, val bytes) triples
+        'timers': [], # (base address, expire cb address, stop cb address) triples 
+        'event_handler_addr': None, # new expire/interrupt cb for event, else None
+        'active_timers': [], # base addresses for each active timer in updated version
+        'gpio_interrupt_enabled': 0, # bit vector for gpio interrupts
+        'gpio_interrupt_callbacks': [], # (pin, address) pairs
+        'gpio_out_enabled': 0, # bit vector for gpio output enabled
+        'gpio_out_set': 0, # bit vector for gpio output set value
+    }
+
+    expected_mem, expected_timers, expected_gpio = point['src_state_f']
+    # fix duplicates in active timers
+    expected_timers['active'] = list(set(expected_timers['active']))
+
+    update_mem, update_timers, update_gpio = point['src_state_u']
+    # fix duplicates in active timers
+    update_timers['active'] = list(set(update_timers['active']))
+
+    for var in update_mem:
+        dest = get_symbol_address(update_symbols, var+'$')
+        size = get_symbol_size(update_symbols, var+'$')
+
+        if var in expected_mem:
+            addr = get_symbol_address(flashed_symbols, var+'$')
+            transfer['memory'].append((addr, dest, size))
+        else:
+            val = update_mem[var].to_bytes(size, byteorder='little') 
+            transfer['init_memory'].append((dest, size, val))
+
+    for timer in update_timers['timers']:
+
+        active = True if timer in update_timers['active'] else False
+
+        expire = None
+        expiry_fn = update_timers['timers'][timer]['expiry_fn']
+        if expiry_fn:
+            expire = get_symbol_address(update_symbols, expiry_fn+'$')
+
+        stop = None
+        if update_timers['timers'][timer]['stop_fn']:
+            stop = get_symbol_address(update_symbols, update_timers['timers'][timer]['stop_fn']+'$')
+
+        # strip the leading & if necessary to get address
+        if timer[0] == '&':
+            timer = timer[1:]
+        addr = get_symbol_address(update_symbols, timer+'$')
+
+        transfer['timers'].append((addr, expire, stop))
+
+        if active:
+            duration = update_timers['timers'][timer]['duration_ms']
+            period = update_timers['timers'][timer]['period_ms']
+            transfer['active_timers'].append((addr, duration, period))
+
+        # this timer expiry is the update trigger for this update point
+        if expiry_fn == point['e_event_u']['event']:
+            transfer['event_handler_addr'] = expire
+
+    transfer['gpio_interrupt_enabled'] = update_gpio['interrupt_enabled']
+
+    for pin, cb in update_gpio['interrupts'].items():
+        addr = get_symbol_address(update_symbols, cb+'$')
+        transfer['gpio_interrupt_callbacks'].append((pin, addr))
+
+        if cb == point['e_event_u']['event']:
+            transfer['event_handler_addr'] = addr
+
+    transfer['gpio_out_enabled'] = update_gpio['output_enabled']
+    transfer['gpio_out_set'] = update_gpio['set']
+
+    return transfer
+
+
+def generate_update_transfers(manifest, app_folder, update_folder, update_points):
+
+    transfers = []
+
+    flashed_symbols = os.path.join(app_folder, '_build', FLASHED_SYMBOLS_NAME)
+    update_symbols = os.path.join(update_folder, manifest['update_symbols'])
+
+    for p in update_points:
+        transfers.append(generate_transfer(manifest, flashed_symbols, update_symbols, p))
+
+    return transfers
+
+
+def generate_update_payloads(header, manifest, app_folder, update_folder, predicates, transfers):
 
     payloads = {}
 
@@ -249,52 +370,100 @@ def generate_update_payloads(header, manifest, app_folder, update_folder):
         print('Error: flashed image and update image both using the same RAM section: {} (flashed) {} (update)'.format(hex(flashed_ram), hex(update_ram)))
         exit(1)
 
-    syms = get_symbols_in_section(update_symbols, '\.app_data')
-    syms += get_symbols_in_section(update_symbols, '\.app_bss')
 
-    syms = [s for s in syms if get_symbol_size(update_symbols, s + '$') != 0]
+    '''
+    predicate = {
+        overall size
+        event_handler_addr
+        len(memory_checks)
+        len(active_timers)
+        len(gpio_interrupt_cbs)
+        'gpio_interrupt_enabled': 0, # bit vector for gpio interrupts
+        'gpio_out_enabled': 0, # bit vector for gpio output enabled
+        'gpio_out_set': 0, # bit vector for gpio output set value
 
-    print('\nTransfer payload:')
-    transfer_triples = []
-    for s in syms:
-        size = get_symbol_size(update_symbols, s + '$') 
+        'memory_checks': [], # (address, size, value bytes) triples
+        'active_timers': [], # (timer base address, duration, period) triples
+        'gpio_interrupt_callbacks': [], # (pin, address) pairs
+    }
+    '''
+    def serialize_predicate(p):
 
-        update_addr = get_symbol_address(update_symbols, s + '$')
-        flashed_addr = get_symbol_address(flashed_symbols, s + '$')
+        p_bytes = struct.pack('IIII', p['event_handler_addr'], len(p['memory_checks']), len(p['active_timers']), len(p['gpio_interrupt_callbacks']))
+        p_bytes += struct.pack('III', p['gpio_interrupt_enabled'], p['gpio_out_enabled'], p['gpio_out_set'])
 
-        if not flashed_addr: # symbol not in old version, so no transfer generated
-            continue
+        for m in p['memory_checks']:
+            addr, size, val_bytes = m
+            p_bytes += struct.pack('II', addr, size) + val_bytes
 
-        print('    {} -> {} ({} bytes)'.format(hex(flashed_addr), hex(update_addr), size))
-        transfer_triples += [flashed_addr, update_addr, size]
+        for a in p['active_timers']:
+            addr, duration, period = a
+            p_bytes += struct.pack('III', addr, duration, period)
 
-    triples_size = len(syms) * 3
-    header['triples_bytes'] = triples_size * 4 # 3 values per memory region, each 4 bytes
-    payloads['transfer'] = struct.pack('I' * triples_size, *transfer_triples)
+        for c in p['gpio_interrupt_callbacks']:
+            pin, address = c
+            p_bytes += struct.pack('II', int(pin), address)
 
-    with open(os.path.join(update_folder, manifest['update_ast']), 'r') as f:
-        ast_metadata = parse_ast(f)
-    init_address_value_triples = []
+        return struct.pack('I', len(p_bytes) + 4) + p_bytes
 
-    print('\nInit payload:')
-    for t in ast_metadata['timers']:
-        t_dict = ast_metadata['timers'][t]
+    payloads['predicates'] = b''
+    for p in predicates:
+        payloads['predicates'] += serialize_predicate(p)
 
-        t_addr = get_symbol_address(update_symbols, t + '$')
-        t_expiry = get_symbol_address(update_symbols, t_dict['expire_callback']) | 0x1 if t_dict['expire_callback'] else 0x0
-        t_stop = get_symbol_address(update_symbols, t_dict['stop_callback']) | 0x1 if t_dict['stop_callback'] else 0x0
 
-        init_address_value_triples += [t_addr, t_expiry, t_stop]
+    '''
+    transfer = {
+        overall size
+        'event_handler_addr': None, # new event handler for event, else None
+        len(memory)
+        len(init_memory)
+        len(timers)
+        len(active_timers)
+        len(gpio_interrupt_cbs)
+        'gpio_interrupt_enabled': 0, # bit vector for gpio interrupts
+        'gpio_out_enabled': 0, # bit vector for gpio output enabled
+        'gpio_out_set': 0, # bit vector for gpio output set value
+        'memory': [], # (address, dest, size) triples
+        'init_memory': [], # (address, size, val bytes) triples
+        'timers': [], # (base address, expire cb address, stop cb address) triples 
+        'active_timers': [], # (base address, duration, period) triples for each active timer in updated version
+        'gpio_interrupt_callbacks': [], # (pin, address) pairs
+    }
+    '''
+    def serialize_transfer(t):
 
-        print("    {} ({}):".format(t, hex(get_symbol_address(update_symbols, t + '$'))))
-        print("      expiry: {}".format(
-            hex(get_symbol_address(update_symbols, t_dict['expire_callback'])) if t_dict['expire_callback'] else '0x0'
-        ))
-        print("      stop: {}".format(
-            hex(get_symbol_address(update_symbols, t_dict['stop_callback'])) if t_dict['stop_callback'] else '0x0'
-        ))
+        t_bytes = struct.pack('IIIIII',
+                t['event_handler_addr'] if t['event_handler_addr'] else 0,
+                len(t['memory']), len(t['init_memory']), len(t['timers']), len(t['active_timers']), len(t['gpio_interrupt_callbacks']))
+        t_bytes += struct.pack('III',
+                t['gpio_interrupt_enabled'], t['gpio_out_enabled'], t['gpio_out_set'])
         
-    payloads['init'] = struct.pack('I' * len(ast_metadata['timers']) * 3, *init_address_value_triples)
+        for m in t['memory']:
+            addr, dest, size = m
+            t_bytes += struct.pack('III', addr, dest, size)
+
+        for i in t['init_memory']:
+            addr, size, val_bytes = i
+            t_bytes += struct.pack('II', addr, size) + val_bytes
+
+        for timer in t['timers']:
+            base, expire, stop = timer
+            t_bytes += struct.pack('III', base, expire if expire else 0, stop if stop else 0)
+
+        for active_timer in t['active_timers']:
+            addr, duration, period = active_timer
+            t_bytes += struct.pack('III', addr, duration, period)
+
+        for cb in t['gpio_interrupt_callbacks']:
+            pin, addr = cb
+            t_bytes += struct.pack('II', int(pin), addr)
+
+        return struct.pack('I', len(t_bytes) + 4) + t_bytes
+
+
+    payloads['transfers'] = b''
+    for t in transfers:
+        payloads['transfers'] += serialize_transfer(t)
 
     return payloads
 
@@ -316,15 +485,16 @@ def serialize_header(header, payloads):
         appram_bss_size: {},
         appram_bss_start_addr: {},
         appram_bss_size_addr: {},
-        transfer_triples_size: {},
-        init_size: {}
+        n_predicates: {},
+        predicates_size: {},
+        transfers_size: {}
     }}
     total size (expected): {}
     total size (actual): {}
     """.format(
         CURRENT_VERSION,
         hex(header['main_ptr_addr']),
-        hex(header['main_addr'] | 0x1), # main ptr (w/ thumb)
+        hex(header['main_addr'] | 0x1),
         hex(header['update_flag_addr']),
         hex(header['appflash_text_start']),
         hex(header['appflash_text_size']),
@@ -334,14 +504,15 @@ def serialize_header(header, payloads):
         hex(header['appram_bss_size']),
         hex(header['appram_bss_start_addr']),
         hex(header['appram_bss_size_addr']),
-        hex(header['triples_bytes']),
-        hex(header['init_size']),
-        4 * len(header) + header['appflash_text_size'] + header['appflash_rodata_size'] + header['triples_bytes'] + header['init_size'],
-        4 * len(header) + sum(len(payloads[x]) for x in payloads)
+        hex(header['n_predicates']),
+        hex(header['predicates_size']),
+        hex(header['transfers_size']),
+        4 * 15 + header['appflash_text_size'] + header['appflash_rodata_size'] + header['predicates_size'] + header['transfers_size'],
+        4 * 15 + sum(len(payloads[x]) for x in payloads)
     )
     print(header_str)
 
-    return struct.pack('IIIIIIIIIIIIII',
+    return struct.pack('I' * 15,
         CURRENT_VERSION,
         header['main_ptr_addr'],
         header['main_addr'] | 0x1, # make sure main ptr is thumb!
@@ -354,14 +525,34 @@ def serialize_header(header, payloads):
         header['appram_bss_size'],
         header['appram_bss_start_addr'],
         header['appram_bss_size_addr'],
-        header['triples_bytes'],
-        header['init_size'],
+        header['n_predicates'],
+        header['predicates_size'],
+        header['transfers_size'],
     )
 
 
 def is_updatable_event(G_u, src_state_u, dst_state_u, e_event_u, start_state_u, src_state_f, dst_state_f, e_event_f):
 
-    if e_event_u['event'] != e_event_f['event']:
+    event_f, event_u = e_event_f['event'], e_event_u['event']
+    same_event = False
+
+    # Check event is the same timer expiry
+    for t in src_state_f[1]['timers']:
+        if src_state_f[1]['timers'][t]['expiry_fn'] == event_f:
+            for t_u in src_state_u[1]['timers']:
+                if t_u == t and src_state_u[1]['timers'][t_u]['expiry_fn'] == event_u:
+                    same_event = True
+                    break
+
+    # Check event is the same GPIO interrupt
+    for i in src_state_f[2]['interrupts']:
+        if event_f == src_state_f[2]['interrupts'][i] and \
+            i in src_state_u[2]['interrupts'] and \
+            event_u == src_state_u[2]['interrupts'][i]:
+            same_event = True
+            break
+
+    if not same_event:
         return False
 
     # Memory: if known, same name needs same values, else needs init values of update
@@ -413,10 +604,11 @@ def is_updatable_event(G_u, src_state_u, dst_state_u, e_event_u, start_state_u, 
     if not (timers_quiescent or timers_reset):
         return False
 
-    # GPIO: output pins need to be the same
+    # GPIO:
     src_gpio_u = src_state_u[2]
     src_gpio_f = src_state_f[2]
 
+    # output pins need to be the same
     if src_gpio_f['set'] != src_gpio_u['set']:
         return False
 
@@ -466,8 +658,7 @@ def find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f):
     if len(reachable_events) == 0:
         return None
     elif len(reachable_events) > 1:
-        print('Warning, found more than 1 potential/reachable update event, exiting...')
-        exit(1)
+        print('Warning, found more than 1 potential/reachable update event, returning the first one...')
     return reachable_events[0] # return the only event
 
     '''
@@ -490,7 +681,7 @@ def find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f):
     '''
 
 
-def test_graph(update_manifest, flashed_manifest, update_dir, flashed_dir):
+def get_update_points(update_manifest, flashed_manifest, update_dir, flashed_dir):
 
     G_u = nx.read_gpickle(
         os.path.join(update_dir, update_manifest['update_graph']))
@@ -515,10 +706,13 @@ def test_graph(update_manifest, flashed_manifest, update_dir, flashed_dir):
                     'e_event_u': e_event_u,
                 })
 
+    '''
     for p in update_points:
-        print(p['e_event_f']['event'], p['e_event_u']['event'])
+        print()
+        pprint.pprint(p)
+    '''
 
-    exit(0)
+    return update_points
 
 
 if __name__ == '__main__':
@@ -552,19 +746,50 @@ if __name__ == '__main__':
 
     if manifest['valid'] and flashed_manifest['valid'] and valid_partition(args.app_folder, manifest):
 
-        test_graph(manifest, flashed_manifest, update_folder, flashed_folder)
+        update_points = get_update_points(manifest, flashed_manifest, update_folder, flashed_folder)
+
+        update_predicates = generate_update_predicates(
+            manifest,
+            args.app_folder,
+            update_folder,
+            update_points
+        )
+
+        update_transfers = generate_update_transfers(
+            manifest,
+            args.app_folder,
+            update_folder,
+            update_points
+        )
+
+        '''
+        for i in range(len(update_points)):
+            print('=== PREDICATE ===')
+            pprint.pprint(update_predicates[i])
+            print()
+
+            print('=== TRANSFER  ===')
+            pprint.pprint(update_transfers[i])
+
+            print()
+            print()
+        '''
 
         update_header = generate_update_header(
             manifest,
             args.app_folder,
-            update_folder
+            update_folder,
+            update_predicates,
+            update_transfers
         )
     
         update_payloads = generate_update_payloads(
             update_header,
             manifest,
             args.app_folder,
-            update_folder
+            update_folder,
+            update_predicates,
+            update_transfers
         )
     
         serialized_update_header = serialize_header(update_header, update_payloads)
@@ -572,24 +797,13 @@ if __name__ == '__main__':
         if not args.dry_run:
             with serial.Serial(args.dev, args.baud, timeout=args.timeout) as ser:
 
-                print("sending header...")
+                print('sending header...')
                 ser.write(serialized_update_header)
 
-                time.sleep(1)
-                print("sending app_text...")
-                ser.write(update_payloads['text'])
-
-                time.sleep(1)
-                print("sending rodata...")
-                ser.write(update_payloads['rodata'])
-
-                time.sleep(1)
-                print("sending transfer data...")
-                ser.write(update_payloads['transfer'])
-
-                time.sleep(1)
-                print("sending init data...")
-                ser.write(update_payloads['init'])
+                for payload_name in ['text', 'rodata', 'predicates', 'transfers']:
+                    time.sleep(1)
+                    print('sending', payload_name, '...')
+                    ser.write(update_payloads[payload_name])
 
             print("updating last flashed version number...")
             flashed_version_filename = os.path.join(args.app_folder, '_build', FLASHED_VERSION_NAME)
