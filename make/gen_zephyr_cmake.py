@@ -51,6 +51,8 @@ list(TRANSFORM INCLUDE_LIST PREPEND "-I")
 get_target_property(Z_INCLUDE_LIST zephyr_interface INTERFACE_INCLUDE_DIRECTORIES)
 list(TRANSFORM Z_INCLUDE_LIST PREPEND "-I")
 
+zephyr_get_compile_definitions_for_lang_as_string("C" Z_DEFS)
+
 add_custom_command(TARGET app POST_BUILD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND clang -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility ${INCLUDE_LIST} ${Z_INCLUDE_LIST} ${SOURCE_LIST} > _build/ast_dump.txt 2> /dev/null || (exit 0))
 """
 
