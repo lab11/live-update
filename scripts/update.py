@@ -180,7 +180,7 @@ def generate_update_header(manifest, app_folder, update_folder, predicates, tran
             transfers_size += (2 * 4) + size
             
         transfers_size += 4 # number timer items
-        transfers_size += (3 * 4) * len(t['timers'])
+        transfers_size += (5 * 4) * len(t['timers'])
 
         transfers_size += 4 # number active timer items
         transfers_size += (3 * 4) * len(t['active_timers'])
@@ -209,7 +209,8 @@ def generate_predicate(manifest, update_folder, flashed_symbols, point):
     # fix duplicates in active timers
     expected_timers['active'] = list(set(expected_timers['active']))
 
-    predicate['event_handler_addr'] = get_symbol_address(flashed_symbols, point['e_event_f']['event'] + '$')
+    event = point['e_event_f']['event']
+    predicate['event_handler_addr'] = get_symbol_address(flashed_symbols, event + '$')
 
     for var in expected_mem:
         addr = get_symbol_address(flashed_symbols, var+'$')
@@ -219,6 +220,10 @@ def generate_predicate(manifest, update_folder, flashed_symbols, point):
         predicate['memory_checks'].append((addr, size, value))
 
     for active_timer in expected_timers['active']:
+
+        # since the timer expiry generated the event, don't expect it to be active
+        if event == expected_timers['timers'][active_timer]['expiry_fn']:
+            continue
 
         duration = expected_timers['timers'][active_timer]['duration_ms']
         period = expected_timers['timers'][active_timer]['period_ms']
@@ -238,6 +243,9 @@ def generate_predicate(manifest, update_folder, flashed_symbols, point):
         addr = get_symbol_address(flashed_symbols, cb+'$')
         predicate['gpio_interrupt_callbacks'].append((pin, addr))
 
+    print()
+    print()
+    pprint.pprint(predicate)
     return predicate
 
 
@@ -289,11 +297,18 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
     for timer in update_timers['timers']:
 
         active = True if timer in update_timers['active'] else False
-
-        expire = None
+        # this timer expiry is the update trigger for this update point
         expiry_fn = update_timers['timers'][timer]['expiry_fn']
+        expire = None
         if expiry_fn:
             expire = get_symbol_address(update_symbols, expiry_fn+'$')
+
+        if expiry_fn == point['e_event_u']['event']:
+            active = False # even though active in state, the event means the timer will be turned inactive
+            transfer['event_handler_addr'] = expire
+
+        duration = update_timers['timers'][timer]['duration_ms']
+        period = update_timers['timers'][timer]['period_ms']
 
         stop = None
         if update_timers['timers'][timer]['stop_fn']:
@@ -304,16 +319,10 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
             timer = timer[1:]
         addr = get_symbol_address(update_symbols, timer+'$')
 
-        transfer['timers'].append((addr, expire, stop))
+        transfer['timers'].append((addr, expire, stop, duration, period))
 
         if active:
-            duration = update_timers['timers'][timer]['duration_ms']
-            period = update_timers['timers'][timer]['period_ms']
             transfer['active_timers'].append((addr, duration, period))
-
-        # this timer expiry is the update trigger for this update point
-        if expiry_fn == point['e_event_u']['event']:
-            transfer['event_handler_addr'] = expire
 
     transfer['gpio_interrupt_enabled'] = update_gpio['interrupt_enabled']
 
@@ -326,6 +335,10 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
 
     transfer['gpio_out_enabled'] = update_gpio['output_enabled']
     transfer['gpio_out_set'] = update_gpio['set']
+
+    print()
+    print()
+    pprint.pprint(transfer)
 
     return transfer
 
@@ -343,7 +356,7 @@ def generate_update_transfers(manifest, app_folder, update_folder, update_points
     return transfers
 
 
-def generate_update_payloads(header, manifest, app_folder, update_folder, predicates, transfers):
+def generate_update_payloads(header, manifest, app_folder, update_folder, predicates, transfers, force=False):
 
     payloads = {}
 
@@ -366,7 +379,7 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
     flashed_ram = get_symbol_address(flashed_symbols, '_appram_mpu_ro_region_start')
     update_ram = get_symbol_address(update_symbols, '_appram_mpu_ro_region_start')
 
-    if flashed_ram == update_ram:
+    if flashed_ram == update_ram and not force:
         print('Error: flashed image and update image both using the same RAM section: {} (flashed) {} (update)'.format(hex(flashed_ram), hex(update_ram)))
         exit(1)
 
@@ -389,7 +402,8 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
     '''
     def serialize_predicate(p):
 
-        p_bytes = struct.pack('IIII', p['event_handler_addr'], len(p['memory_checks']), len(p['active_timers']), len(p['gpio_interrupt_callbacks']))
+        p_bytes = struct.pack('IIII', p['event_handler_addr'] | 0x1, # thumb
+                len(p['memory_checks']), len(p['active_timers']), len(p['gpio_interrupt_callbacks']))
         p_bytes += struct.pack('III', p['gpio_interrupt_enabled'], p['gpio_out_enabled'], p['gpio_out_set'])
 
         for m in p['memory_checks']:
@@ -402,7 +416,7 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
 
         for c in p['gpio_interrupt_callbacks']:
             pin, address = c
-            p_bytes += struct.pack('II', int(pin), address)
+            p_bytes += struct.pack('II', int(pin), address | 0x1) # thumb
 
         return struct.pack('I', len(p_bytes) + 4) + p_bytes
 
@@ -425,7 +439,7 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
         'gpio_out_set': 0, # bit vector for gpio output set value
         'memory': [], # (address, dest, size) triples
         'init_memory': [], # (address, size, val bytes) triples
-        'timers': [], # (base address, expire cb address, stop cb address) triples 
+        'timers': [], # (base address, expire cb address, stop cb address, duration, period) 5 pair
         'active_timers': [], # (base address, duration, period) triples for each active timer in updated version
         'gpio_interrupt_callbacks': [], # (pin, address) pairs
     }
@@ -433,7 +447,7 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
     def serialize_transfer(t):
 
         t_bytes = struct.pack('IIIIII',
-                t['event_handler_addr'] if t['event_handler_addr'] else 0,
+                t['event_handler_addr'] | 0x1 if t['event_handler_addr'] else 0, # thumb
                 len(t['memory']), len(t['init_memory']), len(t['timers']), len(t['active_timers']), len(t['gpio_interrupt_callbacks']))
         t_bytes += struct.pack('III',
                 t['gpio_interrupt_enabled'], t['gpio_out_enabled'], t['gpio_out_set'])
@@ -447,8 +461,8 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
             t_bytes += struct.pack('II', addr, size) + val_bytes
 
         for timer in t['timers']:
-            base, expire, stop = timer
-            t_bytes += struct.pack('III', base, expire if expire else 0, stop if stop else 0)
+            base, expire, stop, duration, period = timer
+            t_bytes += struct.pack('IIIII', base, expire | 0x1 if expire else 0, stop | 0x1 if stop else 0, duration, period) # thumb
 
         for active_timer in t['active_timers']:
             addr, duration, period = active_timer
@@ -456,7 +470,7 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
 
         for cb in t['gpio_interrupt_callbacks']:
             pin, addr = cb
-            t_bytes += struct.pack('II', int(pin), addr)
+            t_bytes += struct.pack('II', int(pin), addr | 0x1) # thumb
 
         return struct.pack('I', len(t_bytes) + 4) + t_bytes
 
@@ -744,7 +758,7 @@ if __name__ == '__main__':
     with open(os.path.join(flashed_folder, 'manifest.json'), 'r') as f:
         flashed_manifest = json.load(f)
 
-    if manifest['valid'] and flashed_manifest['valid'] and valid_partition(args.app_folder, manifest):
+    if manifest['valid'] and flashed_manifest['valid'] and (valid_partition(args.app_folder, manifest) or args.force):
 
         update_points = get_update_points(manifest, flashed_manifest, update_folder, flashed_folder)
 
@@ -789,8 +803,12 @@ if __name__ == '__main__':
             args.app_folder,
             update_folder,
             update_predicates,
-            update_transfers
+            update_transfers,
+            force=args.force
         )
+
+        for payload_name in ['text', 'rodata', 'predicates', 'transfers']:
+            print(payload_name, '\n', update_payloads[payload_name].hex())
     
         serialized_update_header = serialize_header(update_header, update_payloads)
 
@@ -821,7 +839,8 @@ if __name__ == '__main__':
             os.system('rm -rf {}'.format(
                 flashed_folder
             ))
-            os.system('cp -r {}'.format(
-                update_folder
+            os.system('cp -r {} {}'.format(
+                update_folder,
+                flashed_folder
             ))
 

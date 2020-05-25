@@ -94,26 +94,35 @@ def eval_symbolic_expression(exp, state):
 
 def apply_action(all_events, e, state):
 
-    result = deepcopy(state)
-    mem, timers, gpio = result
-    reset_timers = []
-
     if 'call_gpio' in e['event']:
         if "tfm_gpio_enable_output" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_enable_output\((.*)\)$')
             m = r.match(e['call'])
             if m:
                 pin = int(m.group(1))
                 gpio['output_enabled'] |= (1 << pin)
 
+            return [(new_state, [])] 
+
         elif "tfm_gpio_disable" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_disable\((.*)\)$')
             m = r.match(e['call'])
             if m:
                 pin = int(m.group(1))
                 gpio['output_enabled'] &= ~(1 << pin)
 
+            return [(new_state, [])]
+
         elif "tfm_gpio_interrupt_enable" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_interrupt_enable\((.*),(.*)\)$')
             m = r.match(e['call'])
             if m:
@@ -128,7 +137,12 @@ def apply_action(all_events, e, state):
                         if callback_match:
                             gpio['interrupts'][pin] = callback_match.group(1)
 
+            return [(new_state, [])]
+
         elif "tfm_gpio_interrupt_disable" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_interrupt_disable\((.*)\)$')
             m = r.match(e['call'])
             if m:
@@ -136,29 +150,55 @@ def apply_action(all_events, e, state):
                 gpio['interrupt_enabled'] &= ~(1 << pin)
                 del gpio['interrupts'][pin]
 
+            return [(new_state, [])]
+
         elif "tfm_gpio_clear" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_clear\((.*)\)$')
             m = r.match(e['call'])
             if m:
+                print('found GPIO clear on pin', int(m.group(1)))
                 pin = int(m.group(1))
+                print('set before:', gpio['set'])
                 gpio['set'] &= ~(1 << pin)
+                print('set afer:', gpio['set'])
+
+            return [(new_state, [])]
 
         elif "tfm_gpio_set" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_set\((.*)\)$')
             m = r.match(e['call'])
             if m:
+                print('found GPIO set on pin', int(m.group(1)))
                 pin = int(m.group(1))
+                print('set before:', gpio['set'])
                 gpio['set'] |= (1 << pin)
+                print('set after:', gpio['set'])
+
+            return [(new_state, [])]
 
         elif "tfm_gpio_write_all" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('tfm_gpio_write_all\((.*)\)$')
             m = r.match(e['call'])
             if m:
                 val = int(m.group(1))
                 gpio['set'] = val
 
+            return [(new_state, [])]
+
     elif 'call_timer' in e['event']:
         if "k_timer_init" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('k_timer_init\((.*), (.*), (.*)\)$')
             m = r.match(e['call'])
             if m:
@@ -167,7 +207,13 @@ def apply_action(all_events, e, state):
                     'stop_fn': None if '(void *)0' in m.group(3) else m.group(3)
                 }
 
+            return [(new_state, [])]
+
         elif "k_timer_start" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+            reset_timers = []
+
             r = re.compile('k_timer_start\((.*), (.*), (.*)\)$')
             m = r.match(e['call'])
             if m:
@@ -184,7 +230,12 @@ def apply_action(all_events, e, state):
                     timers['active'].append(t_name)
                 reset_timers.append(t_name)
 
+            return [(new_state, reset_timers)]
+
         elif "k_timer_stop" in e['call']:
+            new_state = deepcopy(state)
+            mem, timers, gpio = new_state
+
             r = re.compile('k_timer_stop\((.*)\)$')
             m = r.match(e['call'])
 
@@ -195,23 +246,40 @@ def apply_action(all_events, e, state):
             t = timers['timers'][t_name] 
             if t and t['stop_fn'] and t['stop_fn'] in all_events:
                 timers['stopping'] = t_name
-                result, reset_timers = \
-                        apply_event(t['stop_fn'], all_events, (mem, timers, gpio))
 
+                results = []
+                for s, t in apply_event(t['stop_fn'], 0, all_events, new_state):
+                    results.append((s, t))
+                return results
+            else:
+                return [(new_state, [])]
+
+    # handle potential additional 'events' due to calls to other translation units
     elif 'call_other' in e['event']:
-        # handle potential additional 'events' due to calls to other translation units
+        new_state = deepcopy(state)
+        mem, timers, gpio = new_state
+
         r = re.compile('(.*)\(.*\)$')
         m = r.match(e['call'])
         if m:
             call_name = m.group(1)
             if call_name in all_events:
-                result, reset_timers = \
-                        apply_event(call_name, all_events, (mem, timers, gpio))
+                results = []
+                for s, t in apply_event(call_name, 0, all_events, new_state):
+                    results.append((s, t))
+                return results
+            else:
+                return [(new_state, [])]
+        else:
+            return [(new_state, [])]
 
     elif 'bind' in e['event']:
         if 'bindloc_region' not in e:
             print('Assumed that bindloc_region was there, it\'s not, enjoy your exit')
             exit(1)
+
+        new_state = deepcopy(state)
+        mem, timers, gpio = new_state
 
         dest_name = e['bindloc_region']
         
@@ -223,50 +291,63 @@ def apply_action(all_events, e, state):
             print('Assumed that some known bindval format was there, it\'s not, enjoy your exit')
             exit(1)
 
+        return [(new_state, [])]
+
     else:
         print('DIDN\'T IMPLEMENT apply_action for some e:', e)
         exit(1)
 
-    return result, reset_timers
 
-
+'''
 def apply_event_path(event_id, global_events, specific_events, state):
 
-    end_result = (state, [])
+    end_results = []
     for e in specific_events:
         if e['currentID'] == event_id:
-            new_state, reset_timers = apply_action(global_events, e, state)
-            end_result = (new_state, reset_timers)
+            for s, t in apply_action(global_events, e, state):
+                end_results.append((s, t))  # in case no other paths to take
 
-            for next_e in specific_events:
-                if next_e['previousID'] == event_id:
-                    constraint_fn = constraints_to_fn(next_e['program_state']['constraints'])
-                    if constraint_fn(new_state):
-                        future_result, future_reset_timers = apply_event_path(next_e['currentID'], global_events, specific_events, new_state) 
-                        return (future_result, future_reset_timers + reset_timers)
+                for next_e in specific_events:
+                    if next_e['previousID'] == event_id:
+                        constraint_fn = constraints_to_fn(next_e['program_state']['constraints'])
+                        if constraint_fn(s):
+                            results = []
+                            for s2, t2 in apply_event_path(next_e['currentID'], global_events, specific_events, s):
+                                results.append((s2, t + t2))
+                            return results
+    return end_results
+'''
 
-    return end_result
 
+def apply_event(name, previousID, events, state):
+    print('apply_event:', name, 'prev_id:', previousID)
 
-def apply_event(name, events, state):
-    if name not in events:
-        # print('applying empty event', name, 'because it\'s not listed')
-        return (state, [])
+    # for the event caller `name`, given the current state `state` generated by
+    # event `previousID`, apply any following events and return the resulting
+    # states
 
-    mem, timers, gpio = state
-    reset_timers = []
-    for t in timers['timers']:
-        if timers['timers'][t]['expiry_fn'] == name:
-            reset_timers.append(t)
-
-    for e in events[name]:
-        if e['previousID'] == "0":
-            constraint_fn = constraints_to_fn(e['program_state']['constraints'])
+    results = []
+    for next_event in events:
+        if int(next_event['previousID']) == previousID and name == next_event['caller']:
+            constraint_fn = constraints_to_fn(next_event['program_state']['constraints'])
             if constraint_fn(state):
-                new_state, new_reset_timers = apply_event_path(e['currentID'], events, events[name], state)
-                return (new_state, new_reset_timers + reset_timers)
+                print('  apply_action', next_event['call'] if 'call' in next_event else '', 'curr_id:', next_event['currentID'])
+                for new_state, new_reset_timers in apply_action(events, next_event, state):
+                    results += apply_event(name, int(next_event['currentID']), events, new_state)
 
-    return (state, reset_timers)
+    if len(results) == 0: # no valid next events, just return our state
+        results.append((state, []))
+
+    if previousID == 0:
+        reset_timer = None
+        for t_name, t in state[1]['timers'].items():
+            if t['expiry_fn'] == name:
+                reset_timer = t_name
+
+        for r in results:
+            r[1].append(reset_timer)
+
+    return results
 
 
 def to_node(state):
@@ -294,12 +375,26 @@ if __name__ == '__main__':
     with open(args.app_clang_json, 'r') as f:
         clang_data = pyjson5.load(f)
 
-    system_events = {}
+    # preprocess analysis to get rid of live_symbols and apply those constraints to other events
+    events = []
+    current_constraints = None
+    for e in clang_data['analysis']:
+        if e['event'] == 'live_symbols':
+            current_constraints = e['program_state']['constraints']
+        else:
+            e['program_state']['constraints'] = current_constraints 
+            events.append(e)
+
+    pprint.pprint(events)
+
+    '''
     for i in clang_data['analysis']:
+
         if i['caller'] not in system_events:
             system_events[i['caller']] = []
 
         system_events[i['caller']].append(i)
+    '''
 
     # Initialize application global memory state
     init_mem = {}
@@ -318,7 +413,7 @@ if __name__ == '__main__':
                     continue
 
                 symbol_addr = int(data_item[0], base=16)
-                if symbol_addr >= 0x2001c000: # it's hardcoded for now, sadly
+                if symbol_addr >= 0x2001c000:
                     base = 0x2001c000
                 else:
                     base = 0x20018000
@@ -338,20 +433,22 @@ if __name__ == '__main__':
     init_timers = {'timers': {}, 'active': []}
     init_gpio = {'interrupt_enabled': 0, 'interrupts': {}, 'output_enabled': 0, 'set': 0}
 
-    G = nx.DiGraph()
+    init_state = (init_mem, init_timers, init_gpio)
 
-    G.add_node(to_node((init_mem, init_timers, init_gpio)))
-    start_state, reset_timers = apply_event('main', system_events, (init_mem, init_timers, init_gpio))
-    G.add_node(to_node(start_state))
-    G.add_edge(to_node((init_mem, init_timers, init_gpio)), to_node(start_state), label=[{'event': 'main', 'reset': reset_timers}])
-    #print(start_state)
+    G = nx.DiGraph()
+    G.add_node(to_node(init_state))
 
     to_explore = []
+    print()
+    print('APPLY MAIN')
+    for next_state, t in apply_event('main', 0, events, init_state):
+        G.add_node(to_node(next_state))
+        G.add_edge(to_node(init_state), to_node(next_state), label=[{'event': 'main', 'reset': t}])
 
-    to_explore.append(start_state)
+        to_explore.append(next_state)
 
     while len(to_explore) > 0:
-        #print('TO EXPLORE', to_explore)
+        print('n_to_explore:', len(to_explore))
         curr_state = to_explore.pop()
 
         possible_events = list(curr_state[2]['interrupts'].values())
@@ -360,28 +457,30 @@ if __name__ == '__main__':
                 possible_events.append(curr_state[1]['timers'][active_timer]['expiry_fn'])
 
         for e in possible_events:
-            new_state, reset_timers = apply_event(e, system_events, curr_state)
-            if to_node(new_state) not in G:
-                G.add_node(to_node(new_state))
-                to_explore.append(new_state)
-
-            '''
-            print()
-            print('Adding edge:')
-            print('    SOURCE')
+            print('APPLY TOP LEVEL')
             pprint.pprint(curr_state)
-            print('    DESTINATION')
-            pprint.pprint(new_state)
-            print('    EDGE')
-            pprint.pprint(e)
-            print()
-            '''
+            for s, t in apply_event(e, 0, events, curr_state):
+                if to_node(s) not in G:
+                    G.add_node(to_node(s))
+                    to_explore.append(s)
 
-            U, V = to_node(curr_state), to_node(new_state)
-            if not G.has_edge(U, V):
-                G.add_edge(U, V, label=[{'event': e, 'reset': reset_timers}])
-            else:
-                G.get_edge_data(U, V)['label'].append({'event': e, 'reset': reset_timers})
+                '''
+                print()
+                print('Adding edge:')
+                print('    SOURCE')
+                pprint.pprint(curr_state)
+                print('    DESTINATION')
+                pprint.pprint(s)
+                print('    EDGE')
+                pprint.pprint(e)
+                print()
+                '''
+
+                U, V = to_node(curr_state), to_node(s)
+                if not G.has_edge(U, V):
+                    G.add_edge(U, V, label=[{'event': e, 'reset': t}])
+                else:
+                    G.get_edge_data(U, V)['label'].append({'event': e, 'reset': t})
 
     if args.dump_dot:
         nx.nx_pydot.write_dot(G, args.dump_dot)
