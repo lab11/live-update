@@ -3,10 +3,13 @@
 
 #include "tfm_gpio_veneers.h"
 
-#define PIN 7
+#define PIN 4
 
 bool toggled = false;
+struct k_timer gpio_timer;
+
 void gpio_timer_handler(struct k_timer *t) {
+    printk("new\n");
     if (toggled) {
         printk("setting pin %d...\n", PIN);
         tfm_gpio_set(PIN);
@@ -17,10 +20,10 @@ void gpio_timer_handler(struct k_timer *t) {
     toggled ^= 1;
 }
 
-K_TIMER_DEFINE(gpio_timer, gpio_timer_handler, NULL);
-
 void main(void) {
     tfm_gpio_enable_output(PIN);
+
+    k_timer_init(&gpio_timer, gpio_timer_handler, NULL);
     k_timer_start(&gpio_timer, K_SECONDS(1), K_SECONDS(1));
 }
 

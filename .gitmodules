@@ -1,6 +1,3 @@
-[submodule "zephyros/zephyr"]
-	path = zephyros/zephyr
-	url = https://github.com/jlwatson/zephyr
 [submodule "trusted-firmware-m"]
 	path = ext/trusted-firmware-m
 	url = https://github.com/jlwatson/trusted-firmware-m.git
