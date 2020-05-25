@@ -49,11 +49,11 @@ BOOL Read_U_b_Xbutton(void) {
 }
 
 BOOL Read_U_b_Yled(void) {
-	return (BOOL) read_LED(B);
+	return (BOOL) read_LED(R);
 }
 
 void Write_U_b_Yled(BOOL v) {
-	write_LED(B, v);
+	write_LED(R, v);
 }
 
 BOOL Read_U_b_Ytx(void) {

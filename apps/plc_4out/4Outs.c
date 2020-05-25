@@ -12,7 +12,7 @@
    I/O functions are all declared extern.)
 
    See the generated source code (below) for function names. */
-#include "ladder.h"
+// #include "ladder.h"
 
 /* Define EXTERN_EVERYTHING in ladder.h if you want all symbols extern.
    This could be useful to implement `magic variables,' so that for

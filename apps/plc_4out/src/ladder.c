@@ -69,6 +69,14 @@ BOOL Read_U_b_XStop(void) {
 	return read_button_active_low(PIN7);
 }
 
+BOOL Read_U_b_YLED(void) {
+	return read_LED(G);
+}
+
+void Write_U_b_YLED(BOOL v) {
+	write_LED(G, v);
+}
+
 BOOL Read_U_b_YOut0(void) {
 	return read_pin(PIN8);
 }

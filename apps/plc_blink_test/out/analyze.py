@@ -4,6 +4,7 @@ import csv
 import sys
 
 filename = sys.argv[1]
+savename = sys.argv[2]
 
 # Reading <data>.txt file
 data = []
@@ -23,6 +24,6 @@ if (indata == 'n'):
 
 # Write data into a csv file
 
-with open('control_data.csv', mode='w') as csvfile:
+with open(savename, mode='w') as csvfile:
 	file_writer = csv.writer(csvfile, delimiter=',')
 	file_writer.writerow(data)

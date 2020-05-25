@@ -1,1841 +1,1841 @@
 Simulate Button Press...
-Res Time: 5.156625 ms
+Res Time: 7.331188 ms
 
 Simulate Button Press...
-Res Time: 4.815312 ms
+Res Time: 2.104875 ms
 
 Simulate Button Press...
-Res Time: 3.894938 ms
+Res Time: 6.448000 ms
 
 Simulate Button Press...
-Res Time: 3.765000 ms
+Res Time: 1.788375 ms
 
 Simulate Button Press...
-Res Time: 3.229125 ms
+Res Time: 7.959750 ms
 
 Simulate Button Press...
-Res Time: 3.588000 ms
+Res Time: 3.427625 ms
 
 Simulate Button Press...
-Res Time: 3.120188 ms
+Res Time: 0.259625 ms
 
 Simulate Button Press...
-Res Time: 3.168062 ms
+Res Time: 7.417687 ms
 
 Simulate Button Press...
-Res Time: 1.976875 ms
-
-Simulate Button Press...
-Res Time: 0.302250 ms
-
-Simulate Button Press...
-Res Time: 9.626938 ms
-
-Simulate Button Press...
-Res Time: 0.796375 ms
-
-Simulate Button Press...
-Res Time: 1.267625 ms
-
-Simulate Button Press...
-Res Time: 1.935938 ms
-
-Simulate Button Press...
-Res Time: 0.404625 ms
-
-Simulate Button Press...
-Res Time: 9.102187 ms
-
-Simulate Button Press...
-Res Time: 8.136000 ms
-
-Simulate Button Press...
-Res Time: 7.106250 ms
-
-Simulate Button Press...
-Res Time: 8.059937 ms
-
-Simulate Button Press...
-Res Time: 7.179937 ms
-
-Simulate Button Press...
-Res Time: 6.010687 ms
-
-Simulate Button Press...
-Res Time: 4.387063 ms
-
-Simulate Button Press...
-Res Time: 1.317375 ms
-
-Simulate Button Press...
-Res Time: 6.461312 ms
-
-Simulate Button Press...
-Res Time: 0.443125 ms
-
-Simulate Button Press...
-Res Time: 6.649312 ms
-
-Simulate Button Press...
-Res Time: 2.136750 ms
-
-Simulate Button Press...
-Res Time: 9.233625 ms
-
-Simulate Button Press...
-Res Time: 5.508438 ms
-
-Simulate Button Press...
-Res Time: 1.183375 ms
-
-Simulate Button Press...
-Res Time: 7.922062 ms
-
-Simulate Button Press...
-Res Time: 5.830062 ms
-
-Simulate Button Press...
-Res Time: 2.157375 ms
-
-Simulate Button Press...
-Res Time: 9.865438 ms
-
-Simulate Button Press...
-Res Time: 5.261063 ms
-
-Simulate Button Press...
-Res Time: 0.585500 ms
-
-Simulate Button Press...
-Res Time: 4.572813 ms
-
-Simulate Button Press...
-Res Time: 1.272750 ms
-
-Simulate Button Press...
-Res Time: 9.226937 ms
-
-Simulate Button Press...
-Res Time: 7.877750 ms
-
-Simulate Button Press...
-Res Time: 7.080937 ms
-
-Simulate Button Press...
-Res Time: 5.075562 ms
-
-Simulate Button Press...
-Res Time: 9.767438 ms
-
-Simulate Button Press...
-Res Time: 4.420437 ms
-
-Simulate Button Press...
-Res Time: 7.451250 ms
-
-Simulate Button Press...
-Res Time: 3.987000 ms
-
-Simulate Button Press...
-Res Time: 1.655313 ms
-
-Simulate Button Press...
-Res Time: 9.765875 ms
-
-Simulate Button Press...
-Res Time: 7.353750 ms
-
-Simulate Button Press...
-Res Time: 5.122687 ms
-
-Simulate Button Press...
-Res Time: 1.731938 ms
-
-Simulate Button Press...
-Res Time: 8.089687 ms
-
-Simulate Button Press...
-Res Time: 5.000125 ms
-
-Simulate Button Press...
-Res Time: 3.607938 ms
-
-Simulate Button Press...
-Res Time: 2.565000 ms
-
-Simulate Button Press...
-Res Time: 0.353125 ms
-
-Simulate Button Press...
-Res Time: 7.891375 ms
-
-Simulate Button Press...
-Res Time: 6.048563 ms
-
-Simulate Button Press...
-Res Time: 7.538688 ms
-
-Simulate Button Press...
-Res Time: 7.191125 ms
-
-Simulate Button Press...
-Res Time: 6.028375 ms
-
-Simulate Button Press...
-Res Time: 3.069875 ms
-
-Simulate Button Press...
-Res Time: 0.892250 ms
-
-Simulate Button Press...
-Res Time: 0.496875 ms
-
-Simulate Button Press...
-Res Time: 8.425187 ms
-
-Simulate Button Press...
-Res Time: 5.951437 ms
-
-Simulate Button Press...
-Res Time: 3.280125 ms
-
-Simulate Button Press...
-Res Time: 0.642875 ms
-
-Simulate Button Press...
-Res Time: 8.619062 ms
-
-Simulate Button Press...
-Res Time: 0.094438 ms
-
-Simulate Button Press...
-Res Time: 1.656687 ms
-
-Simulate Button Press...
-Res Time: 2.749625 ms
-
-Simulate Button Press...
-Res Time: 4.119500 ms
-
-Simulate Button Press...
-Res Time: 4.055062 ms
-
-Simulate Button Press...
-Res Time: 2.516750 ms
-
-Simulate Button Press...
-Res Time: 3.882688 ms
-
-Simulate Button Press...
-Res Time: 5.529875 ms
-
-Simulate Button Press...
-Res Time: 7.555750 ms
-
-Simulate Button Press...
-Res Time: 8.470938 ms
-
-Simulate Button Press...
-Res Time: 8.712937 ms
-
-Simulate Button Press...
-Res Time: 8.835313 ms
-
-Simulate Button Press...
-Res Time: 8.758437 ms
-
-Simulate Button Press...
-Res Time: 9.646125 ms
-
-Simulate Button Press...
-Res Time: 9.565375 ms
-
-Simulate Button Press...
-Res Time: 8.762375 ms
-
-Simulate Button Press...
-Res Time: 7.183500 ms
-
-Simulate Button Press...
-Res Time: 4.742688 ms
-
-Simulate Button Press...
-Res Time: 2.458937 ms
-
-Simulate Button Press...
-Res Time: 9.497562 ms
-
-Simulate Button Press...
-Res Time: 7.903375 ms
-
-Simulate Button Press...
-Res Time: 7.573062 ms
-
-Simulate Button Press...
-Res Time: 5.275625 ms
-
-Simulate Button Press...
-Res Time: 2.023438 ms
-
-Simulate Button Press...
-Res Time: 9.471313 ms
-
-Simulate Button Press...
-Res Time: 7.974937 ms
-
-Simulate Button Press...
-Res Time: 7.902812 ms
-
-Simulate Button Press...
-Res Time: 7.730312 ms
-
-Simulate Button Press...
-Res Time: 6.326250 ms
-
-Simulate Button Press...
-Res Time: 1.822125 ms
-
-Simulate Button Press...
-Res Time: 9.630500 ms
-
-Simulate Button Press...
-Res Time: 7.968375 ms
-
-Simulate Button Press...
-Res Time: 7.525688 ms
-
-Simulate Button Press...
-Res Time: 5.117125 ms
-
-Simulate Button Press...
-Res Time: 4.781750 ms
-
-Simulate Button Press...
-Res Time: 3.370125 ms
-
-Simulate Button Press...
-Res Time: 1.603375 ms
-
-Simulate Button Press...
-Res Time: 8.921250 ms
-
-Simulate Button Press...
-Res Time: 6.126563 ms
-
-Simulate Button Press...
-Res Time: 5.822125 ms
-
-Simulate Button Press...
-Res Time: 5.008000 ms
-
-Simulate Button Press...
-Res Time: 4.253438 ms
-
-Simulate Button Press...
-Res Time: 4.020250 ms
-
-Simulate Button Press...
-Res Time: 3.431250 ms
-
-Simulate Button Press...
-Res Time: 3.879000 ms
-
-Simulate Button Press...
-Res Time: 2.729750 ms
-
-Simulate Button Press...
-Res Time: 2.746438 ms
-
-Simulate Button Press...
-Res Time: 2.362313 ms
-
-Simulate Button Press...
-Res Time: 3.482250 ms
-
-Simulate Button Press...
-Res Time: 1.194375 ms
-
-Simulate Button Press...
-Res Time: 1.217813 ms
-
-Simulate Button Press...
-Res Time: 2.235312 ms
-
-Simulate Button Press...
-Res Time: 3.965188 ms
-
-Simulate Button Press...
-Res Time: 3.289813 ms
-
-Simulate Button Press...
-Res Time: 1.857563 ms
-
-Simulate Button Press...
-Res Time: 7.534937 ms
-
-Simulate Button Press...
-Res Time: 4.111938 ms
-
-Simulate Button Press...
-Res Time: 0.469938 ms
-
-Simulate Button Press...
-Res Time: 5.718688 ms
-
-Simulate Button Press...
-Res Time: 3.918375 ms
-
-Simulate Button Press...
-Res Time: 3.216625 ms
-
-Simulate Button Press...
-Res Time: 2.488062 ms
-
-Simulate Button Press...
-Res Time: 3.349688 ms
-
-Simulate Button Press...
-Res Time: 4.338250 ms
-
-Simulate Button Press...
-Res Time: 4.998188 ms
-
-Simulate Button Press...
-Res Time: 4.346437 ms
-
-Simulate Button Press...
-Res Time: 2.763125 ms
-
-Simulate Button Press...
-Res Time: 1.199375 ms
-
-Simulate Button Press...
-Res Time: 0.017750 ms
-
-Simulate Button Press...
-Res Time: 0.998750 ms
-
-Simulate Button Press...
-Res Time: 1.182812 ms
-
-Simulate Button Press...
-Res Time: 9.403000 ms
-
-Simulate Button Press...
-Res Time: 6.825438 ms
-
-Simulate Button Press...
-Res Time: 4.404375 ms
-
-Simulate Button Press...
-Res Time: 1.675875 ms
-
-Simulate Button Press...
-Res Time: 9.309875 ms
-
-Simulate Button Press...
-Res Time: 9.934937 ms
-
-Simulate Button Press...
-Res Time: 9.273750 ms
-
-Simulate Button Press...
-Res Time: 6.058312 ms
-
-Simulate Button Press...
-Res Time: 2.661875 ms
-
-Simulate Button Press...
-Res Time: 1.220750 ms
-
-Simulate Button Press...
-Res Time: 1.820625 ms
-
-Simulate Button Press...
-Res Time: 9.833813 ms
-
-Simulate Button Press...
-Res Time: 9.207562 ms
-
-Simulate Button Press...
-Res Time: 7.740875 ms
-
-Simulate Button Press...
-Res Time: 7.262938 ms
-
-Simulate Button Press...
-Res Time: 5.419312 ms
-
-Simulate Button Press...
-Res Time: 1.974750 ms
-
-Simulate Button Press...
-Res Time: 8.625438 ms
-
-Simulate Button Press...
-Res Time: 7.490562 ms
-
-Simulate Button Press...
-Res Time: 3.115187 ms
-
-Simulate Button Press...
-Res Time: 9.867750 ms
-
-Simulate Button Press...
-Res Time: 8.576750 ms
-
-Simulate Button Press...
-Res Time: 8.310562 ms
-
-Simulate Button Press...
-Res Time: 8.733000 ms
-
-Simulate Button Press...
-Res Time: 9.562813 ms
-
-Simulate Button Press...
-Res Time: 0.770000 ms
-
-Simulate Button Press...
-Res Time: 1.566750 ms
-
-Simulate Button Press...
-Res Time: 0.673063 ms
-
-Simulate Button Press...
-Res Time: 0.082250 ms
-
-Simulate Button Press...
-Res Time: 2.964250 ms
-
-Simulate Button Press...
-Res Time: 6.921000 ms
-
-Simulate Button Press...
-Res Time: 9.443687 ms
-
-Simulate Button Press...
-Res Time: 2.200875 ms
-
-Simulate Button Press...
-Res Time: 3.431000 ms
-
-Simulate Button Press...
-Res Time: 4.011562 ms
-
-Simulate Button Press...
-Res Time: 3.700625 ms
-
-Simulate Button Press...
-Res Time: 4.314500 ms
-
-Simulate Button Press...
-Res Time: 5.652875 ms
-
-Simulate Button Press...
-Res Time: 7.582438 ms
-
-Simulate Button Press...
-Res Time: 9.392750 ms
-
-Simulate Button Press...
-Res Time: 0.698625 ms
-
-Simulate Button Press...
-Res Time: 2.039187 ms
-
-Simulate Button Press...
-Res Time: 2.396750 ms
-
-Simulate Button Press...
-Res Time: 1.657625 ms
-
-Simulate Button Press...
-Res Time: 2.517188 ms
-
-Simulate Button Press...
-Res Time: 2.322750 ms
-
-Simulate Button Press...
-Res Time: 3.688688 ms
-
-Simulate Button Press...
-Res Time: 4.634937 ms
-
-Simulate Button Press...
-Res Time: 2.826437 ms
-
-Simulate Button Press...
-Res Time: 3.247813 ms
-
-Simulate Button Press...
-Res Time: 5.170875 ms
-
-Simulate Button Press...
-Res Time: 5.335187 ms
-
-Simulate Button Press...
-Res Time: 7.354688 ms
-
-Simulate Button Press...
-Res Time: 6.791937 ms
-
-Simulate Button Press...
-Res Time: 7.948187 ms
-
-Simulate Button Press...
-Res Time: 9.086625 ms
-
-Simulate Button Press...
-Res Time: 7.050188 ms
-
-Simulate Button Press...
-Res Time: 9.613250 ms
-
-Simulate Button Press...
-Res Time: 1.769938 ms
-
-Simulate Button Press...
-Res Time: 1.945688 ms
-
-Simulate Button Press...
-Res Time: 1.376625 ms
-
-Simulate Button Press...
-Res Time: 9.679937 ms
-
-Simulate Button Press...
-Res Time: 8.090250 ms
-
-Simulate Button Press...
-Res Time: 2.750750 ms
-
-Simulate Button Press...
-Res Time: 0.387750 ms
-
-Simulate Button Press...
-Res Time: 0.223625 ms
-
-Simulate Button Press...
-Res Time: 0.277312 ms
-
-Simulate Button Press...
-Res Time: 8.096937 ms
-
-Simulate Button Press...
-Res Time: 5.734500 ms
-
-Simulate Button Press...
-Res Time: 3.489125 ms
-
-Simulate Button Press...
-Res Time: 0.548187 ms
-
-Simulate Button Press...
-Res Time: 8.235437 ms
-
-Simulate Button Press...
-Res Time: 5.715000 ms
-
-Simulate Button Press...
-Res Time: 1.761250 ms
-
-Simulate Button Press...
-Res Time: 8.861250 ms
-
-Simulate Button Press...
-Res Time: 5.658875 ms
-
-Simulate Button Press...
-Res Time: 2.622125 ms
-
-Simulate Button Press...
-Res Time: 0.293750 ms
-
-Simulate Button Press...
-Res Time: 9.476000 ms
-
-Simulate Button Press...
-Res Time: 7.676562 ms
-
-Simulate Button Press...
-Res Time: 6.031063 ms
-
-Simulate Button Press...
-Res Time: 3.777437 ms
-
-Simulate Button Press...
-Res Time: 2.178062 ms
-
-Simulate Button Press...
-Res Time: 0.657750 ms
-
-Simulate Button Press...
-Res Time: 8.321563 ms
-
-Simulate Button Press...
-Res Time: 6.512562 ms
-
-Simulate Button Press...
-Res Time: 4.324375 ms
-
-Simulate Button Press...
-Res Time: 0.811125 ms
-
-Simulate Button Press...
-Res Time: 6.819875 ms
-
-Simulate Button Press...
-Res Time: 3.502187 ms
-
-Simulate Button Press...
-Res Time: 1.462750 ms
-
-Simulate Button Press...
-Res Time: 0.585312 ms
-
-Simulate Button Press...
-Res Time: 9.611188 ms
-
-Simulate Button Press...
-Res Time: 6.671187 ms
-
-Simulate Button Press...
-Res Time: 3.687375 ms
-
-Simulate Button Press...
-Res Time: 2.738625 ms
-
-Simulate Button Press...
-Res Time: 2.204562 ms
-
-Simulate Button Press...
-Res Time: 0.227687 ms
-
-Simulate Button Press...
-Res Time: 8.591187 ms
-
-Simulate Button Press...
-Res Time: 6.418437 ms
-
-Simulate Button Press...
-Res Time: 3.719187 ms
-
-Simulate Button Press...
-Res Time: 3.101750 ms
-
-Simulate Button Press...
-Res Time: 2.241437 ms
-
-Simulate Button Press...
-Res Time: 8.159187 ms
-
-Simulate Button Press...
-Res Time: 5.317125 ms
-
-Simulate Button Press...
-Res Time: 2.764125 ms
-
-Simulate Button Press...
-Res Time: 1.581125 ms
-
-Simulate Button Press...
-Res Time: 9.166562 ms
-
-Simulate Button Press...
-Res Time: 5.693812 ms
-
-Simulate Button Press...
-Res Time: 1.221063 ms
-
-Simulate Button Press...
-Res Time: 8.714625 ms
-
-Simulate Button Press...
-Res Time: 6.109875 ms
-
-Simulate Button Press...
-Res Time: 3.411062 ms
-
-Simulate Button Press...
-Res Time: 2.265188 ms
-
-Simulate Button Press...
-Res Time: 0.206062 ms
-
-Simulate Button Press...
-Res Time: 8.682250 ms
-
-Simulate Button Press...
-Res Time: 8.437875 ms
-
-Simulate Button Press...
-Res Time: 8.941438 ms
-
-Simulate Button Press...
-Res Time: 9.886000 ms
-
-Simulate Button Press...
-Res Time: 9.593000 ms
-
-Simulate Button Press...
-Res Time: 1.394375 ms
-
-Simulate Button Press...
-Res Time: 3.972375 ms
-
-Simulate Button Press...
-Res Time: 6.161625 ms
-
-Simulate Button Press...
-Res Time: 0.030625 ms
-
-Simulate Button Press...
-Res Time: 1.554438 ms
-
-Simulate Button Press...
-Res Time: 2.251750 ms
-
-Simulate Button Press...
-Res Time: 1.961063 ms
-
-Simulate Button Press...
-Res Time: 0.891875 ms
-
-Simulate Button Press...
-Res Time: 9.596250 ms
+Res Time: 7.489750 ms
 
 Simulate Button Press...
 Res Time: 6.708437 ms
 
 Simulate Button Press...
-Res Time: 3.316375 ms
+Res Time: 6.797688 ms
 
 Simulate Button Press...
-Res Time: 0.719250 ms
+Res Time: 7.540500 ms
 
 Simulate Button Press...
-Res Time: 9.803562 ms
+Res Time: 5.976875 ms
 
 Simulate Button Press...
-Res Time: 8.667625 ms
+Res Time: 3.665188 ms
 
 Simulate Button Press...
-Res Time: 0.103625 ms
+Res Time: 2.871187 ms
 
 Simulate Button Press...
-Res Time: 1.180625 ms
+Res Time: 4.557125 ms
 
 Simulate Button Press...
-Res Time: 2.195312 ms
+Res Time: 5.298625 ms
 
 Simulate Button Press...
-Res Time: 2.318625 ms
+Res Time: 5.553563 ms
 
 Simulate Button Press...
-Res Time: 2.361938 ms
+Res Time: 6.890438 ms
 
 Simulate Button Press...
-Res Time: 3.497625 ms
+Res Time: 8.033750 ms
 
 Simulate Button Press...
-Res Time: 4.759188 ms
+Res Time: 9.140125 ms
 
 Simulate Button Press...
-Res Time: 6.133875 ms
+Res Time: 1.453812 ms
 
 Simulate Button Press...
-Res Time: 6.960750 ms
+Res Time: 2.182563 ms
 
 Simulate Button Press...
-Res Time: 7.052563 ms
+Res Time: 2.088625 ms
 
 Simulate Button Press...
-Res Time: 6.010000 ms
+Res Time: 2.233313 ms
 
 Simulate Button Press...
-Res Time: 4.603312 ms
+Res Time: 2.669812 ms
 
 Simulate Button Press...
-Res Time: 2.625625 ms
+Res Time: 1.725375 ms
 
 Simulate Button Press...
-Res Time: 1.774625 ms
+Res Time: 0.584750 ms
 
 Simulate Button Press...
-Res Time: 0.262688 ms
+Res Time: 9.012375 ms
 
 Simulate Button Press...
-Res Time: 8.142375 ms
+Res Time: 9.605625 ms
 
 Simulate Button Press...
-Res Time: 7.160313 ms
+Res Time: 0.882688 ms
 
 Simulate Button Press...
-Res Time: 4.865875 ms
+Res Time: 1.142000 ms
 
 Simulate Button Press...
-Res Time: 3.943312 ms
+Res Time: 1.098063 ms
 
 Simulate Button Press...
-Res Time: 3.158875 ms
+Res Time: 1.221437 ms
 
 Simulate Button Press...
-Res Time: 1.899312 ms
+Res Time: 0.974750 ms
 
 Simulate Button Press...
-Res Time: 0.962313 ms
+Res Time: 0.557875 ms
 
 Simulate Button Press...
-Res Time: 0.447750 ms
+Res Time: 0.682688 ms
 
 Simulate Button Press...
-Res Time: 8.092563 ms
+Res Time: 0.765188 ms
 
 Simulate Button Press...
-Res Time: 6.222188 ms
+Res Time: 0.822688 ms
 
 Simulate Button Press...
-Res Time: 4.437875 ms
+Res Time: 0.909938 ms
 
 Simulate Button Press...
-Res Time: 4.705125 ms
+Res Time: 1.960875 ms
 
 Simulate Button Press...
-Res Time: 4.902438 ms
+Res Time: 3.570000 ms
 
 Simulate Button Press...
-Res Time: 4.050938 ms
+Res Time: 3.046250 ms
 
 Simulate Button Press...
-Res Time: 2.280750 ms
+Res Time: 6.247063 ms
 
 Simulate Button Press...
-Res Time: 0.195500 ms
+Res Time: 8.529125 ms
 
 Simulate Button Press...
-Res Time: 9.700063 ms
+Res Time: 1.802938 ms
 
 Simulate Button Press...
-Res Time: 8.947187 ms
+Res Time: 5.161875 ms
 
 Simulate Button Press...
-Res Time: 8.493500 ms
+Res Time: 5.714562 ms
 
 Simulate Button Press...
-Res Time: 8.967063 ms
+Res Time: 5.799687 ms
 
 Simulate Button Press...
-Res Time: 8.270500 ms
+Res Time: 4.283187 ms
 
 Simulate Button Press...
-Res Time: 7.942625 ms
+Res Time: 4.800813 ms
 
 Simulate Button Press...
-Res Time: 5.567000 ms
+Res Time: 6.333687 ms
 
 Simulate Button Press...
-Res Time: 4.117312 ms
+Res Time: 6.956625 ms
 
 Simulate Button Press...
-Res Time: 0.200937 ms
+Res Time: 6.237625 ms
 
 Simulate Button Press...
-Res Time: 9.828813 ms
+Res Time: 6.497562 ms
 
 Simulate Button Press...
-Res Time: 9.725687 ms
+Res Time: 6.013000 ms
 
 Simulate Button Press...
-Res Time: 9.024438 ms
+Res Time: 5.350937 ms
 
 Simulate Button Press...
-Res Time: 7.252188 ms
+Res Time: 4.384000 ms
 
 Simulate Button Press...
-Res Time: 7.943062 ms
+Res Time: 2.959438 ms
 
 Simulate Button Press...
-Res Time: 8.272250 ms
+Res Time: 1.883937 ms
 
 Simulate Button Press...
-Res Time: 7.893063 ms
+Res Time: 2.729250 ms
 
 Simulate Button Press...
-Res Time: 7.941438 ms
+Res Time: 0.902188 ms
 
 Simulate Button Press...
-Res Time: 7.219750 ms
+Res Time: 8.244375 ms
 
 Simulate Button Press...
-Res Time: 7.554688 ms
+Res Time: 8.853937 ms
 
 Simulate Button Press...
-Res Time: 8.906750 ms
+Res Time: 7.969563 ms
 
 Simulate Button Press...
-Res Time: 0.132437 ms
+Res Time: 6.169000 ms
 
 Simulate Button Press...
-Res Time: 1.832875 ms
+Res Time: 5.183187 ms
 
 Simulate Button Press...
-Res Time: 1.563375 ms
+Res Time: 4.911812 ms
 
 Simulate Button Press...
-Res Time: 9.256125 ms
+Res Time: 3.860375 ms
 
 Simulate Button Press...
-Res Time: 9.495750 ms
+Res Time: 4.454937 ms
 
 Simulate Button Press...
-Res Time: 7.611688 ms
+Res Time: 3.896437 ms
 
 Simulate Button Press...
-Res Time: 3.535938 ms
+Res Time: 3.946812 ms
 
 Simulate Button Press...
-Res Time: 0.841062 ms
+Res Time: 3.551438 ms
 
 Simulate Button Press...
-Res Time: 9.875063 ms
+Res Time: 2.989063 ms
 
 Simulate Button Press...
-Res Time: 0.522563 ms
+Res Time: 3.265000 ms
 
 Simulate Button Press...
-Res Time: 8.442687 ms
+Res Time: 4.105875 ms
 
 Simulate Button Press...
-Res Time: 6.746937 ms
+Res Time: 3.522250 ms
 
 Simulate Button Press...
-Res Time: 6.900813 ms
+Res Time: 4.350875 ms
 
 Simulate Button Press...
-Res Time: 7.974187 ms
+Res Time: 5.603625 ms
 
 Simulate Button Press...
-Res Time: 7.904250 ms
+Res Time: 7.128250 ms
 
 Simulate Button Press...
-Res Time: 8.733313 ms
+Res Time: 7.159688 ms
 
 Simulate Button Press...
-Res Time: 9.808500 ms
+Res Time: 6.603000 ms
 
 Simulate Button Press...
-Res Time: 9.761437 ms
+Res Time: 7.061438 ms
 
 Simulate Button Press...
-Res Time: 8.538062 ms
+Res Time: 8.102813 ms
 
 Simulate Button Press...
-Res Time: 7.161125 ms
+Res Time: 8.238000 ms
 
 Simulate Button Press...
-Res Time: 7.460187 ms
+Res Time: 7.704438 ms
 
 Simulate Button Press...
-Res Time: 5.912562 ms
+Res Time: 7.428125 ms
 
 Simulate Button Press...
-Res Time: 5.710187 ms
+Res Time: 7.711750 ms
 
 Simulate Button Press...
-Res Time: 4.609437 ms
+Res Time: 7.507125 ms
 
 Simulate Button Press...
-Res Time: 4.090500 ms
+Res Time: 7.759062 ms
 
 Simulate Button Press...
-Res Time: 4.369812 ms
+Res Time: 7.895750 ms
 
 Simulate Button Press...
-Res Time: 5.787687 ms
+Res Time: 8.513625 ms
 
 Simulate Button Press...
-Res Time: 5.068062 ms
+Res Time: 7.194938 ms
 
 Simulate Button Press...
-Res Time: 6.066937 ms
+Res Time: 3.601063 ms
 
 Simulate Button Press...
-Res Time: 7.676437 ms
+Res Time: 1.788687 ms
 
 Simulate Button Press...
-Res Time: 8.993937 ms
+Res Time: 0.298937 ms
 
 Simulate Button Press...
-Res Time: 7.123750 ms
+Res Time: 1.138375 ms
 
 Simulate Button Press...
-Res Time: 5.178187 ms
+Res Time: 3.164937 ms
 
 Simulate Button Press...
-Res Time: 3.743438 ms
+Res Time: 4.832687 ms
 
 Simulate Button Press...
-Res Time: 2.948500 ms
+Res Time: 4.256000 ms
 
 Simulate Button Press...
-Res Time: 1.485562 ms
+Res Time: 1.871500 ms
 
 Simulate Button Press...
-Res Time: 2.680562 ms
+Res Time: 0.737375 ms
 
 Simulate Button Press...
-Res Time: 3.258250 ms
+Res Time: 2.018250 ms
 
 Simulate Button Press...
-Res Time: 2.196938 ms
+Res Time: 1.840688 ms
 
 Simulate Button Press...
-Res Time: 1.876312 ms
+Res Time: 9.228000 ms
 
 Simulate Button Press...
-Res Time: 2.102875 ms
+Res Time: 8.320875 ms
 
 Simulate Button Press...
-Res Time: 0.477313 ms
+Res Time: 8.278250 ms
 
 Simulate Button Press...
-Res Time: 7.878938 ms
+Res Time: 8.383250 ms
 
 Simulate Button Press...
-Res Time: 7.260125 ms
+Res Time: 8.663500 ms
 
 Simulate Button Press...
-Res Time: 6.258812 ms
+Res Time: 7.385375 ms
 
 Simulate Button Press...
-Res Time: 3.392625 ms
+Res Time: 7.730875 ms
 
 Simulate Button Press...
-Res Time: 2.837000 ms
+Res Time: 7.317250 ms
 
 Simulate Button Press...
-Res Time: 1.906500 ms
+Res Time: 9.145125 ms
 
 Simulate Button Press...
-Res Time: 1.523375 ms
+Res Time: 2.043188 ms
 
 Simulate Button Press...
-Res Time: 1.633750 ms
+Res Time: 5.106563 ms
 
 Simulate Button Press...
-Res Time: 1.349687 ms
+Res Time: 9.176250 ms
 
 Simulate Button Press...
-Res Time: 1.540063 ms
+Res Time: 0.827875 ms
 
 Simulate Button Press...
-Res Time: 2.119875 ms
+Res Time: 0.903750 ms
 
 Simulate Button Press...
-Res Time: 0.248562 ms
+Res Time: 1.924000 ms
 
 Simulate Button Press...
-Res Time: 0.267625 ms
+Res Time: 3.441500 ms
 
 Simulate Button Press...
-Res Time: 0.053562 ms
+Res Time: 4.684875 ms
 
 Simulate Button Press...
-Res Time: 8.697812 ms
+Res Time: 5.250750 ms
 
 Simulate Button Press...
-Res Time: 8.144813 ms
+Res Time: 6.617562 ms
 
 Simulate Button Press...
-Res Time: 6.507625 ms
+Res Time: 8.351313 ms
 
 Simulate Button Press...
-Res Time: 5.930625 ms
+Res Time: 0.305000 ms
 
 Simulate Button Press...
-Res Time: 7.875250 ms
+Res Time: 1.839375 ms
 
 Simulate Button Press...
-Res Time: 6.050437 ms
+Res Time: 2.473500 ms
 
 Simulate Button Press...
-Res Time: 4.737062 ms
+Res Time: 4.246000 ms
 
 Simulate Button Press...
-Res Time: 4.484750 ms
+Res Time: 5.849438 ms
 
 Simulate Button Press...
-Res Time: 4.851313 ms
+Res Time: 7.113125 ms
 
 Simulate Button Press...
-Res Time: 6.419312 ms
+Res Time: 8.421250 ms
 
 Simulate Button Press...
-Res Time: 8.226937 ms
+Res Time: 8.135875 ms
 
 Simulate Button Press...
-Res Time: 8.295625 ms
+Res Time: 7.514375 ms
 
 Simulate Button Press...
-Res Time: 7.048000 ms
+Res Time: 5.682063 ms
 
 Simulate Button Press...
-Res Time: 6.742063 ms
+Res Time: 4.422875 ms
 
 Simulate Button Press...
-Res Time: 6.494250 ms
+Res Time: 4.377313 ms
 
 Simulate Button Press...
-Res Time: 5.689688 ms
+Res Time: 5.204875 ms
 
 Simulate Button Press...
-Res Time: 3.107563 ms
+Res Time: 5.676188 ms
 
 Simulate Button Press...
-Res Time: 9.170500 ms
+Res Time: 4.867875 ms
 
 Simulate Button Press...
-Res Time: 7.533813 ms
+Res Time: 4.888750 ms
 
 Simulate Button Press...
-Res Time: 8.506000 ms
+Res Time: 2.123063 ms
 
 Simulate Button Press...
-Res Time: 7.962750 ms
+Res Time: 8.083187 ms
 
 Simulate Button Press...
-Res Time: 5.346313 ms
+Res Time: 3.470937 ms
 
 Simulate Button Press...
-Res Time: 3.310688 ms
+Res Time: 2.696563 ms
 
 Simulate Button Press...
-Res Time: 4.334437 ms
+Res Time: 1.522938 ms
 
 Simulate Button Press...
-Res Time: 3.791563 ms
+Res Time: 9.780875 ms
 
 Simulate Button Press...
-Res Time: 1.935812 ms
+Res Time: 6.707438 ms
 
 Simulate Button Press...
-Res Time: 0.036000 ms
+Res Time: 4.629188 ms
 
 Simulate Button Press...
-Res Time: 0.719562 ms
+Res Time: 2.166063 ms
 
 Simulate Button Press...
-Res Time: 9.234250 ms
+Res Time: 1.492813 ms
 
 Simulate Button Press...
-Res Time: 9.676562 ms
+Res Time: 0.931063 ms
 
 Simulate Button Press...
-Res Time: 7.005250 ms
+Res Time: 1.405750 ms
 
 Simulate Button Press...
-Res Time: 2.716687 ms
+Res Time: 2.152500 ms
 
 Simulate Button Press...
-Res Time: 9.844937 ms
+Res Time: 2.887000 ms
 
 Simulate Button Press...
-Res Time: 8.756063 ms
+Res Time: 2.127375 ms
 
 Simulate Button Press...
-Res Time: 8.191313 ms
+Res Time: 2.493438 ms
 
 Simulate Button Press...
-Res Time: 7.979125 ms
+Res Time: 1.134812 ms
 
 Simulate Button Press...
-Res Time: 7.422812 ms
+Res Time: 8.386250 ms
 
 Simulate Button Press...
-Res Time: 4.784062 ms
+Res Time: 1.927187 ms
 
 Simulate Button Press...
-Res Time: 3.876750 ms
+Res Time: 5.085187 ms
 
 Simulate Button Press...
-Res Time: 4.233375 ms
+Res Time: 1.545437 ms
 
 Simulate Button Press...
-Res Time: 1.948187 ms
+Res Time: 0.678312 ms
 
 Simulate Button Press...
-Res Time: 9.182813 ms
+Res Time: 8.789125 ms
 
 Simulate Button Press...
-Res Time: 8.085250 ms
+Res Time: 8.143250 ms
 
 Simulate Button Press...
-Res Time: 7.020875 ms
+Res Time: 0.207438 ms
 
 Simulate Button Press...
-Res Time: 4.974312 ms
+Res Time: 3.931250 ms
 
 Simulate Button Press...
-Res Time: 4.853312 ms
+Res Time: 6.683250 ms
 
 Simulate Button Press...
-Res Time: 4.515812 ms
+Res Time: 9.154000 ms
 
 Simulate Button Press...
-Res Time: 3.679563 ms
+Res Time: 0.232688 ms
 
 Simulate Button Press...
-Res Time: 4.187438 ms
+Res Time: 0.340375 ms
 
 Simulate Button Press...
-Res Time: 5.072125 ms
+Res Time: 9.438875 ms
 
 Simulate Button Press...
-Res Time: 6.649312 ms
+Res Time: 0.052313 ms
 
 Simulate Button Press...
-Res Time: 9.665937 ms
+Res Time: 8.821188 ms
 
 Simulate Button Press...
-Res Time: 0.569500 ms
+Res Time: 8.064062 ms
 
 Simulate Button Press...
-Res Time: 0.387875 ms
+Res Time: 0.813563 ms
 
 Simulate Button Press...
-Res Time: 7.071938 ms
+Res Time: 3.596250 ms
 
 Simulate Button Press...
-Res Time: 3.837188 ms
+Res Time: 4.976687 ms
 
 Simulate Button Press...
-Res Time: 0.245500 ms
+Res Time: 7.184062 ms
 
 Simulate Button Press...
-Res Time: 7.197688 ms
+Res Time: 1.213375 ms
 
 Simulate Button Press...
-Res Time: 6.344250 ms
+Res Time: 4.978063 ms
 
 Simulate Button Press...
-Res Time: 4.846625 ms
+Res Time: 7.782125 ms
 
 Simulate Button Press...
-Res Time: 2.433750 ms
+Res Time: 1.307875 ms
 
 Simulate Button Press...
-Res Time: 0.445500 ms
+Res Time: 3.831250 ms
 
 Simulate Button Press...
-Res Time: 9.772062 ms
+Res Time: 5.055812 ms
 
 Simulate Button Press...
-Res Time: 6.322875 ms
+Res Time: 7.230437 ms
 
 Simulate Button Press...
-Res Time: 3.571750 ms
+Res Time: 8.478500 ms
 
 Simulate Button Press...
-Res Time: 2.712812 ms
+Res Time: 9.050938 ms
 
 Simulate Button Press...
-Res Time: 3.417813 ms
+Res Time: 9.384750 ms
 
 Simulate Button Press...
-Res Time: 2.194313 ms
+Res Time: 9.441125 ms
 
 Simulate Button Press...
-Res Time: 2.586562 ms
+Res Time: 1.130687 ms
 
 Simulate Button Press...
-Res Time: 3.887250 ms
+Res Time: 3.079125 ms
 
 Simulate Button Press...
-Res Time: 5.648250 ms
+Res Time: 3.944062 ms
 
 Simulate Button Press...
-Res Time: 7.549125 ms
+Res Time: 5.671312 ms
 
 Simulate Button Press...
-Res Time: 6.888563 ms
+Res Time: 8.223937 ms
 
 Simulate Button Press...
-Res Time: 7.274750 ms
+Res Time: 9.488750 ms
 
 Simulate Button Press...
-Res Time: 7.586625 ms
+Res Time: 0.664625 ms
 
 Simulate Button Press...
-Res Time: 8.211187 ms
+Res Time: 2.385187 ms
 
 Simulate Button Press...
-Res Time: 7.523750 ms
+Res Time: 4.424812 ms
 
 Simulate Button Press...
-Res Time: 6.491125 ms
+Res Time: 5.270125 ms
 
 Simulate Button Press...
-Res Time: 3.446812 ms
+Res Time: 5.695813 ms
 
 Simulate Button Press...
-Res Time: 1.896125 ms
+Res Time: 8.090875 ms
 
 Simulate Button Press...
-Res Time: 0.627125 ms
+Res Time: 0.065187 ms
 
 Simulate Button Press...
-Res Time: 0.974625 ms
+Res Time: 1.038813 ms
 
 Simulate Button Press...
-Res Time: 3.639125 ms
+Res Time: 0.970375 ms
 
 Simulate Button Press...
-Res Time: 4.974500 ms
+Res Time: 0.980062 ms
 
 Simulate Button Press...
-Res Time: 3.115813 ms
+Res Time: 3.612313 ms
 
 Simulate Button Press...
-Res Time: 1.485000 ms
+Res Time: 5.708750 ms
 
 Simulate Button Press...
-Res Time: 0.622875 ms
+Res Time: 8.859438 ms
 
 Simulate Button Press...
-Res Time: 1.377813 ms
+Res Time: 0.490125 ms
 
 Simulate Button Press...
-Res Time: 2.675625 ms
+Res Time: 1.823187 ms
 
 Simulate Button Press...
-Res Time: 3.521563 ms
+Res Time: 3.314625 ms
 
 Simulate Button Press...
-Res Time: 5.093875 ms
+Res Time: 4.304313 ms
 
 Simulate Button Press...
-Res Time: 6.589750 ms
+Res Time: 5.538125 ms
 
 Simulate Button Press...
-Res Time: 6.215188 ms
+Res Time: 5.011625 ms
 
 Simulate Button Press...
-Res Time: 4.545375 ms
+Res Time: 4.265375 ms
 
 Simulate Button Press...
-Res Time: 4.135812 ms
+Res Time: 2.996125 ms
 
 Simulate Button Press...
-Res Time: 4.468750 ms
+Res Time: 4.019563 ms
 
 Simulate Button Press...
-Res Time: 3.955688 ms
+Res Time: 4.484562 ms
 
 Simulate Button Press...
-Res Time: 4.423875 ms
+Res Time: 6.088812 ms
 
 Simulate Button Press...
-Res Time: 4.013312 ms
+Res Time: 0.495000 ms
 
 Simulate Button Press...
-Res Time: 5.430125 ms
+Res Time: 5.288063 ms
 
 Simulate Button Press...
-Res Time: 6.937625 ms
+Res Time: 9.780812 ms
 
 Simulate Button Press...
-Res Time: 6.472562 ms
+Res Time: 3.130000 ms
 
 Simulate Button Press...
-Res Time: 5.995750 ms
+Res Time: 6.561250 ms
 
 Simulate Button Press...
-Res Time: 4.542125 ms
+Res Time: 0.374500 ms
 
 Simulate Button Press...
-Res Time: 2.473687 ms
+Res Time: 3.424937 ms
 
 Simulate Button Press...
-Res Time: 0.827937 ms
+Res Time: 5.680000 ms
 
 Simulate Button Press...
-Res Time: 0.388312 ms
+Res Time: 6.061062 ms
 
 Simulate Button Press...
-Res Time: 3.758063 ms
+Res Time: 7.528313 ms
 
 Simulate Button Press...
-Res Time: 4.025063 ms
+Res Time: 9.590187 ms
 
 Simulate Button Press...
-Res Time: 4.741313 ms
+Res Time: 1.818250 ms
 
 Simulate Button Press...
-Res Time: 5.404375 ms
+Res Time: 4.427187 ms
 
 Simulate Button Press...
-Res Time: 7.508438 ms
+Res Time: 5.923375 ms
 
 Simulate Button Press...
-Res Time: 7.544312 ms
+Res Time: 9.459437 ms
 
 Simulate Button Press...
-Res Time: 7.838250 ms
+Res Time: 3.154687 ms
 
 Simulate Button Press...
-Res Time: 7.039062 ms
+Res Time: 6.613625 ms
 
 Simulate Button Press...
-Res Time: 7.519125 ms
+Res Time: 5.376937 ms
 
 Simulate Button Press...
-Res Time: 6.617000 ms
+Res Time: 5.400938 ms
 
 Simulate Button Press...
-Res Time: 6.616437 ms
+Res Time: 6.557687 ms
 
 Simulate Button Press...
-Res Time: 6.255312 ms
+Res Time: 8.946000 ms
 
 Simulate Button Press...
-Res Time: 6.480312 ms
+Res Time: 2.123188 ms
 
 Simulate Button Press...
-Res Time: 9.811563 ms
+Res Time: 5.941937 ms
 
 Simulate Button Press...
-Res Time: 0.171062 ms
+Res Time: 9.153125 ms
 
 Simulate Button Press...
-Res Time: 9.133187 ms
+Res Time: 2.762875 ms
 
 Simulate Button Press...
-Res Time: 7.840562 ms
+Res Time: 3.661500 ms
 
 Simulate Button Press...
-Res Time: 6.711312 ms
+Res Time: 4.850250 ms
 
 Simulate Button Press...
-Res Time: 7.864625 ms
+Res Time: 6.766125 ms
 
 Simulate Button Press...
-Res Time: 9.226313 ms
+Res Time: 9.609125 ms
 
 Simulate Button Press...
-Res Time: 8.957250 ms
+Res Time: 3.947250 ms
 
 Simulate Button Press...
-Res Time: 8.214875 ms
+Res Time: 6.743437 ms
 
 Simulate Button Press...
-Res Time: 8.764812 ms
+Res Time: 8.617000 ms
 
 Simulate Button Press...
-Res Time: 1.625625 ms
+Res Time: 2.046125 ms
 
 Simulate Button Press...
-Res Time: 1.662438 ms
+Res Time: 5.577750 ms
 
 Simulate Button Press...
-Res Time: 3.698625 ms
+Res Time: 9.006000 ms
 
 Simulate Button Press...
-Res Time: 4.841813 ms
+Res Time: 2.215938 ms
 
 Simulate Button Press...
-Res Time: 4.954438 ms
+Res Time: 5.580250 ms
 
 Simulate Button Press...
-Res Time: 3.817250 ms
+Res Time: 9.268562 ms
 
 Simulate Button Press...
-Res Time: 3.706812 ms
+Res Time: 0.887750 ms
 
 Simulate Button Press...
-Res Time: 3.989813 ms
+Res Time: 9.290000 ms
 
 Simulate Button Press...
-Res Time: 4.902312 ms
+Res Time: 0.940938 ms
 
 Simulate Button Press...
-Res Time: 6.421875 ms
+Res Time: 3.673000 ms
 
 Simulate Button Press...
-Res Time: 7.178312 ms
+Res Time: 6.629250 ms
 
 Simulate Button Press...
-Res Time: 7.637625 ms
+Res Time: 9.200625 ms
 
 Simulate Button Press...
-Res Time: 0.203250 ms
+Res Time: 4.038125 ms
 
 Simulate Button Press...
-Res Time: 0.519500 ms
+Res Time: 7.804688 ms
 
 Simulate Button Press...
-Res Time: 0.584437 ms
+Res Time: 0.915750 ms
 
 Simulate Button Press...
-Res Time: 1.015875 ms
+Res Time: 5.016000 ms
 
 Simulate Button Press...
-Res Time: 3.769250 ms
+Res Time: 0.365562 ms
 
 Simulate Button Press...
-Res Time: 6.415375 ms
+Res Time: 2.828312 ms
 
 Simulate Button Press...
-Res Time: 8.800438 ms
+Res Time: 4.299000 ms
 
 Simulate Button Press...
-Res Time: 0.179375 ms
+Res Time: 7.128625 ms
 
 Simulate Button Press...
-Res Time: 2.296062 ms
+Res Time: 8.024875 ms
 
 Simulate Button Press...
-Res Time: 3.213312 ms
+Res Time: 8.088250 ms
 
 Simulate Button Press...
-Res Time: 5.536625 ms
+Res Time: 8.729250 ms
 
 Simulate Button Press...
-Res Time: 6.213812 ms
+Res Time: 9.796062 ms
 
 Simulate Button Press...
-Res Time: 7.120125 ms
+Res Time: 2.409250 ms
 
 Simulate Button Press...
-Res Time: 9.203500 ms
+Res Time: 3.104938 ms
 
 Simulate Button Press...
-Res Time: 0.482750 ms
+Res Time: 5.912750 ms
 
 Simulate Button Press...
-Res Time: 2.731250 ms
+Res Time: 7.891562 ms
 
 Simulate Button Press...
-Res Time: 2.402750 ms
+Res Time: 9.094500 ms
 
 Simulate Button Press...
-Res Time: 3.269625 ms
+Res Time: 0.246625 ms
 
 Simulate Button Press...
-Res Time: 5.263312 ms
+Res Time: 0.303813 ms
 
 Simulate Button Press...
-Res Time: 6.186687 ms
+Res Time: 0.456000 ms
 
 Simulate Button Press...
-Res Time: 4.757563 ms
+Res Time: 1.109875 ms
 
 Simulate Button Press...
-Res Time: 4.671312 ms
+Res Time: 5.029313 ms
 
 Simulate Button Press...
-Res Time: 4.941125 ms
+Res Time: 9.951563 ms
 
 Simulate Button Press...
-Res Time: 5.350125 ms
+Res Time: 3.944062 ms
 
 Simulate Button Press...
-Res Time: 6.902937 ms
+Res Time: 5.771125 ms
 
 Simulate Button Press...
-Res Time: 8.893250 ms
+Res Time: 7.549625 ms
 
 Simulate Button Press...
-Res Time: 1.086687 ms
+Res Time: 9.584500 ms
 
 Simulate Button Press...
-Res Time: 1.675437 ms
+Res Time: 2.163563 ms
 
 Simulate Button Press...
-Res Time: 1.662562 ms
+Res Time: 3.355250 ms
 
 Simulate Button Press...
-Res Time: 1.305562 ms
+Res Time: 5.727750 ms
 
 Simulate Button Press...
-Res Time: 9.026750 ms
+Res Time: 8.652938 ms
 
 Simulate Button Press...
-Res Time: 8.740875 ms
+Res Time: 2.166625 ms
 
 Simulate Button Press...
-Res Time: 1.083812 ms
+Res Time: 5.465000 ms
 
 Simulate Button Press...
-Res Time: 2.587250 ms
+Res Time: 9.408188 ms
 
 Simulate Button Press...
-Res Time: 5.498375 ms
+Res Time: 4.629625 ms
 
 Simulate Button Press...
-Res Time: 6.712812 ms
+Res Time: 8.181250 ms
 
 Simulate Button Press...
-Res Time: 9.047313 ms
+Res Time: 1.557188 ms
 
 Simulate Button Press...
-Res Time: 0.525063 ms
+Res Time: 7.125438 ms
 
 Simulate Button Press...
-Res Time: 1.506750 ms
+Res Time: 2.697000 ms
 
 Simulate Button Press...
-Res Time: 3.099125 ms
+Res Time: 6.503562 ms
 
 Simulate Button Press...
-Res Time: 5.588000 ms
+Res Time: 0.166250 ms
 
 Simulate Button Press...
-Res Time: 6.891438 ms
+Res Time: 4.068687 ms
 
 Simulate Button Press...
-Res Time: 7.773750 ms
+Res Time: 7.987500 ms
 
 Simulate Button Press...
-Res Time: 9.537375 ms
+Res Time: 1.420375 ms
 
 Simulate Button Press...
-Res Time: 0.024000 ms
+Res Time: 4.129750 ms
 
 Simulate Button Press...
-Res Time: 8.943000 ms
+Res Time: 8.320250 ms
 
 Simulate Button Press...
-Res Time: 1.209313 ms
+Res Time: 1.057812 ms
 
 Simulate Button Press...
-Res Time: 2.745812 ms
+Res Time: 4.643625 ms
 
 Simulate Button Press...
-Res Time: 6.342875 ms
+Res Time: 1.040687 ms
 
 Simulate Button Press...
-Res Time: 8.605625 ms
+Res Time: 6.759000 ms
 
 Simulate Button Press...
-Res Time: 9.197437 ms
+Res Time: 1.377437 ms
 
 Simulate Button Press...
-Res Time: 9.634875 ms
+Res Time: 4.485813 ms
 
 Simulate Button Press...
-Res Time: 2.558875 ms
+Res Time: 7.241313 ms
 
 Simulate Button Press...
-Res Time: 6.515625 ms
+Res Time: 1.110500 ms
 
 Simulate Button Press...
-Res Time: 9.931937 ms
+Res Time: 4.944875 ms
 
 Simulate Button Press...
-Res Time: 2.144125 ms
+Res Time: 3.632937 ms
 
 Simulate Button Press...
-Res Time: 5.443875 ms
+Res Time: 3.593125 ms
 
 Simulate Button Press...
-Res Time: 9.416813 ms
+Res Time: 4.664437 ms
 
 Simulate Button Press...
-Res Time: 2.701562 ms
+Res Time: 5.842500 ms
 
 Simulate Button Press...
-Res Time: 7.095125 ms
+Res Time: 7.430062 ms
 
 Simulate Button Press...
-Res Time: 9.189563 ms
+Res Time: 7.624187 ms
 
 Simulate Button Press...
-Res Time: 1.710125 ms
+Res Time: 0.283125 ms
 
 Simulate Button Press...
-Res Time: 3.317812 ms
+Res Time: 1.389562 ms
 
 Simulate Button Press...
-Res Time: 7.125813 ms
+Res Time: 3.248375 ms
 
 Simulate Button Press...
-Res Time: 0.881625 ms
+Res Time: 4.377188 ms
 
 Simulate Button Press...
-Res Time: 6.028375 ms
+Res Time: 6.262312 ms
 
 Simulate Button Press...
-Res Time: 8.828062 ms
+Res Time: 7.718125 ms
 
 Simulate Button Press...
-Res Time: 9.769250 ms
+Res Time: 0.850625 ms
 
 Simulate Button Press...
-Res Time: 9.648313 ms
+Res Time: 0.961250 ms
 
 Simulate Button Press...
-Res Time: 7.898313 ms
+Res Time: 1.099500 ms
 
 Simulate Button Press...
-Res Time: 6.042313 ms
+Res Time: 1.401500 ms
 
 Simulate Button Press...
-Res Time: 4.785625 ms
+Res Time: 2.624250 ms
 
 Simulate Button Press...
-Res Time: 4.685438 ms
+Res Time: 2.881125 ms
 
 Simulate Button Press...
-Res Time: 3.945937 ms
+Res Time: 2.712375 ms
 
 Simulate Button Press...
-Res Time: 2.622625 ms
+Res Time: 3.508188 ms
 
 Simulate Button Press...
-Res Time: 2.099813 ms
+Res Time: 4.340250 ms
 
 Simulate Button Press...
-Res Time: 9.679063 ms
+Res Time: 5.712563 ms
 
 Simulate Button Press...
-Res Time: 9.327875 ms
+Res Time: 7.302688 ms
 
 Simulate Button Press...
-Res Time: 0.702875 ms
+Res Time: 8.942375 ms
 
 Simulate Button Press...
-Res Time: 1.690313 ms
+Res Time: 8.289000 ms
 
 Simulate Button Press...
-Res Time: 1.440313 ms
+Res Time: 9.577375 ms
 
 Simulate Button Press...
-Res Time: 3.814063 ms
+Res Time: 1.803813 ms
 
 Simulate Button Press...
-Res Time: 6.130125 ms
+Res Time: 4.401000 ms
 
 Simulate Button Press...
-Res Time: 8.198063 ms
+Res Time: 6.023000 ms
 
 Simulate Button Press...
-Res Time: 9.525625 ms
+Res Time: 8.418500 ms
 
 Simulate Button Press...
-Res Time: 1.167375 ms
+Res Time: 0.423500 ms
 
 Simulate Button Press...
-Res Time: 2.434937 ms
+Res Time: 1.494063 ms
 
 Simulate Button Press...
-Res Time: 4.166125 ms
+Res Time: 2.345000 ms
 
 Simulate Button Press...
-Res Time: 3.928688 ms
+Res Time: 4.826375 ms
 
 Simulate Button Press...
-Res Time: 3.478563 ms
+Res Time: 7.050625 ms
 
 Simulate Button Press...
-Res Time: 3.383687 ms
+Res Time: 0.098500 ms
+
+Simulate Button Press...
+Res Time: 4.147438 ms
+
+Simulate Button Press...
+Res Time: 8.275937 ms
+
+Simulate Button Press...
+Res Time: 9.743688 ms
+
+Simulate Button Press...
+Res Time: 2.615187 ms
+
+Simulate Button Press...
+Res Time: 5.598063 ms
+
+Simulate Button Press...
+Res Time: 7.320437 ms
+
+Simulate Button Press...
+Res Time: 9.218062 ms
+
+Simulate Button Press...
+Res Time: 2.584875 ms
+
+Simulate Button Press...
+Res Time: 4.905812 ms
+
+Simulate Button Press...
+Res Time: 5.389750 ms
+
+Simulate Button Press...
+Res Time: 5.174750 ms
+
+Simulate Button Press...
+Res Time: 6.239313 ms
+
+Simulate Button Press...
+Res Time: 8.767563 ms
+
+Simulate Button Press...
+Res Time: 1.569750 ms
+
+Simulate Button Press...
+Res Time: 4.646125 ms
+
+Simulate Button Press...
+Res Time: 8.592563 ms
+
+Simulate Button Press...
+Res Time: 0.304125 ms
+
+Simulate Button Press...
+Res Time: 0.577812 ms
+
+Simulate Button Press...
+Res Time: 1.718938 ms
+
+Simulate Button Press...
+Res Time: 4.552187 ms
+
+Simulate Button Press...
+Res Time: 6.576750 ms
+
+Simulate Button Press...
+Res Time: 8.094937 ms
+
+Simulate Button Press...
+Res Time: 0.455625 ms
+
+Simulate Button Press...
+Res Time: 1.567750 ms
+
+Simulate Button Press...
+Res Time: 4.134500 ms
+
+Simulate Button Press...
+Res Time: 6.645438 ms
+
+Simulate Button Press...
+Res Time: 0.153437 ms
+
+Simulate Button Press...
+Res Time: 4.582000 ms
+
+Simulate Button Press...
+Res Time: 8.310000 ms
+
+Simulate Button Press...
+Res Time: 2.188937 ms
+
+Simulate Button Press...
+Res Time: 4.958562 ms
+
+Simulate Button Press...
+Res Time: 6.306375 ms
+
+Simulate Button Press...
+Res Time: 8.955063 ms
+
+Simulate Button Press...
+Res Time: 1.722125 ms
+
+Simulate Button Press...
+Res Time: 2.977250 ms
+
+Simulate Button Press...
+Res Time: 3.820625 ms
+
+Simulate Button Press...
+Res Time: 6.140937 ms
+
+Simulate Button Press...
+Res Time: 0.572000 ms
+
+Simulate Button Press...
+Res Time: 1.504063 ms
+
+Simulate Button Press...
+Res Time: 1.665812 ms
+
+Simulate Button Press...
+Res Time: 2.111813 ms
+
+Simulate Button Press...
+Res Time: 2.185937 ms
+
+Simulate Button Press...
+Res Time: 4.161812 ms
+
+Simulate Button Press...
+Res Time: 6.746750 ms
+
+Simulate Button Press...
+Res Time: 9.391625 ms
+
+Simulate Button Press...
+Res Time: 9.779375 ms
+
+Simulate Button Press...
+Res Time: 3.203750 ms
+
+Simulate Button Press...
+Res Time: 2.872437 ms
+
+Simulate Button Press...
+Res Time: 4.976687 ms
+
+Simulate Button Press...
+Res Time: 7.574500 ms
+
+Simulate Button Press...
+Res Time: 1.083625 ms
+
+Simulate Button Press...
+Res Time: 4.118750 ms
+
+Simulate Button Press...
+Res Time: 6.874813 ms
+
+Simulate Button Press...
+Res Time: 9.350938 ms
+
+Simulate Button Press...
+Res Time: 2.859562 ms
+
+Simulate Button Press...
+Res Time: 6.811687 ms
+
+Simulate Button Press...
+Res Time: 9.169875 ms
+
+Simulate Button Press...
+Res Time: 1.295875 ms
+
+Simulate Button Press...
+Res Time: 1.949375 ms
+
+Simulate Button Press...
+Res Time: 5.264000 ms
+
+Simulate Button Press...
+Res Time: 8.859375 ms
+
+Simulate Button Press...
+Res Time: 3.077938 ms
+
+Simulate Button Press...
+Res Time: 7.731937 ms
+
+Simulate Button Press...
+Res Time: 1.764688 ms
+
+Simulate Button Press...
+Res Time: 5.973875 ms
+
+Simulate Button Press...
+Res Time: 0.597500 ms
+
+Simulate Button Press...
+Res Time: 5.022625 ms
+
+Simulate Button Press...
+Res Time: 7.027062 ms
+
+Simulate Button Press...
+Res Time: 0.130187 ms
+
+Simulate Button Press...
+Res Time: 1.764750 ms
+
+Simulate Button Press...
+Res Time: 3.924500 ms
+
+Simulate Button Press...
+Res Time: 4.581250 ms
+
+Simulate Button Press...
+Res Time: 4.901813 ms
+
+Simulate Button Press...
+Res Time: 7.719375 ms
+
+Simulate Button Press...
+Res Time: 0.242375 ms
+
+Simulate Button Press...
+Res Time: 1.942750 ms
+
+Simulate Button Press...
+Res Time: 3.578187 ms
+
+Simulate Button Press...
+Res Time: 5.780875 ms
+
+Simulate Button Press...
+Res Time: 7.678375 ms
+
+Simulate Button Press...
+Res Time: 9.118625 ms
+
+Simulate Button Press...
+Res Time: 0.592250 ms
+
+Simulate Button Press...
+Res Time: 4.247063 ms
+
+Simulate Button Press...
+Res Time: 7.507312 ms
+
+Simulate Button Press...
+Res Time: 9.359187 ms
+
+Simulate Button Press...
+Res Time: 1.353187 ms
+
+Simulate Button Press...
+Res Time: 4.665250 ms
+
+Simulate Button Press...
+Res Time: 8.454375 ms
+
+Simulate Button Press...
+Res Time: 1.080438 ms
+
+Simulate Button Press...
+Res Time: 3.056000 ms
+
+Simulate Button Press...
+Res Time: 4.203187 ms
+
+Simulate Button Press...
+Res Time: 7.515500 ms
+
+Simulate Button Press...
+Res Time: 2.194813 ms
+
+Simulate Button Press...
+Res Time: 7.052750 ms
+
+Simulate Button Press...
+Res Time: 0.534688 ms
+
+Simulate Button Press...
+Res Time: 1.848750 ms
+
+Simulate Button Press...
+Res Time: 5.700625 ms
+
+Simulate Button Press...
+Res Time: 9.777813 ms
+
+Simulate Button Press...
+Res Time: 3.822187 ms
+
+Simulate Button Press...
+Res Time: 6.180125 ms
+
+Simulate Button Press...
+Res Time: 9.111750 ms
+
+Simulate Button Press...
+Res Time: 9.010062 ms
+
+Simulate Button Press...
+Res Time: 9.859625 ms
+
+Simulate Button Press...
+Res Time: 0.656812 ms
+
+Simulate Button Press...
+Res Time: 3.572687 ms
+
+Simulate Button Press...
+Res Time: 4.703500 ms
+
+Simulate Button Press...
+Res Time: 7.208687 ms
+
+Simulate Button Press...
+Res Time: 8.731875 ms
+
+Simulate Button Press...
+Res Time: 9.742375 ms
+
+Simulate Button Press...
+Res Time: 9.913500 ms
+
+Simulate Button Press...
+Res Time: 7.935375 ms
+
+Simulate Button Press...
+Res Time: 6.735000 ms
+
+Simulate Button Press...
+Res Time: 7.712187 ms
+
+Simulate Button Press...
+Res Time: 7.806313 ms
+
+Simulate Button Press...
+Res Time: 7.544750 ms
+
+Simulate Button Press...
+Res Time: 7.992688 ms
+
+Simulate Button Press...
+Res Time: 8.502812 ms
+
+Simulate Button Press...
+Res Time: 8.104625 ms
+
+Simulate Button Press...
+Res Time: 8.987562 ms
+
+Simulate Button Press...
+Res Time: 9.360562 ms
+
+Simulate Button Press...
+Res Time: 9.707812 ms
+
+Simulate Button Press...
+Res Time: 0.119375 ms
+
+Simulate Button Press...
+Res Time: 1.253500 ms
+
+Simulate Button Press...
+Res Time: 2.171125 ms
+
+Simulate Button Press...
+Res Time: 6.144813 ms
+
+Simulate Button Press...
+Res Time: 8.875563 ms
+
+Simulate Button Press...
+Res Time: 1.278188 ms
+
+Simulate Button Press...
+Res Time: 2.418562 ms
+
+Simulate Button Press...
+Res Time: 3.169312 ms
+
+Simulate Button Press...
+Res Time: 3.327750 ms
+
+Simulate Button Press...
+Res Time: 3.582313 ms
+
+Simulate Button Press...
+Res Time: 4.429500 ms
+
+Simulate Button Press...
+Res Time: 6.201625 ms
+
+Simulate Button Press...
+Res Time: 6.284812 ms
+
+Simulate Button Press...
+Res Time: 6.191125 ms
+
+Simulate Button Press...
+Res Time: 6.744250 ms
+
+Simulate Button Press...
+Res Time: 7.639937 ms
+
+Simulate Button Press...
+Res Time: 6.875438 ms
+
+Simulate Button Press...
+Res Time: 8.769313 ms
+
+Simulate Button Press...
+Res Time: 9.448750 ms
+
+Simulate Button Press...
+Res Time: 1.795125 ms
+
+Simulate Button Press...
+Res Time: 2.927750 ms
+
+Simulate Button Press...
+Res Time: 5.218312 ms
+
+Simulate Button Press...
+Res Time: 5.707063 ms
+
+Simulate Button Press...
+Res Time: 4.432000 ms
+
+Simulate Button Press...
+Res Time: 4.303187 ms
+
+Simulate Button Press...
+Res Time: 2.965500 ms
+
+Simulate Button Press...
+Res Time: 0.607063 ms
+
+Simulate Button Press...
+Res Time: 0.750375 ms
+
+Simulate Button Press...
+Res Time: 1.075562 ms
+
+Simulate Button Press...
+Res Time: 8.762813 ms
+
+Simulate Button Press...
+Res Time: 8.725000 ms
+
+Simulate Button Press...
+Res Time: 0.326688 ms
+
+Simulate Button Press...
+Res Time: 1.715625 ms
+
+Simulate Button Press...
+Res Time: 3.631438 ms
+
+Simulate Button Press...
+Res Time: 5.218625 ms
+
+Simulate Button Press...
+Res Time: 6.498063 ms
+
+Simulate Button Press...
+Res Time: 6.944125 ms
+
+Simulate Button Press...
+Res Time: 7.000062 ms
+
+Simulate Button Press...
+Res Time: 8.263250 ms
+
+Simulate Button Press...
+Res Time: 9.409813 ms
+
+Simulate Button Press...
+Res Time: 0.630625 ms
+
+Simulate Button Press...
+Res Time: 2.366437 ms
+
+Simulate Button Press...
+Res Time: 3.344750 ms
+
+Simulate Button Press...
+Res Time: 3.510062 ms
+
+Simulate Button Press...
+Res Time: 3.905437 ms
+
+Simulate Button Press...
+Res Time: 6.016250 ms
+
+Simulate Button Press...
+Res Time: 7.854437 ms
+
+Simulate Button Press...
+Res Time: 8.210125 ms
+
+Simulate Button Press...
+Res Time: 9.528812 ms
+
+Simulate Button Press...
+Res Time: 1.479625 ms
+
+Simulate Button Press...
+Res Time: 3.319875 ms
+
+Simulate Button Press...
+Res Time: 3.755438 ms
+
+Simulate Button Press...
+Res Time: 5.523063 ms
+
+Simulate Button Press...
+Res Time: 6.979625 ms
+
+Simulate Button Press...
+Res Time: 7.398313 ms
+
+Simulate Button Press...
+Res Time: 7.279562 ms
+
+Simulate Button Press...
+Res Time: 9.008000 ms
+
+Simulate Button Press...
+Res Time: 1.836437 ms
+
+Simulate Button Press...
+Res Time: 4.585250 ms
+
+Simulate Button Press...
+Res Time: 8.708438 ms
+
+Simulate Button Press...
+Res Time: 0.914688 ms
+
+Simulate Button Press...
+Res Time: 3.203125 ms
+
+Simulate Button Press...
+Res Time: 5.973250 ms
+
+Simulate Button Press...
+Res Time: 8.599250 ms
+
+Simulate Button Press...
+Res Time: 3.130312 ms
+
+Simulate Button Press...
+Res Time: 6.032000 ms
+
+Simulate Button Press...
+Res Time: 7.998500 ms
+
+Simulate Button Press...
+Res Time: 8.078938 ms
+
+Simulate Button Press...
+Res Time: 0.033312 ms
+
+Simulate Button Press...
+Res Time: 0.682312 ms
+
+Simulate Button Press...
+Res Time: 9.452812 ms
+
+Simulate Button Press...
+Res Time: 0.528625 ms
+
+Simulate Button Press...
+Res Time: 0.783375 ms
+
+Simulate Button Press...
+Res Time: 2.893375 ms
+
+Simulate Button Press...
+Res Time: 4.482750 ms
+
+Simulate Button Press...
+Res Time: 6.111500 ms
+
+Simulate Button Press...
+Res Time: 8.076625 ms
+
+Simulate Button Press...
+Res Time: 9.249312 ms
+
+Simulate Button Press...
+Res Time: 9.521250 ms
+
+Simulate Button Press...
+Res Time: 2.069750 ms
+
+Simulate Button Press...
+Res Time: 5.088375 ms
+
+Simulate Button Press...
+Res Time: 6.704187 ms
+
+Simulate Button Press...
+Res Time: 6.056063 ms
+
+Simulate Button Press...
+Res Time: 5.952437 ms
+
+Simulate Button Press...
+Res Time: 5.101687 ms
+
+Simulate Button Press...
+Res Time: 4.770750 ms
+
+Simulate Button Press...
+Res Time: 4.312000 ms
+
+Simulate Button Press...
+Res Time: 1.062875 ms
+
+Simulate Button Press...
+Res Time: 9.542000 ms
+
+Simulate Button Press...
+Res Time: 7.333437 ms
+
+Simulate Button Press...
+Res Time: 6.610562 ms
+
+Simulate Button Press...
+Res Time: 6.301625 ms
+
+Simulate Button Press...
+Res Time: 6.472688 ms
+
+Simulate Button Press...
+Res Time: 7.707063 ms
+
+Simulate Button Press...
+Res Time: 9.053375 ms
+
+Simulate Button Press...
+Res Time: 9.331875 ms
+
+Simulate Button Press...
+Res Time: 9.882438 ms
+
+Simulate Button Press...
+Res Time: 3.234437 ms
+
+Simulate Button Press...
+Res Time: 5.378562 ms
+
+Simulate Button Press...
+Res Time: 5.263250 ms
+
+Simulate Button Press...
+Res Time: 6.862937 ms
+
+Simulate Button Press...
+Res Time: 4.972875 ms
+
+Simulate Button Press...
+Res Time: 4.454688 ms
+
+Simulate Button Press...
+Res Time: 5.371750 ms
+
+Simulate Button Press...
+Res Time: 6.318563 ms
+
+Simulate Button Press...
+Res Time: 9.097187 ms
+
+Simulate Button Press...
+Res Time: 1.480875 ms
+
+Simulate Button Press...
+Res Time: 2.729625 ms
+
+Simulate Button Press...
+Res Time: 3.958188 ms
+
+Simulate Button Press...
+Res Time: 5.185812 ms
+
+Simulate Button Press...
+Res Time: 7.476812 ms
+
+Simulate Button Press...
+Res Time: 0.184938 ms
+
+Simulate Button Press...
+Res Time: 1.188187 ms
+
+Simulate Button Press...
+Res Time: 2.182125 ms
+
+Simulate Button Press...
+Res Time: 3.114312 ms
+
+Simulate Button Press...
+Res Time: 3.369937 ms
+
+Simulate Button Press...
+Res Time: 4.702562 ms
+
+Simulate Button Press...
+Res Time: 6.539000 ms
+
+Simulate Button Press...
+Res Time: 8.077875 ms
+
+Simulate Button Press...
+Res Time: 9.869750 ms
+
+Simulate Button Press...
+Res Time: 0.828313 ms
+
+Simulate Button Press...
+Res Time: 1.424625 ms
+
+Simulate Button Press...
+Res Time: 1.504187 ms
+
+Simulate Button Press...
+Res Time: 0.554937 ms
+
+Simulate Button Press...
+Res Time: 9.413375 ms
+
+Simulate Button Press...
+Res Time: 8.292063 ms
+
+Simulate Button Press...
+Res Time: 7.480187 ms
+
+Simulate Button Press...
+Res Time: 6.190312 ms
+
+Simulate Button Press...
+Res Time: 7.275312 ms
+
+Simulate Button Press...
+Res Time: 6.358500 ms
+
+Simulate Button Press...
+Res Time: 5.200125 ms
+
+Simulate Button Press...
+Res Time: 3.462312 ms
+
+Simulate Button Press...
+Res Time: 1.160750 ms
+
+Simulate Button Press...
+Res Time: 8.476687 ms
+
+Simulate Button Press...
+Res Time: 5.975375 ms
+
+Simulate Button Press...
+Res Time: 3.958563 ms
+
+Simulate Button Press...
+Res Time: 1.143813 ms
+
+Simulate Button Press...
+Res Time: 7.948937 ms
+
+Simulate Button Press...
+Res Time: 6.992125 ms
+
+Simulate Button Press...
+Res Time: 6.856688 ms

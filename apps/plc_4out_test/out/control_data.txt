@@ -1,0 +1,1253 @@
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.084875 ms
+OUT1 Res Time: 4966.770508 ms
+OUT2 Res Time: 9926.971680 ms
+OUT3 Res Time: 14886.501953 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.479000 ms
+OUT1 Res Time: 4965.090820 ms
+OUT2 Res Time: 9928.822266 ms
+OUT3 Res Time: 14892.155273 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.195813 ms
+OUT1 Res Time: 4969.031738 ms
+OUT2 Res Time: 9931.827148 ms
+OUT3 Res Time: 14892.102539 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.696125 ms
+OUT1 Res Time: 4964.439941 ms
+OUT2 Res Time: 9923.904297 ms
+OUT3 Res Time: 14883.615234 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.212188 ms
+OUT1 Res Time: 4967.955566 ms
+OUT2 Res Time: 9929.513672 ms
+OUT3 Res Time: 14889.333984 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.049125 ms
+OUT1 Res Time: 4962.762695 ms
+OUT2 Res Time: 9924.177734 ms
+OUT3 Res Time: 14886.134766 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.927125 ms
+OUT1 Res Time: 4968.154785 ms
+OUT2 Res Time: 9930.060547 ms
+OUT3 Res Time: 14891.990234 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.955250 ms
+OUT1 Res Time: 4968.578125 ms
+OUT2 Res Time: 9929.463867 ms
+OUT3 Res Time: 14890.210938 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.207750 ms
+OUT1 Res Time: 4969.224609 ms
+OUT2 Res Time: 9931.318359 ms
+OUT3 Res Time: 14894.896484 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.827750 ms
+OUT1 Res Time: 4972.072266 ms
+OUT2 Res Time: 9938.238281 ms
+OUT3 Res Time: 14905.884766 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.229812 ms
+OUT1 Res Time: 4965.379395 ms
+OUT2 Res Time: 9930.206055 ms
+OUT3 Res Time: 14891.756836 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.510688 ms
+OUT1 Res Time: 4968.064453 ms
+OUT2 Res Time: 9932.553711 ms
+OUT3 Res Time: 14895.100586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.984250 ms
+OUT1 Res Time: 4967.196289 ms
+OUT2 Res Time: 9928.345703 ms
+OUT3 Res Time: 14890.500977 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.680312 ms
+OUT1 Res Time: 4968.870117 ms
+OUT2 Res Time: 9933.625000 ms
+OUT3 Res Time: 14898.614258 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.886500 ms
+OUT1 Res Time: 4965.884766 ms
+OUT2 Res Time: 9929.925781 ms
+OUT3 Res Time: 14894.643555 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.965687 ms
+OUT1 Res Time: 4972.748047 ms
+OUT2 Res Time: 9939.340820 ms
+OUT3 Res Time: 14905.136719 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.301063 ms
+OUT1 Res Time: 4970.116211 ms
+OUT2 Res Time: 9933.114258 ms
+OUT3 Res Time: 14896.318359 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.951875 ms
+OUT1 Res Time: 4970.661133 ms
+OUT2 Res Time: 9935.297852 ms
+OUT3 Res Time: 14900.393555 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.301312 ms
+OUT1 Res Time: 4970.913086 ms
+OUT2 Res Time: 9936.348633 ms
+OUT3 Res Time: 14901.807617 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.920813 ms
+OUT1 Res Time: 4969.587402 ms
+OUT2 Res Time: 9933.307617 ms
+OUT3 Res Time: 14899.191406 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.520125 ms
+OUT1 Res Time: 4967.534180 ms
+OUT2 Res Time: 9932.778320 ms
+OUT3 Res Time: 14897.666016 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.263187 ms
+OUT1 Res Time: 4972.115723 ms
+OUT2 Res Time: 9937.109375 ms
+OUT3 Res Time: 14903.638672 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.429438 ms
+OUT1 Res Time: 4972.990234 ms
+OUT2 Res Time: 9934.511719 ms
+OUT3 Res Time: 14895.773438 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.185312 ms
+OUT1 Res Time: 4975.785645 ms
+OUT2 Res Time: 9941.711914 ms
+OUT3 Res Time: 14906.917969 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.476188 ms
+OUT1 Res Time: 4974.173828 ms
+OUT2 Res Time: 9940.609375 ms
+OUT3 Res Time: 14904.401367 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.336125 ms
+OUT1 Res Time: 4968.566895 ms
+OUT2 Res Time: 9932.129883 ms
+OUT3 Res Time: 14896.738281 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.495313 ms
+OUT1 Res Time: 4974.499512 ms
+OUT2 Res Time: 9937.875977 ms
+OUT3 Res Time: 14901.208008 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.895562 ms
+OUT1 Res Time: 4966.325684 ms
+OUT2 Res Time: 9929.945312 ms
+OUT3 Res Time: 14893.999023 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.034250 ms
+OUT1 Res Time: 4970.581543 ms
+OUT2 Res Time: 9934.653320 ms
+OUT3 Res Time: 14896.909180 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.460500 ms
+OUT1 Res Time: 4969.610840 ms
+OUT2 Res Time: 9931.646484 ms
+OUT3 Res Time: 14893.115234 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.855438 ms
+OUT1 Res Time: 4965.453125 ms
+OUT2 Res Time: 9930.495117 ms
+OUT3 Res Time: 14894.916016 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.306938 ms
+OUT1 Res Time: 4971.245605 ms
+OUT2 Res Time: 9937.326172 ms
+OUT3 Res Time: 14903.339844 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.315687 ms
+OUT1 Res Time: 4972.459961 ms
+OUT2 Res Time: 9937.565430 ms
+OUT3 Res Time: 14902.440430 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.235188 ms
+OUT1 Res Time: 4969.958984 ms
+OUT2 Res Time: 9936.519531 ms
+OUT3 Res Time: 14903.795898 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.178937 ms
+OUT1 Res Time: 4968.611816 ms
+OUT2 Res Time: 9935.321289 ms
+OUT3 Res Time: 14902.621094 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.237750 ms
+OUT1 Res Time: 4974.791992 ms
+OUT2 Res Time: 9940.430664 ms
+OUT3 Res Time: 14907.396484 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.158437 ms
+OUT1 Res Time: 4969.408203 ms
+OUT2 Res Time: 9936.204102 ms
+OUT3 Res Time: 14902.158203 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.739625 ms
+OUT1 Res Time: 4969.987305 ms
+OUT2 Res Time: 9936.793945 ms
+OUT3 Res Time: 14901.375000 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.493062 ms
+OUT1 Res Time: 4965.645996 ms
+OUT2 Res Time: 9928.416016 ms
+OUT3 Res Time: 14892.387695 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.781500 ms
+OUT1 Res Time: 4967.985840 ms
+OUT2 Res Time: 9932.007812 ms
+OUT3 Res Time: 14894.737305 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.293563 ms
+OUT1 Res Time: 4975.132324 ms
+OUT2 Res Time: 9942.203125 ms
+OUT3 Res Time: 14909.843750 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.754687 ms
+OUT1 Res Time: 4976.982910 ms
+OUT2 Res Time: 9944.932617 ms
+OUT3 Res Time: 14911.809570 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.088062 ms
+OUT1 Res Time: 4973.111816 ms
+OUT2 Res Time: 9937.376953 ms
+OUT3 Res Time: 14901.988281 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.487937 ms
+OUT1 Res Time: 4967.312012 ms
+OUT2 Res Time: 9933.278320 ms
+OUT3 Res Time: 14899.080078 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.694562 ms
+OUT1 Res Time: 4966.795898 ms
+OUT2 Res Time: 9933.740234 ms
+OUT3 Res Time: 14900.611328 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.314062 ms
+OUT1 Res Time: 4973.775879 ms
+OUT2 Res Time: 9939.759766 ms
+OUT3 Res Time: 14906.958008 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.926250 ms
+OUT1 Res Time: 4974.534180 ms
+OUT2 Res Time: 9940.837891 ms
+OUT3 Res Time: 14903.569336 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.727500 ms
+OUT1 Res Time: 4968.544434 ms
+OUT2 Res Time: 9935.164062 ms
+OUT3 Res Time: 14900.073242 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.329875 ms
+OUT1 Res Time: 4966.479004 ms
+OUT2 Res Time: 9931.292969 ms
+OUT3 Res Time: 14895.350586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.752875 ms
+OUT1 Res Time: 4967.516602 ms
+OUT2 Res Time: 9935.934570 ms
+OUT3 Res Time: 14903.281250 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.145437 ms
+OUT1 Res Time: 4973.606934 ms
+OUT2 Res Time: 9938.443359 ms
+OUT3 Res Time: 14903.161133 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.131812 ms
+OUT1 Res Time: 4974.852051 ms
+OUT2 Res Time: 9939.565430 ms
+OUT3 Res Time: 14903.412109 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.958813 ms
+OUT1 Res Time: 4973.930176 ms
+OUT2 Res Time: 9939.064453 ms
+OUT3 Res Time: 14904.987305 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.506562 ms
+OUT1 Res Time: 4965.983398 ms
+OUT2 Res Time: 9929.957031 ms
+OUT3 Res Time: 14892.867188 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.134062 ms
+OUT1 Res Time: 4970.208984 ms
+OUT2 Res Time: 9934.709961 ms
+OUT3 Res Time: 14900.315430 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.151062 ms
+OUT1 Res Time: 4971.389648 ms
+OUT2 Res Time: 9935.782227 ms
+OUT3 Res Time: 14901.014648 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.626062 ms
+OUT1 Res Time: 4975.330566 ms
+OUT2 Res Time: 9940.821289 ms
+OUT3 Res Time: 14902.641602 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.943625 ms
+OUT1 Res Time: 4968.821777 ms
+OUT2 Res Time: 9934.703125 ms
+OUT3 Res Time: 14899.159180 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.250750 ms
+OUT1 Res Time: 4970.383789 ms
+OUT2 Res Time: 9935.932617 ms
+OUT3 Res Time: 14899.898438 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.381063 ms
+OUT1 Res Time: 4968.466309 ms
+OUT2 Res Time: 9933.982422 ms
+OUT3 Res Time: 14898.822266 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.917438 ms
+OUT1 Res Time: 4972.331055 ms
+OUT2 Res Time: 9933.593750 ms
+OUT3 Res Time: 14897.763672 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.995937 ms
+OUT1 Res Time: 4966.266602 ms
+OUT2 Res Time: 9931.547852 ms
+OUT3 Res Time: 14897.234375 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.164750 ms
+OUT1 Res Time: 4969.390137 ms
+OUT2 Res Time: 9932.902344 ms
+OUT3 Res Time: 14895.993164 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.033187 ms
+OUT1 Res Time: 4967.750488 ms
+OUT2 Res Time: 9931.300781 ms
+OUT3 Res Time: 14895.565430 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.057500 ms
+OUT1 Res Time: 4973.435059 ms
+OUT2 Res Time: 9937.491211 ms
+OUT3 Res Time: 14902.202148 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.863625 ms
+OUT1 Res Time: 4972.316895 ms
+OUT2 Res Time: 9936.817383 ms
+OUT3 Res Time: 14901.402344 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.854813 ms
+OUT1 Res Time: 4973.637207 ms
+OUT2 Res Time: 9940.417969 ms
+OUT3 Res Time: 14907.147461 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.392688 ms
+OUT1 Res Time: 4968.554688 ms
+OUT2 Res Time: 9934.028320 ms
+OUT3 Res Time: 14899.088867 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.611813 ms
+OUT1 Res Time: 4966.442871 ms
+OUT2 Res Time: 9930.063477 ms
+OUT3 Res Time: 14895.949219 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.679500 ms
+OUT1 Res Time: 4973.324707 ms
+OUT2 Res Time: 9937.427734 ms
+OUT3 Res Time: 14900.446289 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.922375 ms
+OUT1 Res Time: 4967.345215 ms
+OUT2 Res Time: 9930.773438 ms
+OUT3 Res Time: 14894.123047 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.343688 ms
+OUT1 Res Time: 4967.297363 ms
+OUT2 Res Time: 9931.027344 ms
+OUT3 Res Time: 14896.289062 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.355562 ms
+OUT1 Res Time: 4971.458984 ms
+OUT2 Res Time: 9935.743164 ms
+OUT3 Res Time: 14899.756836 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.822750 ms
+OUT1 Res Time: 4964.696777 ms
+OUT2 Res Time: 9928.718750 ms
+OUT3 Res Time: 14891.334961 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.100625 ms
+OUT1 Res Time: 4964.918945 ms
+OUT2 Res Time: 9927.947266 ms
+OUT3 Res Time: 14891.528320 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.963625 ms
+OUT1 Res Time: 4965.761230 ms
+OUT2 Res Time: 9929.135742 ms
+OUT3 Res Time: 14893.838867 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.709812 ms
+OUT1 Res Time: 4968.487305 ms
+OUT2 Res Time: 9930.632812 ms
+OUT3 Res Time: 14893.586914 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.250438 ms
+OUT1 Res Time: 4967.812988 ms
+OUT2 Res Time: 9931.517578 ms
+OUT3 Res Time: 14896.795898 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.377375 ms
+OUT1 Res Time: 4966.205566 ms
+OUT2 Res Time: 9931.474609 ms
+OUT3 Res Time: 14896.326172 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 11.012125 ms
+OUT1 Res Time: 4973.134277 ms
+OUT2 Res Time: 9934.264648 ms
+OUT3 Res Time: 14896.114258 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.808750 ms
+OUT1 Res Time: 4970.015625 ms
+OUT2 Res Time: 9936.028320 ms
+OUT3 Res Time: 14899.676758 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.481250 ms
+OUT1 Res Time: 4972.330566 ms
+OUT2 Res Time: 9936.386719 ms
+OUT3 Res Time: 14900.050781 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.571500 ms
+OUT1 Res Time: 4971.202637 ms
+OUT2 Res Time: 9934.042969 ms
+OUT3 Res Time: 14898.666016 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.966938 ms
+OUT1 Res Time: 4967.115234 ms
+OUT2 Res Time: 9931.465820 ms
+OUT3 Res Time: 14895.683594 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.775000 ms
+OUT1 Res Time: 4973.404785 ms
+OUT2 Res Time: 9938.958984 ms
+OUT3 Res Time: 14903.725586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.480187 ms
+OUT1 Res Time: 4974.639160 ms
+OUT2 Res Time: 9942.146484 ms
+OUT3 Res Time: 14909.990234 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.225875 ms
+OUT1 Res Time: 4971.735352 ms
+OUT2 Res Time: 9936.578125 ms
+OUT3 Res Time: 14902.053711 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.684500 ms
+OUT1 Res Time: 4969.000000 ms
+OUT2 Res Time: 9935.185547 ms
+OUT3 Res Time: 14899.538086 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.073313 ms
+OUT1 Res Time: 4967.180176 ms
+OUT2 Res Time: 9933.634766 ms
+OUT3 Res Time: 14898.959961 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.892938 ms
+OUT1 Res Time: 4969.012695 ms
+OUT2 Res Time: 9935.745117 ms
+OUT3 Res Time: 14902.285156 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.737563 ms
+OUT1 Res Time: 4969.772949 ms
+OUT2 Res Time: 9933.705078 ms
+OUT3 Res Time: 14898.881836 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.897125 ms
+OUT1 Res Time: 4970.324707 ms
+OUT2 Res Time: 9937.580078 ms
+OUT3 Res Time: 14904.478516 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.807750 ms
+OUT1 Res Time: 4973.996582 ms
+OUT2 Res Time: 9943.488281 ms
+OUT3 Res Time: 14912.578125 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.388125 ms
+OUT1 Res Time: 4973.755859 ms
+OUT2 Res Time: 9942.731445 ms
+OUT3 Res Time: 14911.668945 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.190187 ms
+OUT1 Res Time: 4978.329590 ms
+OUT2 Res Time: 9946.559570 ms
+OUT3 Res Time: 14913.292969 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.752937 ms
+OUT1 Res Time: 4976.990723 ms
+OUT2 Res Time: 9943.714844 ms
+OUT3 Res Time: 14910.804688 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.856875 ms
+OUT1 Res Time: 4977.113281 ms
+OUT2 Res Time: 9944.956055 ms
+OUT3 Res Time: 14911.076172 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.270812 ms
+OUT1 Res Time: 4973.097168 ms
+OUT2 Res Time: 9937.563477 ms
+OUT3 Res Time: 14903.832031 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.706437 ms
+OUT1 Res Time: 4975.109863 ms
+OUT2 Res Time: 9942.172852 ms
+OUT3 Res Time: 14908.477539 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.336313 ms
+OUT1 Res Time: 4969.250488 ms
+OUT2 Res Time: 9935.626953 ms
+OUT3 Res Time: 14900.849609 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.851500 ms
+OUT1 Res Time: 4974.101074 ms
+OUT2 Res Time: 9939.176758 ms
+OUT3 Res Time: 14905.525391 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.942500 ms
+OUT1 Res Time: 4975.759766 ms
+OUT2 Res Time: 9942.599609 ms
+OUT3 Res Time: 14910.984375 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.059875 ms
+OUT1 Res Time: 4972.543945 ms
+OUT2 Res Time: 9939.064453 ms
+OUT3 Res Time: 14904.492188 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.961812 ms
+OUT1 Res Time: 4972.851562 ms
+OUT2 Res Time: 9937.460938 ms
+OUT3 Res Time: 14903.784180 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.397812 ms
+OUT1 Res Time: 4973.726562 ms
+OUT2 Res Time: 9942.651367 ms
+OUT3 Res Time: 14911.082031 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.541750 ms
+OUT1 Res Time: 4976.349121 ms
+OUT2 Res Time: 9944.035156 ms
+OUT3 Res Time: 14912.184570 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.268188 ms
+OUT1 Res Time: 4975.815918 ms
+OUT2 Res Time: 9943.581055 ms
+OUT3 Res Time: 14910.903320 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.745000 ms
+OUT1 Res Time: 4976.536133 ms
+OUT2 Res Time: 9947.915039 ms
+OUT3 Res Time: 14918.506836 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.937750 ms
+OUT1 Res Time: 4972.855469 ms
+OUT2 Res Time: 9941.285156 ms
+OUT3 Res Time: 14909.627930 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.019938 ms
+OUT1 Res Time: 4969.870605 ms
+OUT2 Res Time: 9935.344727 ms
+OUT3 Res Time: 14899.103516 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.921188 ms
+OUT1 Res Time: 4965.560547 ms
+OUT2 Res Time: 9930.240234 ms
+OUT3 Res Time: 14896.258789 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.821188 ms
+OUT1 Res Time: 4975.439453 ms
+OUT2 Res Time: 9943.125977 ms
+OUT3 Res Time: 14910.568359 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.915937 ms
+OUT1 Res Time: 4973.627930 ms
+OUT2 Res Time: 9941.348633 ms
+OUT3 Res Time: 14907.458984 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.774437 ms
+OUT1 Res Time: 4973.756348 ms
+OUT2 Res Time: 9942.166016 ms
+OUT3 Res Time: 14909.114258 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.888125 ms
+OUT1 Res Time: 4967.795410 ms
+OUT2 Res Time: 9930.063477 ms
+OUT3 Res Time: 14893.380859 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.962500 ms
+OUT1 Res Time: 4974.195312 ms
+OUT2 Res Time: 9942.225586 ms
+OUT3 Res Time: 14908.497070 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.724437 ms
+OUT1 Res Time: 4968.387207 ms
+OUT2 Res Time: 9935.867188 ms
+OUT3 Res Time: 14903.586914 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.731500 ms
+OUT1 Res Time: 4974.562012 ms
+OUT2 Res Time: 9939.368164 ms
+OUT3 Res Time: 14903.769531 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.451750 ms
+OUT1 Res Time: 4972.410156 ms
+OUT2 Res Time: 9938.127930 ms
+OUT3 Res Time: 14903.482422 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.527625 ms
+OUT1 Res Time: 4970.686523 ms
+OUT2 Res Time: 9934.534180 ms
+OUT3 Res Time: 14899.669922 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.524063 ms
+OUT1 Res Time: 4970.349121 ms
+OUT2 Res Time: 9935.421875 ms
+OUT3 Res Time: 14900.958008 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.266438 ms
+OUT1 Res Time: 4971.557129 ms
+OUT2 Res Time: 9936.022461 ms
+OUT3 Res Time: 14902.034180 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.352063 ms
+OUT1 Res Time: 4971.021484 ms
+OUT2 Res Time: 9938.084961 ms
+OUT3 Res Time: 14905.703125 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.257125 ms
+OUT1 Res Time: 4967.776855 ms
+OUT2 Res Time: 9933.630859 ms
+OUT3 Res Time: 14899.673828 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.733875 ms
+OUT1 Res Time: 4970.745605 ms
+OUT2 Res Time: 9937.799805 ms
+OUT3 Res Time: 14903.481445 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.811188 ms
+OUT1 Res Time: 4974.970703 ms
+OUT2 Res Time: 9943.973633 ms
+OUT3 Res Time: 14911.241211 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.688687 ms
+OUT1 Res Time: 4968.943359 ms
+OUT2 Res Time: 9934.671875 ms
+OUT3 Res Time: 14900.861328 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.416000 ms
+OUT1 Res Time: 4972.751465 ms
+OUT2 Res Time: 9940.734375 ms
+OUT3 Res Time: 14906.180664 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.499125 ms
+OUT1 Res Time: 4966.272461 ms
+OUT2 Res Time: 9932.001953 ms
+OUT3 Res Time: 14897.262695 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.581375 ms
+OUT1 Res Time: 4964.845215 ms
+OUT2 Res Time: 9929.608398 ms
+OUT3 Res Time: 14895.782227 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.746938 ms
+OUT1 Res Time: 4973.706543 ms
+OUT2 Res Time: 9940.131836 ms
+OUT3 Res Time: 14907.577148 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.898875 ms
+OUT1 Res Time: 4971.116211 ms
+OUT2 Res Time: 9935.537109 ms
+OUT3 Res Time: 14901.324219 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.147438 ms
+OUT1 Res Time: 4972.478027 ms
+OUT2 Res Time: 9940.238281 ms
+OUT3 Res Time: 14906.180664 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.484250 ms
+OUT1 Res Time: 4970.292969 ms
+OUT2 Res Time: 9936.365234 ms
+OUT3 Res Time: 14901.612305 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.567750 ms
+OUT1 Res Time: 4969.008301 ms
+OUT2 Res Time: 9933.939453 ms
+OUT3 Res Time: 14898.408203 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.337375 ms
+OUT1 Res Time: 4966.333008 ms
+OUT2 Res Time: 9930.742188 ms
+OUT3 Res Time: 14894.218750 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.329750 ms
+OUT1 Res Time: 4968.381836 ms
+OUT2 Res Time: 9931.143555 ms
+OUT3 Res Time: 14895.355469 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.798875 ms
+OUT1 Res Time: 4970.948730 ms
+OUT2 Res Time: 9934.761719 ms
+OUT3 Res Time: 14901.081055 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.381938 ms
+OUT1 Res Time: 4972.048340 ms
+OUT2 Res Time: 9939.593750 ms
+OUT3 Res Time: 14906.069336 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.372375 ms
+OUT1 Res Time: 4966.651855 ms
+OUT2 Res Time: 9929.023438 ms
+OUT3 Res Time: 14892.045898 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.360562 ms
+OUT1 Res Time: 4970.991699 ms
+OUT2 Res Time: 9936.102539 ms
+OUT3 Res Time: 14902.449219 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.643938 ms
+OUT1 Res Time: 4966.926270 ms
+OUT2 Res Time: 9932.231445 ms
+OUT3 Res Time: 14898.329102 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.477125 ms
+OUT1 Res Time: 4973.084473 ms
+OUT2 Res Time: 9936.914062 ms
+OUT3 Res Time: 14900.783203 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.308000 ms
+OUT1 Res Time: 4970.251465 ms
+OUT2 Res Time: 9933.005859 ms
+OUT3 Res Time: 14895.930664 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.494500 ms
+OUT1 Res Time: 4966.755371 ms
+OUT2 Res Time: 9930.997070 ms
+OUT3 Res Time: 14892.837891 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.826187 ms
+OUT1 Res Time: 4971.601562 ms
+OUT2 Res Time: 9933.489258 ms
+OUT3 Res Time: 14895.414062 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.077500 ms
+OUT1 Res Time: 4966.130371 ms
+OUT2 Res Time: 9930.575195 ms
+OUT3 Res Time: 14895.664062 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.528188 ms
+OUT1 Res Time: 4973.884277 ms
+OUT2 Res Time: 9938.027344 ms
+OUT3 Res Time: 14902.426758 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.264812 ms
+OUT1 Res Time: 4967.794922 ms
+OUT2 Res Time: 9931.221680 ms
+OUT3 Res Time: 14895.980469 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.349813 ms
+OUT1 Res Time: 4965.875977 ms
+OUT2 Res Time: 9929.672852 ms
+OUT3 Res Time: 14894.794922 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.493063 ms
+OUT1 Res Time: 4973.586426 ms
+OUT2 Res Time: 9937.641602 ms
+OUT3 Res Time: 14902.117188 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.048938 ms
+OUT1 Res Time: 4973.148926 ms
+OUT2 Res Time: 9937.613281 ms
+OUT3 Res Time: 14902.172852 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.858625 ms
+OUT1 Res Time: 4973.122559 ms
+OUT2 Res Time: 9939.250977 ms
+OUT3 Res Time: 14904.493164 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.356437 ms
+OUT1 Res Time: 4963.041504 ms
+OUT2 Res Time: 9924.930664 ms
+OUT3 Res Time: 14888.893555 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.981437 ms
+OUT1 Res Time: 4964.720703 ms
+OUT2 Res Time: 9928.498047 ms
+OUT3 Res Time: 14891.339844 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.423000 ms
+OUT1 Res Time: 4965.496582 ms
+OUT2 Res Time: 9929.992188 ms
+OUT3 Res Time: 14894.254883 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.812562 ms
+OUT1 Res Time: 4972.296875 ms
+OUT2 Res Time: 9936.355469 ms
+OUT3 Res Time: 14901.708008 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.690312 ms
+OUT1 Res Time: 4971.161133 ms
+OUT2 Res Time: 9936.976562 ms
+OUT3 Res Time: 14903.025391 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.277375 ms
+OUT1 Res Time: 4970.619629 ms
+OUT2 Res Time: 9935.454102 ms
+OUT3 Res Time: 14899.214844 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.513875 ms
+OUT1 Res Time: 4967.554199 ms
+OUT2 Res Time: 9934.284180 ms
+OUT3 Res Time: 14901.765625 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.959000 ms
+OUT1 Res Time: 4976.621582 ms
+OUT2 Res Time: 9942.675781 ms
+OUT3 Res Time: 14907.064453 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.113812 ms
+OUT1 Res Time: 4969.053711 ms
+OUT2 Res Time: 9936.494141 ms
+OUT3 Res Time: 14902.600586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.978812 ms
+OUT1 Res Time: 4964.863281 ms
+OUT2 Res Time: 9927.041016 ms
+OUT3 Res Time: 14891.325195 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.930250 ms
+OUT1 Res Time: 4971.516113 ms
+OUT2 Res Time: 9939.177734 ms
+OUT3 Res Time: 14907.041992 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.475750 ms
+OUT1 Res Time: 4968.127930 ms
+OUT2 Res Time: 9933.590820 ms
+OUT3 Res Time: 14898.255859 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 11.079562 ms
+OUT1 Res Time: 4976.041016 ms
+OUT2 Res Time: 9944.301758 ms
+OUT3 Res Time: 14910.213867 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.356875 ms
+OUT1 Res Time: 4973.187500 ms
+OUT2 Res Time: 9940.669922 ms
+OUT3 Res Time: 14907.966797 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.057125 ms
+OUT1 Res Time: 4968.960938 ms
+OUT2 Res Time: 9935.254883 ms
+OUT3 Res Time: 14901.192383 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.973000 ms
+OUT1 Res Time: 4971.357422 ms
+OUT2 Res Time: 9933.674805 ms
+OUT3 Res Time: 14896.336914 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.021812 ms
+OUT1 Res Time: 4970.242188 ms
+OUT2 Res Time: 9933.663086 ms
+OUT3 Res Time: 14897.175781 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.920625 ms
+OUT1 Res Time: 4971.056152 ms
+OUT2 Res Time: 9935.633789 ms
+OUT3 Res Time: 14902.366211 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 9.644563 ms
+OUT1 Res Time: 4972.584473 ms
+OUT2 Res Time: 9934.750977 ms
+OUT3 Res Time: 14899.493164 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.563937 ms
+OUT1 Res Time: 4966.913574 ms
+OUT2 Res Time: 9929.162109 ms
+OUT3 Res Time: 14893.335938 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.058187 ms
+OUT1 Res Time: 4968.940430 ms
+OUT2 Res Time: 9935.337891 ms
+OUT3 Res Time: 14900.430664 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.460750 ms
+OUT1 Res Time: 4969.552734 ms
+OUT2 Res Time: 9935.532227 ms
+OUT3 Res Time: 14900.332031 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.456438 ms
+OUT1 Res Time: 4967.065918 ms
+OUT2 Res Time: 9931.169922 ms
+OUT3 Res Time: 14893.264648 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.582125 ms
+OUT1 Res Time: 4966.515625 ms
+OUT2 Res Time: 9929.734375 ms
+OUT3 Res Time: 14895.125000 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.725000 ms
+OUT1 Res Time: 4972.095215 ms
+OUT2 Res Time: 9938.415039 ms
+OUT3 Res Time: 14905.150391 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.334000 ms
+OUT1 Res Time: 4964.474121 ms
+OUT2 Res Time: 9928.303711 ms
+OUT3 Res Time: 14890.850586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.469812 ms
+OUT1 Res Time: 4967.534668 ms
+OUT2 Res Time: 9930.412109 ms
+OUT3 Res Time: 14892.058594 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.194063 ms
+OUT1 Res Time: 4965.482422 ms
+OUT2 Res Time: 9927.973633 ms
+OUT3 Res Time: 14888.646484 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.573688 ms
+OUT1 Res Time: 4968.553711 ms
+OUT2 Res Time: 9931.907227 ms
+OUT3 Res Time: 14895.553711 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.114875 ms
+OUT1 Res Time: 4973.569824 ms
+OUT2 Res Time: 9938.634766 ms
+OUT3 Res Time: 14903.832031 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.748375 ms
+OUT1 Res Time: 4972.685547 ms
+OUT2 Res Time: 9938.656250 ms
+OUT3 Res Time: 14903.667969 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.131312 ms
+OUT1 Res Time: 4972.171875 ms
+OUT2 Res Time: 9937.434570 ms
+OUT3 Res Time: 14900.219727 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.251250 ms
+OUT1 Res Time: 4967.601562 ms
+OUT2 Res Time: 9932.679688 ms
+OUT3 Res Time: 14897.581055 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.966125 ms
+OUT1 Res Time: 4968.918945 ms
+OUT2 Res Time: 9931.654297 ms
+OUT3 Res Time: 14896.188477 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.524188 ms
+OUT1 Res Time: 4971.159668 ms
+OUT2 Res Time: 9936.416016 ms
+OUT3 Res Time: 14903.609375 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.563625 ms
+OUT1 Res Time: 4972.868652 ms
+OUT2 Res Time: 9939.375000 ms
+OUT3 Res Time: 14906.965820 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 3.569000 ms
+OUT1 Res Time: 4966.650391 ms
+OUT2 Res Time: 9930.305664 ms
+OUT3 Res Time: 14894.902344 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.081375 ms
+OUT1 Res Time: 4970.119141 ms
+OUT2 Res Time: 9934.089844 ms
+OUT3 Res Time: 14897.833008 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.015500 ms
+OUT1 Res Time: 4971.745605 ms
+OUT2 Res Time: 9938.923828 ms
+OUT3 Res Time: 14903.019531 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.618437 ms
+OUT1 Res Time: 4969.132324 ms
+OUT2 Res Time: 9934.498047 ms
+OUT3 Res Time: 14898.847656 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.491937 ms
+OUT1 Res Time: 4966.750000 ms
+OUT2 Res Time: 9930.406250 ms
+OUT3 Res Time: 14894.160156 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.580125 ms
+OUT1 Res Time: 4968.064941 ms
+OUT2 Res Time: 9932.132812 ms
+OUT3 Res Time: 14897.225586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.453750 ms
+OUT1 Res Time: 4973.954102 ms
+OUT2 Res Time: 9936.496094 ms
+OUT3 Res Time: 14900.519531 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.994688 ms
+OUT1 Res Time: 4968.964355 ms
+OUT2 Res Time: 9934.002930 ms
+OUT3 Res Time: 14897.394531 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 7.463125 ms
+OUT1 Res Time: 4969.639648 ms
+OUT2 Res Time: 9934.661133 ms
+OUT3 Res Time: 14898.661133 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.490063 ms
+OUT1 Res Time: 4971.422852 ms
+OUT2 Res Time: 9935.955078 ms
+OUT3 Res Time: 14898.996094 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 11.070188 ms
+OUT1 Res Time: 4972.974121 ms
+OUT2 Res Time: 9936.513672 ms
+OUT3 Res Time: 14900.710938 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 5.556625 ms
+OUT1 Res Time: 4969.246094 ms
+OUT2 Res Time: 9934.623047 ms
+OUT3 Res Time: 14897.942383 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.001500 ms
+OUT1 Res Time: 4973.734375 ms
+OUT2 Res Time: 9939.577148 ms
+OUT3 Res Time: 14905.869141 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 1.866000 ms
+OUT1 Res Time: 4968.395020 ms
+OUT2 Res Time: 9936.660156 ms
+OUT3 Res Time: 14903.419922 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.533375 ms
+OUT1 Res Time: 4972.225586 ms
+OUT2 Res Time: 9939.755859 ms
+OUT3 Res Time: 14908.329102 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 8.232750 ms
+OUT1 Res Time: 4974.062012 ms
+OUT2 Res Time: 9942.218750 ms
+OUT3 Res Time: 14907.975586 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 4.245812 ms
+OUT1 Res Time: 4967.839844 ms
+OUT2 Res Time: 9932.162109 ms
+OUT3 Res Time: 14896.466797 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 2.040125 ms
+OUT1 Res Time: 4969.437012 ms
+OUT2 Res Time: 9936.840820 ms
+OUT3 Res Time: 14902.901367 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 6.918188 ms
+OUT1 Res Time: 4970.795898 ms
+OUT2 Res Time: 9936.582031 ms
+OUT3 Res Time: 14903.402344 ms
+
+Starting 4 Ouputs Now...
+OUT0 Res Time: 10.932875 ms
+OUT1 Res Time: 4977.587891 ms
+OUT2 Res Time: 9945.265625 ms
+OUT3 Res Time: 14911.290039 ms

@@ -9,8 +9,8 @@ typedef unsigned char BOOL;
 
 #define USE_LED 0					/* true if the program uses on-board LEDs. false otherwise */
 
-#define NUM_PINS 4					/* Number of pins to use as outputs */
-static uint8_t output_pins[] __attribute__((section(".rodata"))) = {PIN8, PIN9, PIN10, PIN11};	/* List pins to use as outputs as {PIN0, PIN1, ...} */
+#define NUM_PINS 5					/* Number of pins to use as outputs */
+static uint8_t output_pins[] __attribute__((section(".rodata"))) = {PIN3, PIN8, PIN9, PIN10, PIN11};	/* List pins to use as outputs as {PIN0, PIN1, ...} */
 
 /************** DO NOT EDIT THESE FUNCTIONS **************/
 
@@ -31,6 +31,9 @@ void init_plc(void);
 BOOL Read_U_b_XMStart(void);
 
 BOOL Read_U_b_XStop(void);
+
+BOOL Read_U_b_YLED(void);
+void Write_U_b_YLED(BOOL v);
 
 BOOL Read_U_b_YOut0(void);
 void Write_U_b_YOut0(BOOL v);

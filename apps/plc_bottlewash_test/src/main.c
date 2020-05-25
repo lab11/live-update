@@ -31,9 +31,9 @@
 
 #define MUSCA_ON	 			13		// gpio pin to start musca program		(output)
 #define MUSCA_OFF 				14		// gpio pin to stop musca program		(output)
-#define MUSCA_Bottle_IN 		2		// gpio pin to sim bottle presence		(output)
-#define MUSCA_Bottle_UP			26		// gpio pin to sim bottle upright		(output)
-#define MUSCA_Position_DOWN		27		// gpio pin to sim bottle upside0down	(output)
+#define MUSCA_Bottle_IN 		10		// gpio pin to sim bottle presence		(output)
+#define MUSCA_Bottle_UP			9		// gpio pin to sim bottle upright		(output)
+#define MUSCA_Position_DOWN		8		// gpio pin to sim bottle upside0down	(output)
 
 #define MUSCA_Bottle_HOLD		22		// gpio pin to receive HOLD signal		(input)
 #define MUSCA_Motor_FORWARD		20		// gpio pin to receive Motor FORWARD	(input)
@@ -116,7 +116,7 @@ void gpio_init(void) {
 
 	// printf("Configure MUSCA_Bottle_HOLD...\n");
 	nrfx_gpiote_in_init(MUSCA_Bottle_HOLD,
-				&MUSCA_ouput_config,
+				&musca_output_config,
 				(nrfx_gpiote_evt_handler_t) musca_out_cb);
 
 	// printf("Configure MUSCA_Motor_FORWARD...\n");
@@ -158,18 +158,20 @@ void gpio_init(void) {
 
 	/* Configure Outputs:
 	 * MUSCA_ON
-	 * LED1
+	 * 
 	 *
 	 * Note: MUSCA_OFF is a directly linked to a button that the musca will read directly anyways
 	 */ 
 
-	printf("Configuring Outputs...");
+	nrf_gpio_cfg_output(MUSCA_Bottle_IN);
+	nrf_gpio_cfg_output(MUSCA_Bottle_UP);
+	nrf_gpio_cfg_output(MUSCA_Position_DOWN);
 
-	nrf_gpio_cfg_output(MUSCA_ON);
-	nrf_gpio_cfg_output(LED1);
+	nrf_gpio_pin_set(MUSCA_Bottle_IN);
+	nrf_gpio_pin_set(MUSCA_Bottle_UP);
+	nrf_gpio_pin_set(MUSCA_Position_DOWN);
 
-	nrf_gpio_pin_set(MUSCA_ON);
-	nrf_gpio_pin_set(LED1);
+	// printf("BUTTON1: %d\n", nrf_gpio_pin_read(NRF_BUTTON1));
 
 	printf("GPIO and GPIOTE initialized!\n");
 }
@@ -202,21 +204,21 @@ void timer_init(void) {
 
 	/* Uncomment to trigger application periodically. */
 
-	// uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&musca_bottle_timer, TIMER_PERIOD_MS);
-	// printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+	uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&musca_bottle_timer, TIMER_PERIOD_MS);
+	printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
 
-	// nrfx_timer_extended_compare(&musca_bottle_timer,
-	// 							NRF_TIMER_CC_CHANNEL0,
-	// 							timer_period_ticks,
-	// 							NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-	// 							true);
+	nrfx_timer_extended_compare(&musca_bottle_timer,
+								NRF_TIMER_CC_CHANNEL0,
+								timer_period_ticks,
+								NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+								true);
 
 	printf("Timer Initialized!\n"); // Remember to enable the timer in main
 }
 
 /***********************************************/
 
-uint32_t* pin_context;
+uint32_t pin_context;
 
 /******** Callback and Helper Functions ********/
 
@@ -226,23 +228,40 @@ float timer_16MHz_ticks_to_ms(uint32_t ticks) {
 
 static void musca_bottle_cb(nrf_timer_event_t evt_type, void* p_context) {
 	printf("Simulating Bottle Presence...\n");
-	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), p_context);
+	pin_context = MUSCA_Bottle_IN;
+	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), (void*) &pin_context);
 	APP_ERROR_CHECK(error_code);
-
+	
 	tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
+	printf("Clearing Pin %d...\n", MUSCA_Bottle_IN);
 	nrf_gpio_pin_clear(MUSCA_Bottle_IN);
 }
 
 static void sim_sensor(void* p_context) {
+	rx_time = nrfx_timer_capture(&musca_bottle_timer, 2);
+	res_time = (rx_time < tx_time) ? (rx_time + (1 + ~tx_time)) : (rx_time - tx_time);
+	switch(*((uint32_t*) p_context)) {
+		case MUSCA_Position_DOWN :
+			printf("Motor_FORWARD Hold Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Bottle Down, Turning Water On...\n");
+			break;
+		case MUSCA_Bottle_UP :
+			printf("Motor_REVERSE Hold Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Bottle Up, Releasing Bottle...\n");
+			break;
+	}
+
 	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), p_context);
 	APP_ERROR_CHECK(error_code);
 
 	tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
-	nrf_gpio_pin_clear(*p_context);b
+	nrf_gpio_pin_clear(*((uint32_t*) p_context));
 }
 
 static void release_button(void* p_context) {
-	nrf_gpio_pin_set(*p_context);
+	// printf("Context %x\n", (int) p_context);
+	// printf("Setting Pin %d\n", *((uint32_t*) p_context));
+	nrf_gpio_pin_set(*((uint32_t*) p_context));
 }
 
 static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
@@ -254,25 +273,32 @@ static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
 	// printf("Response Time: %d ticks\n", res_time);
 	switch(pin) {
 		case MUSCA_Bottle_HOLD :
-			printf("Bottle_HOLD Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Bottle_IN Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Holding Bottle...\n");
 			tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
-			*pin_context = MUSCA_Bottle_HOLD;
-			error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), (void*) pin_context);
-			APP_ERROR_CHECK(error_code);
+			// *pin_context = MUSCA_Bottle_HOLD;
+			// error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), (void*) pin_context);
+			// APP_ERROR_CHECK(error_code);
 			break;
 		case MUSCA_Motor_FORWARD :
-			printf("Motor_FORWARD Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
-			// tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
+			printf("Bottle Hold Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Motor Forward...\n");
+			tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
+			pin_context = MUSCA_Position_DOWN;
+			error_code = app_timer_start(SSIM_TIMER, APP_TIMER_TICKS(3000), (void*) &pin_context);
+			APP_ERROR_CHECK(error_code);
 			break;
 		case MUSCA_Water_ON :
 			printf("Water_ON Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
 			tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
-			*pin_context = MUSCA_Water_ON;
-			error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), (void*) pin_context);
-			APP_ERROR_CHECK(error_code);
 			break;
 		case MUSCA_Motor_REVERSE :
-			printf("Motor REVERSE Res Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Water ON Hold Time: %f ms\n", timer_16MHz_ticks_to_ms(res_time));
+			printf("Motor Reverse...\n");
+			tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
+			pin_context = MUSCA_Bottle_UP;
+			error_code = app_timer_start(SSIM_TIMER, APP_TIMER_TICKS(3000), (void*) &pin_context);
+			APP_ERROR_CHECK(error_code);
 			break;
 		case MUSCA_Bottle_RELEASE :
 			printf("Bottle RELEASE Res Time: %f ms\n\n", timer_16MHz_ticks_to_ms(res_time));
@@ -282,19 +308,20 @@ static void musca_out_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
 }
 
 static void musca_btn_cb(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
+	// printf("pin %d\n", pin);
 	switch(pin) {
 
-		case NRF_BUTTON1 : // Stop Button
-			printf("Stopped 4 Ouputs.\n\n");
+		case NRF_BUTTON1 : // MUSCA ON
+			printf("Bottle Washer On\n\n");
+			printf("First Bottle in %ds...\n", TIMER_PERIOD_MS);
+			
+			nrfx_timer_enable(&musca_bottle_timer);
 			break;
 
-		case NRF_BUTTON2 : // Start Case
-			printf("Starting 4 Ouputs Now...\n");
-			error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), NULL);
-			APP_ERROR_CHECK(error_code);
+		case NRF_BUTTON2 : // MUSCA OFF
+			printf("Bottle Washer Off\n\n");
 
-			tx_time = nrfx_timer_capture(&musca_bottle_timer, 1);
-			nrf_gpio_pin_clear(MUSCA_ON);
+			nrfx_timer_disable(&musca_bottle_timer);
 			break;
 	}
 }
@@ -317,9 +344,6 @@ int main(void) {
 	// // start testing timer
 	// error_code = app_timer_start(PUSH_TIMER, APP_TIMER_TICKS(5000), NULL);
 	// APP_ERROR_CHECK(error_code);
-
-	printf("HF Timer Enabled!\n\n");
-	nrfx_timer_enable(&musca_bottle_timer);
 
 	// printf("Button Simulator Enabled!\n");
 	// error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(TIMER_PERIOD_MS), NULL);

@@ -38,7 +38,7 @@
 
 #define LED1 17							// specify LED pin
 
-#define TIMER_PERIOD_MS 23000			// desired timer period in milliseconds
+#define TIMER_PERIOD_MS 23001			// desired timer period in milliseconds
 #define NRF_BUTTON1 13					// Button 1 on nrf52
 #define NRF_BUTTON2 14					// Button 2 on nrf52
 
@@ -188,14 +188,14 @@ void timer_init(void) {
 
 	/* Uncomment to trigger application periodically. */
 
-	// uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&musca_start_timer, TIMER_PERIOD_MS);
-	// printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+	uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&musca_start_timer, TIMER_PERIOD_MS);
+	printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
 
-	// nrfx_timer_extended_compare(&musca_start_timer,
-	// 							NRF_TIMER_CC_CHANNEL0,
-	// 							timer_period_ticks,
-	// 							NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-	// 							true);
+	nrfx_timer_extended_compare(&musca_start_timer,
+								NRF_TIMER_CC_CHANNEL0,
+								timer_period_ticks,
+								NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+								true);
 
 	printf("Timer Initialized!\n"); // Remember to enable the timer in main
 }
