@@ -316,8 +316,8 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
 
         # strip the leading & if necessary to get address
         if timer[0] == '&':
-            timer = timer[1:]
-        addr = get_symbol_address(update_symbols, timer+'$')
+            timer_stripped = timer[1:]
+        addr = get_symbol_address(update_symbols, timer_stripped+'$')
 
         transfer['timers'].append((addr, expire, stop, duration, period))
 
@@ -699,6 +699,7 @@ def get_update_points(update_manifest, flashed_manifest, update_dir, flashed_dir
 
     G_u = nx.read_gpickle(
         os.path.join(update_dir, update_manifest['update_graph']))
+
     G_f = nx.read_gpickle(
         os.path.join(flashed_dir, flashed_manifest['update_graph']))
 
