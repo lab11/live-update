@@ -93,6 +93,7 @@ def eval_symbolic_expression(exp, state):
 
 
 def apply_action(all_events, e, state):
+    #print('apply_action:', e['event'], e['call'] if 'call' in e else '', e['caller'], e['previousID'], e['currentID'])
 
     if 'call_gpio' in e['event']:
         if "tfm_gpio_enable_output" in e['call']:
@@ -159,11 +160,11 @@ def apply_action(all_events, e, state):
             r = re.compile('tfm_gpio_clear\((.*)\)$')
             m = r.match(e['call'])
             if m:
-                print('found GPIO clear on pin', int(m.group(1)))
+                #print('found GPIO clear on pin', int(m.group(1)))
                 pin = int(m.group(1))
-                print('set before:', gpio['set'])
+                #print('set before:', gpio['set'])
                 gpio['set'] &= ~(1 << pin)
-                print('set afer:', gpio['set'])
+                #print('set afer:', gpio['set'])
 
             return [(new_state, [])]
 
@@ -174,11 +175,11 @@ def apply_action(all_events, e, state):
             r = re.compile('tfm_gpio_set\((.*)\)$')
             m = r.match(e['call'])
             if m:
-                print('found GPIO set on pin', int(m.group(1)))
+                #print('found GPIO set on pin', int(m.group(1)))
                 pin = int(m.group(1))
-                print('set before:', gpio['set'])
+                #print('set before:', gpio['set'])
                 gpio['set'] |= (1 << pin)
-                print('set after:', gpio['set'])
+                #print('set after:', gpio['set'])
 
             return [(new_state, [])]
 
@@ -195,7 +196,7 @@ def apply_action(all_events, e, state):
             return [(new_state, [])]
 
     elif 'call_timer' in e['event']:
-        if "k_timer_init" in e['call']:
+        if e['call'].startswith("k_timer_init"):
             new_state = deepcopy(state)
             mem, timers, gpio = new_state
 
@@ -209,7 +210,7 @@ def apply_action(all_events, e, state):
 
             return [(new_state, [])]
 
-        elif "k_timer_start" in e['call']:
+        elif e['call'].startswith("k_timer_start"):
             new_state = deepcopy(state)
             mem, timers, gpio = new_state
             reset_timers = []
@@ -221,6 +222,7 @@ def apply_action(all_events, e, state):
                     t_name = m.group(1)
                 else:
                     t_name = timers['stopping']
+
                 timers['stopping'] = None
                 timers['timers'][t_name]['duration_ms'] = \
                     eval(m.group(2).replace('U', ''))
@@ -228,11 +230,12 @@ def apply_action(all_events, e, state):
                     eval(m.group(3).replace('U', ''))
                 if t_name not in timers['active']:
                     timers['active'].append(t_name)
+
                 reset_timers.append(t_name)
 
             return [(new_state, reset_timers)]
 
-        elif "k_timer_stop" in e['call']:
+        elif e['call'].startswith("k_timer_stop"):
             new_state = deepcopy(state)
             mem, timers, gpio = new_state
 
@@ -241,7 +244,7 @@ def apply_action(all_events, e, state):
 
             t_name = m.group(1)
             if m and t_name in timers['active']:
-                timers['active'].remove(m.group(1))
+                timers['active'].remove(m.group(1)) 
 
             t = timers['timers'][t_name] 
             if t and t['stop_fn'] and t['stop_fn'] in all_events:
@@ -249,29 +252,30 @@ def apply_action(all_events, e, state):
 
                 results = []
                 for s, t in apply_event(t['stop_fn'], 0, all_events, new_state):
-                    results.append((s, t))
+                    results.append((s, t.append(t_name)))
                 return results
             else:
-                return [(new_state, [])]
+                return [(new_state, [t_name])]
 
     # handle potential additional 'events' due to calls to other translation units
     elif 'call_other' in e['event']:
+        #print('call other')
         new_state = deepcopy(state)
         mem, timers, gpio = new_state
 
         r = re.compile('(.*)\(.*\)$')
         m = r.match(e['call'])
+
         if m:
-            call_name = m.group(1)
-            if call_name in all_events:
-                results = []
-                for s, t in apply_event(call_name, 0, all_events, new_state):
-                    results.append((s, t))
-                return results
-            else:
-                return [(new_state, [])]
-        else:
-            return [(new_state, [])]
+            #print('>>>', m.group(1), e['call'], len(all_events))
+            for next_e in all_events:
+                if next_e['caller'] == m.group(1) and next_e['previousID'] == '0':    
+                    results = []
+                    for s, t in apply_event(m.group(1), 0, all_events, new_state):
+                        results.append((s, t))
+                    return results
+
+        return [(new_state, [])]
 
     elif 'bind' in e['event']:
         if 'bindloc_region' not in e:
@@ -298,29 +302,8 @@ def apply_action(all_events, e, state):
         exit(1)
 
 
-'''
-def apply_event_path(event_id, global_events, specific_events, state):
-
-    end_results = []
-    for e in specific_events:
-        if e['currentID'] == event_id:
-            for s, t in apply_action(global_events, e, state):
-                end_results.append((s, t))  # in case no other paths to take
-
-                for next_e in specific_events:
-                    if next_e['previousID'] == event_id:
-                        constraint_fn = constraints_to_fn(next_e['program_state']['constraints'])
-                        if constraint_fn(s):
-                            results = []
-                            for s2, t2 in apply_event_path(next_e['currentID'], global_events, specific_events, s):
-                                results.append((s2, t + t2))
-                            return results
-    return end_results
-'''
-
-
 def apply_event(name, previousID, events, state):
-    print('apply_event:', name, 'prev_id:', previousID)
+    #print('apply_event:', name, 'prev_id:', previousID)
 
     # for the event caller `name`, given the current state `state` generated by
     # event `previousID`, apply any following events and return the resulting
@@ -331,9 +314,12 @@ def apply_event(name, previousID, events, state):
         if int(next_event['previousID']) == previousID and name == next_event['caller']:
             constraint_fn = constraints_to_fn(next_event['program_state']['constraints'])
             if constraint_fn(state):
-                print('  apply_action', next_event['call'] if 'call' in next_event else '', 'curr_id:', next_event['currentID'])
+                #print('  apply_action', next_event['call'] if 'call' in next_event else '', 'curr_id:', next_event['currentID'])
                 for new_state, new_reset_timers in apply_action(events, next_event, state):
-                    results += apply_event(name, int(next_event['currentID']), events, new_state)
+                    #print('after calling apply action', next_event['call'] if 'call' in next_event else next_event['event'], ', got', new_state, new_reset_timers)
+                    for s, t in apply_event(name, int(next_event['currentID']), events, new_state):
+                        t += new_reset_timers
+                        results.append((s, t))
 
     if len(results) == 0: # no valid next events, just return our state
         results.append((state, []))
@@ -344,8 +330,9 @@ def apply_event(name, previousID, events, state):
             if t['expiry_fn'] == name:
                 reset_timer = t_name
 
-        for r in results:
-            r[1].append(reset_timer)
+        if reset_timer:
+            for r in results:
+                r[1].append(reset_timer)
 
     return results
 
@@ -384,8 +371,6 @@ if __name__ == '__main__':
         else:
             e['program_state']['constraints'] = current_constraints 
             events.append(e)
-
-    pprint.pprint(events)
 
     '''
     for i in clang_data['analysis']:
@@ -439,16 +424,33 @@ if __name__ == '__main__':
     G.add_node(to_node(init_state))
 
     to_explore = []
-    print()
-    print('APPLY MAIN')
+    #print()
+    #print('APPLY MAIN')
     for next_state, t in apply_event('main', 0, events, init_state):
         G.add_node(to_node(next_state))
         G.add_edge(to_node(init_state), to_node(next_state), label=[{'event': 'main', 'reset': t}])
 
+        '''
+        print()
+        print()
+        print('Adding main edge:')
+        print()
+        print('    EDGE')
+        pprint.pprint({
+            'event': 'main',
+            'reset': t
+        })
+        print('    SOURCE')
+        pprint.pprint(init_state)
+        print('    DESTINATION')
+        pprint.pprint(next_state)
+        print()
+        '''
+
         to_explore.append(next_state)
 
     while len(to_explore) > 0:
-        print('n_to_explore:', len(to_explore))
+        #print('n_to_explore:', len(to_explore))
         curr_state = to_explore.pop()
 
         possible_events = list(curr_state[2]['interrupts'].values())
@@ -457,8 +459,8 @@ if __name__ == '__main__':
                 possible_events.append(curr_state[1]['timers'][active_timer]['expiry_fn'])
 
         for e in possible_events:
-            print('APPLY TOP LEVEL')
-            pprint.pprint(curr_state)
+            #print('APPLY TOP LEVEL')
+            #pprint.pprint(curr_state)
             for s, t in apply_event(e, 0, events, curr_state):
                 if to_node(s) not in G:
                     G.add_node(to_node(s))
@@ -466,13 +468,18 @@ if __name__ == '__main__':
 
                 '''
                 print()
+                print()
                 print('Adding edge:')
+                print()
+                print('    EDGE')
+                pprint.pprint({
+                    'event': e,
+                    'reset': t
+                })
                 print('    SOURCE')
                 pprint.pprint(curr_state)
                 print('    DESTINATION')
                 pprint.pprint(s)
-                print('    EDGE')
-                pprint.pprint(e)
                 print()
                 '''
 
