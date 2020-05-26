@@ -307,6 +307,10 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
             active = False # even though active in state, the event means the timer will be turned inactive
             transfer['event_handler_addr'] = expire
 
+        if 'duration_ms' not in update_timers['timers'][timer]:
+            pass
+            #print('hello')
+            #pprint.pprint(point)
         duration = update_timers['timers'][timer]['duration_ms']
         period = update_timers['timers'][timer]['period_ms']
 
@@ -664,6 +668,7 @@ def find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f):
     reachable_events = []
     for potential_e in potential_events:
         src_u = json.dumps(potential_e[0])
+        #print(nx.ancestors(G_u, src_u))
         unreachable_nodes = set(G_u.nodes).difference(nx.ancestors(G_u, src_u))
 
         if len(unreachable_nodes) == 1 and src_u in unreachable_nodes:
@@ -763,6 +768,8 @@ if __name__ == '__main__':
 
         update_points = get_update_points(manifest, flashed_manifest, update_folder, flashed_folder)
 
+        print('-- Predicates --')
+        print()
         update_predicates = generate_update_predicates(
             manifest,
             args.app_folder,
@@ -770,6 +777,8 @@ if __name__ == '__main__':
             update_points
         )
 
+        print('-- Transfers --')
+        print()
         update_transfers = generate_update_transfers(
             manifest,
             args.app_folder,
@@ -808,8 +817,10 @@ if __name__ == '__main__':
             force=args.force
         )
 
+        '''
         for payload_name in ['text', 'rodata', 'predicates', 'transfers']:
             print(payload_name, '\n', update_payloads[payload_name].hex())
+        '''
     
         serialized_update_header = serialize_header(update_header, update_payloads)
 
