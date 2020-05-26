@@ -11,7 +11,6 @@ args = parser.parse_args()
 contents = \
 """
 CONFIG_UART_INTERRUPT_DRIVEN=y
-CONFIG_GPIO=y
 CONFIG_LIVE_UPDATE=y
 CONFIG_LIVE_UPDATE_FUTURE=y
 """
