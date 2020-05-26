@@ -4,8 +4,8 @@
 
 #include "plc_platform.h"
 
-typedef signed short SWORD;
-typedef unsigned char BOOL;
+// typedef signed short SWORD;
+// typedef unsigned char BOOL;
 
 #define USE_LED 1					/* true if the program uses on-board LEDs. false otherwise */
 

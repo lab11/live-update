@@ -62,7 +62,8 @@ all: $(BIN_S) $(BIN) $(MERGED_HEX) $(UPDATE_DIR)
 # 	$(shell source $(ZEPHYR_BASE)/zephyr-env.sh)
 
 CLANG_ANALYSIS_FLAGS = -Xclang -analyze -Xclang -analyzer-checker=core.LiveUpdate -fsyntax-only
-CLANG_COMPILE_FLAGS = -ffreestanding -fno-common -Wall -Wformat -Wformat-security -Wno-format-zero-length -Wno-main -Wno-address-of-packed-member -Wno-pointer-sign -Wpointer-arith -Werror=implicit-int -ffunction-sections -fdata-sections -std=c99
+CLANG_COMPILE_FLAGS = -ffreestanding -fno-common -Wall -Wformat -Wformat-security -Wno-format-zero-length -Wno-main -Wno-address-of-packed-member -Wno-pointer-sign -Wpointer-arith -Werror=implicit-int -Wunused -ffunction-sections -fdata-sections -std=c99
+CLANG_CMPLE_FLAGS_T = -ffreestanding -fno-common -Wall -Wformat -Wformat-security -Wno-format-zero-length -Wno-main -Wno-address-of-packed-member -Wno-pointer-sign -Wpointer-arith -Werror=implicit-int -ffunction-sections -fdata-sections -std=c99
 CLANG_INCLUDE_DIRS = -imacros$(ZEPHYR_BASE)/include/toolchain/zephyr_stdint.h \
 					 -imacros$(ZEPHYR_BUILDDIR)/zephyr/include/generated/autoconf.h \
 					 -I./include \
@@ -87,7 +88,7 @@ $(UPDATE_DIR): $(BUILDDIR)
 	$(Q)cp $(ELF) $@/update_ns.elf
 	$(Q)cp $(MERGED_HEX) $@/update.hex
 	$(Q)echo "{\"analysis\":[" > $@/analysis.json
-#	$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
+	$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
 	$(Q)echo "]}" >> $@/analysis.json
 	$(Q)python3 $(BASE_DIR)/scripts/gen_app_graph.py $@/update.symbols $(ELF) $@/analysis.json $@/update.graph --dump_dot $@/update.graph.dot
 	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json

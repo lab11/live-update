@@ -8,8 +8,8 @@ static uint8_t LED_pins[] __attribute__((section(".rodata"))) = {2, 3, 4};
 // super hacky change this later
 // this is a useful thing to tell the compiler where a variable should be stored
 
-static uint32_t time_old = 0;
-static uint32_t time_cnt = 0;
+// static uint32_t time_old = 0;
+// static uint32_t time_cnt = 0;
 
 void plc_callback(struct k_timer *t) {	
 	// time_old = time_cnt;
@@ -49,11 +49,11 @@ BOOL Read_U_b_Xbutton(void) {
 }
 
 BOOL Read_U_b_Yled(void) {
-	return (BOOL) read_LED(R);
+	return (BOOL) read_LED(B);
 }
 
 void Write_U_b_Yled(BOOL v) {
-	write_LED(R, v);
+	write_LED(B, v);
 }
 
 BOOL Read_U_b_Ytx(void) {
