@@ -30,10 +30,10 @@ void avi_timer_expire_cb(struct k_timer *t) {
     if (VSed == 1) {
         return;
     } else {
-        if (uri_expired == 1 && VP_allowed == 1) {
+        if (uri_expired == 1) {
             // printk("V Pacing.. \n");
             ventricle_pace();
-        } else if (uri_expired == 0 && VP_allowed == 0) {
+        } else if (uri_expired == 0) {
             // printk("Extending AVI \n");
             avi_extended = 1;
         }
@@ -56,6 +56,7 @@ void uri_timer_expire_cb(struct k_timer *t) {
 
 void avi_observe() {
     VSed = 0;
+    avi_expired = 0;
     k_timer_start(&avi_timer, TAVI, 0);
 }
 

@@ -84,7 +84,7 @@ void observe(EventType_t event) {
         // printk("Now observing Ventricle Event... \n");
         VP_allowed = 0;
 
-        k_timer_stop(&lri_timer);
+        // k_timer_stop(&lri_timer);
         k_timer_stop(&avi_timer);
         notify_fsms(event);
     } else if (event == ATRIAL) {
