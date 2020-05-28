@@ -13,7 +13,7 @@ def parse_value(value):
     except ValueError:
         return '0'
 
-output = open('data.h','w')
+output = open('src/data.h','w')
 
 output.write('#include <time.h>\n')
 output.write('#define SIZE ' + str(SIZE) + '\n')

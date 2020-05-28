@@ -1,4 +1,5 @@
 #include "monitor.h"
+#include "sys/printk.h"
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -45,8 +46,8 @@ void calculate_deltas(float *);
 void determine_basal(float, float, float, float, float, float, float);
 
 void init_monitor(void) {
-  current_scheduled_basal.duration = 30.0f;
-  current_scheduled_basal.rate = 0.0f;
+  current_scheduled_basal.duration = 30.0f; // NOT USED
+  current_scheduled_basal.rate = 1.2f;
   current_temp_basal.duration = 30.0f;
   current_temp_basal.rate = 0.0f;
 
@@ -69,11 +70,6 @@ void add_reading(time_t rawtime, float glucose) {
   glucose_data_absolute[glucose_size].time = rawtime;
   glucose_data_absolute[glucose_size].glucose = glucose;
   glucose_size++;
-}
-
-void set_current_basal(float rate) {
-  current_scheduled_basal.duration = 0.0f; // NOT USED
-  current_scheduled_basal.rate = 1.2f;
 }
 
 void add_treatment(time_t rawtime, float bolus_insulin) {
@@ -173,10 +169,10 @@ void determine_basal(float blood_glucose,
           // high temp is running or shorten long zero temps to 30m
             current_temp_basal.duration = 30;
             current_temp_basal.rate = 0;
-            //printf("  176 ");
+            printk("  176 ");
             return;
         } else {
-        //printf("  179 ");
+        printk("  179 ");
           return;
         }
     }
@@ -211,7 +207,7 @@ void determine_basal(float blood_glucose,
 
     // TODO: raise target for noisy / raw CGM data
 
-    float expectedDelta = bgi + (target_bg - eventual_bg) * 5 / 120;
+    float expectedDelta = bgi + (target_bg - eventual_bg) * 10 / DIA;
 
     // min_bg of 90 -> threshold of 65, 100 -> 70 110 -> 75, and 130 -> 85
     float threshold = TARGET_LOW - 0.5f * (TARGET_LOW - 40);
@@ -221,7 +217,7 @@ void determine_basal(float blood_glucose,
     if ( blood_glucose < threshold) {
       current_temp_basal.duration = 0;
       current_temp_basal.rate = 0;
-      //printf("  224 ");
+      printk("  224 ");
       return;
     }
 
@@ -232,18 +228,18 @@ void determine_basal(float blood_glucose,
             if (naive_eventual_bg < 40) {
               current_temp_basal.duration = 30;
               current_temp_basal.rate = 0;
-              //printf("  235 ");
+              printk("  235 ");
               return;
             }
             if (current_duration > 15) {
               current_temp_basal.duration = 0;
               current_temp_basal.rate = 0;
-              //printf("  241 ");
+              printk("  241 ");
               return;
             } else {
               current_temp_basal.duration = 30;
               current_temp_basal.rate = scheduled_basal;
-              //printf("  246 ");
+              printk("  246 ");
               return;
             }
         }
@@ -268,7 +264,7 @@ void determine_basal(float blood_glucose,
         if (insulinScheduled < minInsulinReq - scheduled_basal * 0.3f) {
           current_temp_basal.duration = 30;
           current_temp_basal.rate = rate;
-          //printf("  271 ");
+          printk("  271 ");
           return;
         }
         // calculate a long enough zero temp to eventually correct back up to target
@@ -279,7 +275,7 @@ void determine_basal(float blood_glucose,
         }
         current_temp_basal.duration = 30;
         current_temp_basal.rate = rate;
-        //printf("  301 ");
+        printk("  301 ");
         return;
     }
 
@@ -287,12 +283,12 @@ void determine_basal(float blood_glucose,
     // if iob is over max, just cancel any temps
     if (iob > MAX_IOB) {
         if (current_duration > 15 && current_basal == scheduled_basal) {
-        //printf("  309 ");
+        printk("  309 ");
             return;
         } else {
           current_temp_basal.duration = 30;
           current_temp_basal.rate = scheduled_basal;
-          //printf("  314 ");
+          printk("  314 ");
           return;
         }
     } else { // otherwise, calculate 30m high-temp required to get projected BG down to target
@@ -306,20 +302,26 @@ void determine_basal(float blood_glucose,
 
         // rate required to deliver insulinReq more insulin over 30m:
         float rate = MIN (MAX_BASAL_PUMP, scheduled_basal / 2 + insulinReq);
+        /*float rate = MIN (MAX_BASAL_PUMP, scheduled_basal / 2 + insulinReq) + (short_avgdelta > 1? 0.2 : -0.2);
+        if (long_avgdelta + bgi <= 8) {
+          current_temp_basal.duration = 30;
+          current_temp_basal.rate = rate / 2;
+          return;
+        }*/
 
         float insulinScheduled = current_duration * (current_basal - scheduled_basal) / 60;
         if (insulinScheduled >= insulinReq * 2 || current_duration <= 5 || rate < current_basal) {
           // if current temp would deliver >2x more than the required insulin, lower the rate
           current_temp_basal.duration = 30;
           current_temp_basal.rate = rate;
-          //printf("insulinReq: %f, blood_glucose: %f, eventual_bg: %f, target_bg: %f, iob: %f\n", insulinReq, blood_glucose, eventual_bg, target_bg, iob);
-          //printf("  334 ");
+          printk("insulinReq: %f, blood_glucose: %f, eventual_bg: %f, target_bg: %f, iob: %f\n", insulinReq, blood_glucose, eventual_bg, target_bg, iob);
+          printk("  334 ");
           return;
         } else {
           // if required temp <~ existing temp basal
           current_temp_basal.duration = 30;
           current_temp_basal.rate = scheduled_basal;
-          //printf("  338 ");
+          printk("  338 ");
           return;
         }
     }

@@ -1,0 +1,57 @@
+GLUCOSE MONITOR
+
+How to run (Steps should be similar to running most other test applications):
+1) Enter vagrant (`vagrant up`, `vagrant ssh` as necessary)
+2) Navigate to glucose directory (ie `/vagrant/apps/glucose`)
+3) Run `make`
+4) Exit from vagrant (`exit`)
+5) Run `make flash`
+6) Run `make serial`
+7) Restart board
+
+How to update (Steps should be similar to running most other test applications):
+1) Run `make` and `make flash` as before
+2) Comment line 309 of monitor.c (`float rate = MIN (MAX_BASAL_PUMP, scheduled_basal / 2 + insulinReq);`)
+3) Uncomment lines 310-315 of monitor.c (
+```
+float rate = MIN (MAX_BASAL_PUMP, scheduled_basal / 2 + insulinReq) + (short_avgdelta > 1? 0.2 : -0.2);
+if (long_avgdelta + bgi <= 8) {
+  current_temp_basal.duration = 30;
+  current_temp_basal.rate = rate / 2;
+  return;
+}
+```
+)
+4) Run `make` as before
+5) Run `python3 <path to top level dir>/scripts/update.py <path to top level dir>/glucose /dev/<serial device>`
+
+Notes about the change:
+The above update is part of a patch for adjusting for unexpected blood glucose
+deviations by using the blood glucose impact as described in the OpenAPS
+reference guide, specifically the current insulin activity multiplied to the
+insulin sensitivity, along with both short term and long term average change
+in blood glucose levels. Both blood glucose impact and average changes are
+heavily dependent upon maintaining state, as the application records
+necessary past glucose levels and calculates blood glucose impact using
+past bolus inputs. Improvement in before and after inclusion of the patch can
+be observed from the histograms "HISTOGRAM_BEFORE.png" versus
+"HISTOGRAM_AFTER.png", respectively.
+
+Notes about evaluating application:
+Using the dataset "n=111 from the OpenAPS Data Commons," we selected a small
+sample of real data and took in necessary information, such as blood glucose
+level and correction bolus intake. We then calculated what the expected
+temporary basal rate should be and compare it against what was actually set,
+so lower absolute differences implied better results. Check the histograms
+for performance.
+
+Notes about files in glucose:
+combined_data_edited.csv: Processed data that contains only necessary columns and information
+data_processor.py: To convert "combined_data_edited.csv" into a data file c can easily process (To run, just `python3 data_processor.py`)
+HISTOGRAM_BEFORE.png: Histogram of absolute differences between calculated temp basal rate and actually used temp basal rate before the patch for adjusting unexpected blood glucose deviations
+HISTOGRAM_AFTER.png: Histogram of absolute differences between calculated temp basal rate and actually used temp basal rate after the patch for adjusting unexpected blood glucose deviations
+COMPLETE_UPDATE_RESULT: Text file containing complete output in terminal from following the update procedure
+CONDENSED_UPDATE_RESULT: Text file containing only the output comparing duration and rate of calculated temp basal against values of the actually used temp basal rate
+src/data.h: combined_data_edited.csv processed into a simple c data file
+src/main.c: To use src/data.h and call monitor functions
+src/monitor.c and src/monitor.h: The actual code for the glucose monitor for taking in necessary values and estimating temp basal rate.
