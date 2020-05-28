@@ -1,4 +1,5 @@
 import argparse
+from collections import defaultdict
 from copy import deepcopy
 from elftools.elf.elffile import ELFFile
 import json
@@ -19,7 +20,7 @@ def constraints_to_fn(c_list):
 
     reg_symbol_re = re.compile('reg_.*<.* (.*)>$')
     derived_symbol_re = re.compile('derived_.*\{.*,(.*)\}$')
-    range_re = re.compile('\{.*\[(\d+), (\d+)\].*\}')
+    range_re = re.compile('\{.*\[(-?\d+), (-?\d+)\].*\}')
 
     # TODO handle more constraints that aren't just one int
     constraint_ranges = []  # [symbol, lower, upper]
@@ -43,8 +44,7 @@ def constraints_to_fn(c_list):
     def check_constraint(state):
         mem = state[0]
         for c in constraint_ranges:
-            if c[0] not in mem:
-                return False
+            if c[0] not in mem: return False
 
             if mem[c[0]] < c[1] or mem[c[0]] > c[2]:
                 return False
@@ -92,7 +92,7 @@ def eval_symbolic_expression(exp, state):
         exit(1)
 
 
-def apply_action(all_events, e, state):
+def apply_action(e, state, edge_data):
     #print('apply_action:', e['event'], e['call'] if 'call' in e else '', e['caller'], e['previousID'], e['currentID'])
 
     if 'call_gpio' in e['event']:
@@ -106,7 +106,7 @@ def apply_action(all_events, e, state):
                 pin = int(m.group(1))
                 gpio['output_enabled'] |= (1 << pin)
 
-            return [(new_state, [])] 
+            return (new_state, [])
 
         elif "tfm_gpio_disable" in e['call']:
             new_state = deepcopy(state)
@@ -118,7 +118,7 @@ def apply_action(all_events, e, state):
                 pin = int(m.group(1))
                 gpio['output_enabled'] &= ~(1 << pin)
 
-            return [(new_state, [])]
+            return (new_state, [])
 
         elif "tfm_gpio_interrupt_enable" in e['call']:
             new_state = deepcopy(state)
@@ -138,7 +138,7 @@ def apply_action(all_events, e, state):
                         if callback_match:
                             gpio['interrupts'][pin] = callback_match.group(1)
 
-            return [(new_state, [])]
+            return (new_state, [])
 
         elif "tfm_gpio_interrupt_disable" in e['call']:
             new_state = deepcopy(state)
@@ -151,7 +151,7 @@ def apply_action(all_events, e, state):
                 gpio['interrupt_enabled'] &= ~(1 << pin)
                 del gpio['interrupts'][pin]
 
-            return [(new_state, [])]
+            return (new_state, [])
 
         elif "tfm_gpio_clear" in e['call']:
             new_state = deepcopy(state)
@@ -160,13 +160,10 @@ def apply_action(all_events, e, state):
             r = re.compile('tfm_gpio_clear\((.*)\)$')
             m = r.match(e['call'])
             if m:
-                #print('found GPIO clear on pin', int(m.group(1)))
                 pin = int(m.group(1))
-                #print('set before:', gpio['set'])
                 gpio['set'] &= ~(1 << pin)
-                #print('set afer:', gpio['set'])
 
-            return [(new_state, [])]
+            return (new_state, [])
 
         elif "tfm_gpio_set" in e['call']:
             new_state = deepcopy(state)
@@ -175,13 +172,10 @@ def apply_action(all_events, e, state):
             r = re.compile('tfm_gpio_set\((.*)\)$')
             m = r.match(e['call'])
             if m:
-                #print('found GPIO set on pin', int(m.group(1)))
                 pin = int(m.group(1))
-                #print('set before:', gpio['set'])
                 gpio['set'] |= (1 << pin)
-                #print('set after:', gpio['set'])
 
-            return [(new_state, [])]
+            return (new_state, [])
 
         elif "tfm_gpio_write_all" in e['call']:
             new_state = deepcopy(state)
@@ -193,7 +187,7 @@ def apply_action(all_events, e, state):
                 val = int(m.group(1))
                 gpio['set'] = val
 
-            return [(new_state, [])]
+            return (new_state, [])
 
     elif 'call_timer' in e['event']:
         if e['call'].startswith("k_timer_init"):
@@ -208,7 +202,7 @@ def apply_action(all_events, e, state):
                     'stop_fn': None if '(void *)0' in m.group(3) else m.group(3)
                 }
 
-            return [(new_state, [])]
+            return (new_state, [])
 
         elif e['call'].startswith("k_timer_start"):
             new_state = deepcopy(state)
@@ -218,12 +212,12 @@ def apply_action(all_events, e, state):
             r = re.compile('k_timer_start\((.*), (.*), (.*)\)$')
             m = r.match(e['call'])
             if m:
-                if 'stopping' not in timers or not timers['stopping']:
-                    t_name = m.group(1)
+                if edge_data and 'label' in edge_data and 'vars' in edge_data['label']  and 'stopped_timer' in edge_data['label']['vars']:
+                    t_name = edge_data['label']['vars']['stopped_timer']
                 else:
-                    t_name = timers['stopping']
+                    t_name = m.group(1)
 
-                timers['stopping'] = None
+                #print('T NAME', t_name)
                 timers['timers'][t_name]['duration_ms'] = \
                     eval(m.group(2).replace('U', ''))
                 timers['timers'][t_name]['period_ms'] = \
@@ -233,49 +227,31 @@ def apply_action(all_events, e, state):
 
                 reset_timers.append(t_name)
 
-            return [(new_state, reset_timers)]
+            return (new_state, reset_timers)
 
         elif e['call'].startswith("k_timer_stop"):
             new_state = deepcopy(state)
             mem, timers, gpio = new_state
 
-            r = re.compile('k_timer_stop\((.*)\)$')
-            m = r.match(e['call'])
+            if edge_data and 'label' in edge_data and 'vars' in edge_data['label']  and 'stopped_timer' in edge_data['label']['vars']:
+                t_name = edge_data['label']['vars']['stopped_timer']
+            else:
+                r = re.compile('k_timer_stop\((.*)\)$')
+                m = r.match(e['call'])
 
-            t_name = m.group(1)
+                t_name = m.group(1)
+
             if m and t_name in timers['active']:
                 timers['active'].remove(m.group(1)) 
 
-            t = timers['timers'][t_name] 
-            if t and t['stop_fn'] and t['stop_fn'] in all_events:
-                timers['stopping'] = t_name
+            return (new_state, [t_name])
 
-                results = []
-                for s, t in apply_event(t['stop_fn'], 0, all_events, new_state):
-                    results.append((s, t.append(t_name)))
-                return results
-            else:
-                return [(new_state, [t_name])]
-
-    # handle potential additional 'events' due to calls to other translation units
     elif 'call_other' in e['event']:
         #print('call other')
         new_state = deepcopy(state)
         mem, timers, gpio = new_state
 
-        r = re.compile('(.*)\(.*\)$')
-        m = r.match(e['call'])
-
-        if m:
-            #print('>>>', m.group(1), e['call'], len(all_events))
-            for next_e in all_events:
-                if next_e['caller'] == m.group(1) and next_e['previousID'] == '0':    
-                    results = []
-                    for s, t in apply_event(m.group(1), 0, all_events, new_state):
-                        results.append((s, t))
-                    return results
-
-        return [(new_state, [])]
+        return (new_state, [])
 
     elif 'bind' in e['event']:
         if 'bindloc_region' not in e:
@@ -295,44 +271,60 @@ def apply_action(all_events, e, state):
             print('Assumed that some known bindval format was there, it\'s not, enjoy your exit')
             exit(1)
 
-        return [(new_state, [])]
+        return (new_state, [])
 
     else:
         print('DIDN\'T IMPLEMENT apply_action for some e:', e)
         exit(1)
 
 
-def apply_event(name, previousID, events, state):
-    #print('apply_event:', name, 'prev_id:', previousID)
+def apply_event_path(eventG, path, start_state):
+    #print()
+    #print('PATH (length', len(path), ')')
 
-    # for the event caller `name`, given the current state `state` generated by
-    # event `previousID`, apply any following events and return the resulting
-    # states
+    curr_state = start_state
+    curr_in_edge = None
+
+    reset_timers = []
+    for t_name, t in start_state[1]['timers'].items():
+        if t['expiry_fn'] == path[0]['caller']:
+            reset_timers.append(t_name)
+
+    for idx, s in enumerate(path):
+        if idx > 0:
+            curr_in_edge = eventG.get_edge_data(to_node(path[idx-1]), to_node(path[idx]))
+
+        constraint_fn = constraints_to_fn(s['program_state']['constraints'])
+        if not constraint_fn(curr_state):
+            #print(idx, 'state does not meet constraints:')
+            #print('  constraints:', s['program_state']['constraints'])
+            #print('  state:', curr_state)
+            break # done processing path
+
+        next_state, r = apply_action(s, curr_state, curr_in_edge)
+
+        curr_state = next_state
+        reset_timers += r
+
+    return curr_state, list(set(reset_timers))
+
+
+def apply_event(eventG, name, paths, start_state):
+
+    #print()
+    #print()
+    #print('EVENT', name)
 
     results = []
-    for next_event in events:
-        if int(next_event['previousID']) == previousID and name == next_event['caller']:
-            constraint_fn = constraints_to_fn(next_event['program_state']['constraints'])
-            if constraint_fn(state):
-                #print('  apply_action', next_event['call'] if 'call' in next_event else '', 'curr_id:', next_event['currentID'])
-                for new_state, new_reset_timers in apply_action(events, next_event, state):
-                    #print('after calling apply action', next_event['call'] if 'call' in next_event else next_event['event'], ', got', new_state, new_reset_timers)
-                    for s, t in apply_event(name, int(next_event['currentID']), events, new_state):
-                        t += new_reset_timers
-                        results.append((s, t))
 
-    if len(results) == 0: # no valid next events, just return our state
-        results.append((state, []))
-
-    if previousID == 0:
-        reset_timer = None
-        for t_name, t in state[1]['timers'].items():
-            if t['expiry_fn'] == name:
-                reset_timer = t_name
-
-        if reset_timer:
-            for r in results:
-                r[1].append(reset_timer)
+    event_paths = paths[name]
+    for p in event_paths:
+        #print(p)
+        p = [to_state(s) for s in p]
+        result = apply_event_path(eventG, p, start_state)
+        if result:
+            #print(result)
+            results.append(result)
 
     return results
 
@@ -372,14 +364,128 @@ if __name__ == '__main__':
             e['program_state']['constraints'] = current_constraints 
             events.append(e)
 
-    '''
-    for i in clang_data['analysis']:
 
-        if i['caller'] not in system_events:
-            system_events[i['caller']] = []
 
-        system_events[i['caller']].append(i)
-    '''
+    #print(len(events))
+    #print(e['event'], e['caller'], 'calling', e['call'] if 'call' in e else '', e['currentID'])
+    eventG = nx.DiGraph()
+
+    top_level_events = [e for e in events if e['previousID'] == '0']
+    top_level_callers = [e['caller'] for e in top_level_events]
+
+    frontier = top_level_events
+    for n in frontier:
+        #print(n['caller'], n['program_state']['constraints'])
+        eventG.add_node(to_node(n))
+
+    # build initial graph without interproc. dependencies
+    while len(frontier) != 0:
+        curr_n = frontier.pop()
+
+        for next_n in events:
+            if curr_n['currentID'] == next_n['previousID'] and curr_n['caller'] == next_n['caller']:
+                if to_node(next_n) not in eventG:
+                    eventG.add_node(to_node(next_n))
+                eventG.add_edge(to_node(curr_n), to_node(next_n))
+                frontier.append(next_n)
+
+    # get leaf node information for each event
+    leaves = {} # top level call name -> leaf nodes
+    for top_level_node in [to_node(e) for e in events if e['previousID'] == '0']:
+        leaf_list = []
+
+        #print(to_state(top_level_node)['caller'])
+        #print(len(nx.descendants(eventG, top_level_node)))
+        for s in nx.descendants(eventG, top_level_node):
+            if len(list(eventG.successors(s))) == 0:
+                leaf_list.append(s)
+
+        if len(leaf_list) == 0:
+            leaf_list.append(top_level_node)
+
+        leaves[to_state(top_level_node)['caller']] = leaf_list
+
+    # get timer stop callback linkage
+    timer_stop_cbs = {}
+    for n in eventG:
+        curr_n = to_state(n)
+        if curr_n['event'] == 'call_timer':
+            m = re.compile('^k_timer_init\((.*), (.*), (.*)\)$').match(curr_n['call'])
+            if m:
+                timer = m.group(1)
+                stop_cb = m.group(3)
+                timer_stop_cbs[timer] = stop_cb
+
+    # insert procedure calls
+    for n in eventG:
+        curr_n = to_state(n)
+
+
+        if curr_n['event'] == 'call_other':
+            m = re.compile('^(.*)\(.*\)$').match(curr_n['call'])
+            if m:
+                fn = m.group(1) 
+                if fn in top_level_callers:
+
+                    # unlink next nodes
+                    curr_n_successors = list(eventG.successors(n))
+                    for s in curr_n_successors:
+                        eventG.remove_edge(n, s)
+
+                    for t in [e for e in events if e['previousID'] == '0']:
+                        if t['caller'] == fn:
+
+                            eventG.add_edge(n, to_node(t))
+
+                            for l in leaves[fn]:
+                                for s in curr_n_successors:
+                                    eventG.add_edge(l, s)
+
+            else:
+                print('RIP failed call_other fn name regex')
+
+        elif curr_n['event'] == 'call_timer':
+            m = re.compile('^k_timer_stop\((.*)\)$').match(curr_n['call'])
+            if m:
+                timer_name = m.group(1)
+                if timer_name in timer_stop_cbs and timer_stop_cbs[timer_name] in top_level_callers:
+
+                    # unlink next nodes
+                    curr_n_successors = list(eventG.successors(n))
+                    for s in curr_n_successors:
+                        eventG.remove_edge(n, s)
+
+                    for t in [e for e in events if e['previousID'] == '0']:
+                        if t['caller'] == timer_stop_cbs[timer_name]:
+
+                            eventG.add_edge(n, to_node(t), label={'vars':{'stopped_timer': timer_name}})
+
+                            for l in leaves[timer_stop_cbs[timer_name]]:
+                                for s in curr_n_successors:
+                                    eventG.add_edge(l, s)
+
+    # Calculate paths through graph
+    paths = defaultdict(list)
+    for n in eventG:
+        n_state = to_state(n)
+        if n_state['caller'] in top_level_callers and len(list(eventG.predecessors(n))) == 0:
+            #print('PATHS - for', n_state['caller'])
+            descendant_nodes = nx.descendants(eventG, n)
+            for dest_n in descendant_nodes:
+                if len(list(eventG.successors(dest_n))) == 0:
+                    #print('  SINK', to_state(dest_n)['call'] if 'call' in to_state(dest_n) else '', to_state(dest_n)['caller'])
+                    paths[n_state['caller']] += list(nx.all_simple_paths(eventG, n, dest_n))
+
+            if len(descendant_nodes) == 0:
+                paths[n_state['caller']].append([n])
+
+    for e in paths:
+        #print(e, len(paths[e]))
+        for p in paths[e]:
+            #print('  ', len(p), type(p))
+            pass
+    
+    nx.nx_pydot.write_dot(eventG, 'TEST_EVENT.dot')
 
     # Initialize application global memory state
     init_mem = {}
@@ -424,11 +530,11 @@ if __name__ == '__main__':
     G.add_node(to_node(init_state))
 
     to_explore = []
-    #print()
-    #print('APPLY MAIN')
-    for next_state, t in apply_event('main', 0, events, init_state):
+    for next_state, reset_timers in apply_event(eventG, 'main', paths, init_state):
         G.add_node(to_node(next_state))
-        G.add_edge(to_node(init_state), to_node(next_state), label=[{'event': 'main', 'reset': t}])
+        G.add_edge(to_node(init_state), to_node(next_state), label=[{'event': 'main', 'reset': reset_timers}])
+
+        to_explore.append(next_state)
 
         '''
         print()
@@ -447,8 +553,6 @@ if __name__ == '__main__':
         print()
         '''
 
-        to_explore.append(next_state)
-
     while len(to_explore) > 0:
         #print('n_to_explore:', len(to_explore))
         curr_state = to_explore.pop()
@@ -461,10 +565,10 @@ if __name__ == '__main__':
         for e in possible_events:
             #print('APPLY TOP LEVEL')
             #pprint.pprint(curr_state)
-            for s, t in apply_event(e, 0, events, curr_state):
-                if to_node(s) not in G:
-                    G.add_node(to_node(s))
-                    to_explore.append(s)
+            for next_state, t in apply_event(eventG, e, paths, curr_state):
+                if to_node(next_state) not in G:
+                    G.add_node(to_node(next_state))
+                    to_explore.append(next_state)
 
                 '''
                 print()
@@ -483,7 +587,7 @@ if __name__ == '__main__':
                 print()
                 '''
 
-                U, V = to_node(curr_state), to_node(s)
+                U, V = to_node(curr_state), to_node(next_state)
                 if not G.has_edge(U, V):
                     G.add_edge(U, V, label=[{'event': e, 'reset': t}])
                 else:
@@ -493,5 +597,4 @@ if __name__ == '__main__':
         nx.nx_pydot.write_dot(G, args.dump_dot)
 
     nx.write_gpickle(G, args.out_graph_json)
-
 
