@@ -1,27 +1,56 @@
-#include "sys/printk.h"
-#include "tfm_gpio_veneers.h"
+// https://docs.zephyrproject.org/latest/reference/peripherals/gpio.html
 
-void pin10_cb(void) {
-    printk("Got an interrupt on pin 10!\n");
+#include "kernel.h"
+#include "drivers/gpio.h"
+#include "sys/printk.h"
+
+#define PIN1 10
+#define PIN2 11
+
+struct device *gpio_dev;
+struct gpio_callback cb1_data;
+struct gpio_callback cb2_data;
+
+void pin1_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
+    printk("Got an interrupt on pin %d!\n", pin);
 }
 
-void pin11_cb(void) {
-    printk("Got an interrupt on pin 11!\n");
+void pin2_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
+    printk("Got another interrupt on pin %d!\n", pin);
 }
 
 void main(void) {
-    gpio_int_config pin10_cfg = {
-        .type = 1,
-        .polarity = 0,
-        .cb = pin10_cb
-    };
-    tfm_gpio_interrupt_enable(10, &pin10_cfg);
 
-    gpio_int_config pin11_cfg = {
-        .type = 1,
-        .polarity = 1,
-        .cb = pin11_cb
-    };
-    tfm_gpio_interrupt_enable(11, &pin11_cfg);
+    gpio_dev = device_get_binding("GPIO_0");
+
+    int ret = gpio_pin_configure(gpio_dev, PIN1, GPIO_INPUT);
+    if (ret) {
+        printk("gpio_pin_configure(%d) failed with error code: %d\n", PIN1, ret);
+        return;
+    }
+
+    ret = gpio_pin_configure(gpio_dev, PIN2, GPIO_INPUT);
+    if (ret) {
+        printk("gpio_pin_configure(%d) failed with error code: %d\n", PIN2, ret);
+        return;
+    }
+
+    ret = gpio_pin_interrupt_configure(gpio_dev, PIN1, GPIO_INT_EDGE_TO_ACTIVE);
+    if (ret) {
+        printk("gpio_pin_interrupt_configure(%d) failed with error code: %d\n", PIN1, ret);
+        return;
+    }
+
+    ret = gpio_pin_interrupt_configure(gpio_dev, PIN2, GPIO_INT_EDGE_TO_INACTIVE);
+    if (ret) {
+        printk("gpio_pin_configure(%d) failed with error code: %d\n", PIN2, ret);
+        return;
+    }
+
+    gpio_init_callback(&cb1_data, pin1_cb, BIT(PIN1));
+    gpio_add_callback(gpio_dev, &cb1_data);
+
+    gpio_init_callback(&cb2_data, pin2_cb, BIT(PIN2));
+    gpio_add_callback(gpio_dev, &cb2_data);
 }
 

@@ -1,3 +1,5 @@
+//docs.zephyrproject.org/latest/reference/peripherals/gpio.html
+
 #include "kernel.h"
 #include "drivers/gpio.h"
 #include "sys/printk.h"
@@ -24,8 +26,8 @@ void main(void) {
     gpio_dev = device_get_binding("GPIO_0");
     int ret = gpio_pin_configure(gpio_dev, PIN, GPIO_OUTPUT_INACTIVE);
     if (ret) {
-	printk("gpio_pin_configure failed with error code: %d\n", ret);
-	return;
+	    printk("gpio_pin_configure failed with error code: %d\n", ret);
+	    return;
     }
     
     k_timer_init(&gpio_timer, gpio_timer_handler, NULL);
