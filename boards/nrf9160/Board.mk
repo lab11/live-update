@@ -65,7 +65,7 @@ $(UPDATE_DIR): $(BUILDDIR) $(ELF)
 	$(Q)cp $(ELF) $@/update_ns.elf
 	$(Q)cp $(MERGED_HEX) $@/update.hex
 	$(Q)echo "{\"analysis\":[" > $@/analysis.json
-	$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
+	#$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
 	$(Q)echo "]}" >> $@/analysis.json
 	$(Q)python3 $(BASE_DIR)/scripts/gen_app_graph.py $@/update.symbols $(ELF) $@/analysis.json $@/update.graph --dump_dot $@/update.graph.dot
 	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json
