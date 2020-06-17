@@ -1,7 +1,7 @@
 PROJECT_NAME = $(shell basename "$(realpath ./)")
 
 # Configuration
-BOARD = musca_a
+BOARD = nrf9160
 
 # Source and header files
 APP_HEADER_PATHS += ./include
