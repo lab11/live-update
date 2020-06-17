@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import json
 import networkx as nx
 import os
@@ -56,6 +57,15 @@ def get_symbol_size(filename, symbol_re):
         size = int(l.split()[-2], base=16)
     search_symbols(filename, symbol_re, cb)
     return size
+
+
+def get_symbol_name(filename, addr_re):
+    name = None
+    def cb(l):
+        nonlocal name
+        name = l.split()[-1]
+    search_symbols(filename, format(addr_re, 'x'), cb)
+    return name
 
 
 def valid_partition(app_folder, manifest):
@@ -243,9 +253,6 @@ def generate_predicate(manifest, update_folder, flashed_symbols, point):
         addr = get_symbol_address(flashed_symbols, cb+'$')
         predicate['gpio_interrupt_callbacks'].append((pin, addr))
 
-    print()
-    print()
-    pprint.pprint(predicate)
     return predicate
 
 
@@ -316,8 +323,8 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
 
         # strip the leading & if necessary to get address
         if timer[0] == '&':
-            timer = timer[1:]
-        addr = get_symbol_address(update_symbols, timer+'$')
+            timer_stripped = timer[1:]
+        addr = get_symbol_address(update_symbols, timer_stripped+'$')
 
         transfer['timers'].append((addr, expire, stop, duration, period))
 
@@ -335,10 +342,6 @@ def generate_transfer(manifest, flashed_symbols, update_symbols, point):
 
     transfer['gpio_out_enabled'] = update_gpio['output_enabled']
     transfer['gpio_out_set'] = update_gpio['set']
-
-    print()
-    print()
-    pprint.pprint(transfer)
 
     return transfer
 
@@ -471,6 +474,8 @@ def generate_update_payloads(header, manifest, app_folder, update_folder, predic
         for cb in t['gpio_interrupt_callbacks']:
             pin, addr = cb
             t_bytes += struct.pack('II', int(pin), addr | 0x1) # thumb
+
+        print('TRANSFER SIZE', len(t_bytes) + 4)
 
         return struct.pack('I', len(t_bytes) + 4) + t_bytes
 
@@ -664,16 +669,19 @@ def find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f):
     reachable_events = []
     for potential_e in potential_events:
         src_u = json.dumps(potential_e[0])
+        #print(nx.ancestors(G_u, src_u))
         unreachable_nodes = set(G_u.nodes).difference(nx.ancestors(G_u, src_u))
 
         if len(unreachable_nodes) == 1 and src_u in unreachable_nodes:
             reachable_events.append(potential_e)
 
-    if len(reachable_events) == 0:
-        return None
+    return reachable_events
+
+    '''
     elif len(reachable_events) > 1:
         print('Warning, found more than 1 potential/reachable update event, returning the first one...')
     return reachable_events[0] # return the only event
+    '''
 
     '''
     print('EVENT_F:')
@@ -699,6 +707,7 @@ def get_update_points(update_manifest, flashed_manifest, update_dir, flashed_dir
 
     G_u = nx.read_gpickle(
         os.path.join(update_dir, update_manifest['update_graph']))
+
     G_f = nx.read_gpickle(
         os.path.join(flashed_dir, flashed_manifest['update_graph']))
 
@@ -708,17 +717,19 @@ def get_update_points(update_manifest, flashed_manifest, update_dir, flashed_dir
         e_events_f = G_f.get_edge_data(e[0], e[1])['label']
 
         for e_event_f in e_events_f:
-            match = find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f)
-            if match:
-                src_state_u, dst_state_u, e_event_u = match
-                update_points.append({
+            matches = find_matching_update_event(G_u, src_state_f, dst_state_f, e_event_f)
+            for m in matches:
+                src_state_u, dst_state_u, e_event_u = m
+                pt = {
                     'src_state_f': src_state_f,
                     'dst_state_f': dst_state_f,
                     'src_state_u': src_state_u,
                     'dst_state_u': dst_state_u,
                     'e_event_f': e_event_f,
                     'e_event_u': e_event_u,
-                })
+                }
+                if pt not in update_points:
+                    update_points.append(pt)
 
     '''
     for p in update_points:
@@ -727,6 +738,67 @@ def get_update_points(update_manifest, flashed_manifest, update_dir, flashed_dir
     '''
 
     return update_points
+
+
+def pprint_predicate(p, flashed_symbols):
+    print_p = deepcopy(p)
+
+    named_list = []
+    for at in p['active_timers']:
+        name = get_symbol_name(flashed_symbols, at[0])
+        named_list.append((name, at[1], at[2]))
+    print_p['active_timers'] = named_list
+
+    print_p['event_handler_addr'] = get_symbol_name(flashed_symbols, p['event_handler_addr'])
+
+    named_list = []
+    for gic in p['gpio_interrupt_callbacks']:
+        named_list.append((gic[0], get_symbol_name(flashed_symbols, gic[1])))
+    print_p['gpio_interrupt_callbacks'] = named_list
+
+    print_p['gpio_interrupt_enabled'] = bin(p['gpio_interrupt_enabled'])
+    print_p['gpio_out_enabled'] = bin(p['gpio_out_enabled'])
+    print_p['gpio_out_set'] = bin(p['gpio_out_set'])
+
+    named_list = []
+    for mc in p['memory_checks']:
+        named_list.append((get_symbol_name(flashed_symbols, mc[0]), mc[1], mc[2].hex()))
+    print_p['memory_checks'] = named_list
+
+    pprint.pprint(print_p)
+
+
+def pprint_transfer(t, flashed_symbols, update_symbols):
+    print_t = deepcopy(t)
+
+    named_list = []
+    for at in t['active_timers']:
+        name = get_symbol_name(update_symbols, at[0])
+        named_list.append((name, at[1], at[2]))
+    print_t['active_timers'] = named_list
+
+    print_t['event_handler_addr'] = get_symbol_name(update_symbols, t['event_handler_addr'])
+
+    named_list = []
+    for gic in t['gpio_interrupt_callbacks']:
+        named_list.append((gic[0], get_symbol_name(update_symbols, gic[1])))
+    print_t['gpio_interrupt_callbacks'] = named_list
+
+    print_t['gpio_interrupt_enabled'] = bin(t['gpio_interrupt_enabled'])
+    print_t['gpio_out_enabled'] = bin(t['gpio_out_enabled'])
+    print_t['gpio_out_set'] = bin(t['gpio_out_set'])
+
+    named_list = []
+    for mc in t['memory']:
+        named_list.append((get_symbol_name(flashed_symbols, mc[0]), get_symbol_name(update_symbols, mc[1]), mc[2]))
+    print_t['memory'] = named_list
+
+    named_list = []
+    for x in t['timers']:
+        named_list.append((get_symbol_name(update_symbols, x[0]), get_symbol_name(update_symbols, x[1]) if x[1] else None, get_symbol_name(update_symbols, x[2]) if x[2] else None, x[3], x[4]))
+    print_t['timers'] = named_list
+
+    pprint.pprint(print_t)
 
 
 if __name__ == '__main__':
@@ -740,6 +812,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', help='Timeout', type=int, default=2)
     parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
     parser.add_argument('--dry_run', help='Does not attempt serial communication', action='store_true', default=False)
+    parser.add_argument('--no_update_flashed', help='Does not overwrite currently flashed info', action='store_true', default=False)
     args = parser.parse_args()
 
     if args.update_folder:
@@ -762,28 +835,42 @@ if __name__ == '__main__':
 
         update_points = get_update_points(manifest, flashed_manifest, update_folder, flashed_folder)
 
-        update_predicates = generate_update_predicates(
+        candidate_predicates = generate_update_predicates(
             manifest,
             args.app_folder,
             update_folder,
             update_points
         )
 
-        update_transfers = generate_update_transfers(
+        candidate_transfers = generate_update_transfers(
             manifest,
             args.app_folder,
             update_folder,
             update_points
         )
+
+        flashed_symbols = os.path.join(args.app_folder, '_build', FLASHED_SYMBOLS_NAME)
+        update_symbols = os.path.join(update_folder, manifest['update_symbols'])
+
+        update_predicates = []
+        update_transfers = []
+        #print(len(candidate_predicates), len(candidate_transfers))
+        for i, p in enumerate(candidate_predicates):
+            if p not in update_predicates and get_symbol_name(flashed_symbols, p['event_handler_addr']) == 'ventricle_sense_cb':
+                update_predicates.append(p)
+                update_transfers.append(candidate_transfers[i])
+
+        #update_predicates = update_predicates[0:5]
+        #update_transfers = update_transfers[0:5]
 
         '''
-        for i in range(len(update_points)):
-            print('=== PREDICATE ===')
-            pprint.pprint(update_predicates[i])
+        for i in range(len(update_predicates)):
+            print('=== PREDICATE {} ==='.format(i))
+            pprint_predicate(update_predicates[i], flashed_symbols)
             print()
 
-            print('=== TRANSFER  ===')
-            pprint.pprint(update_transfers[i])
+            print('=== TRANSFER  {} ==='.format(i))
+            pprint_transfer(update_transfers[i], flashed_symbols, update_symbols)
 
             print()
             print()
@@ -807,40 +894,48 @@ if __name__ == '__main__':
             force=args.force
         )
 
+        '''
         for payload_name in ['text', 'rodata', 'predicates', 'transfers']:
             print(payload_name, '\n', update_payloads[payload_name].hex())
+        '''
     
         serialized_update_header = serialize_header(update_header, update_payloads)
 
         if not args.dry_run:
             with serial.Serial(args.dev, args.baud, timeout=args.timeout) as ser:
 
-                print('sending header...')
+                total_size = len(serialized_update_header)
+                print('sending header', hex(len(serialized_update_header)), '...')
                 ser.write(serialized_update_header)
 
                 for payload_name in ['text', 'rodata', 'predicates', 'transfers']:
-                    time.sleep(1)
-                    print('sending', payload_name, '...')
+                    time.sleep(3)
+                    total_size += len(update_payloads[payload_name])
+                    print('sending', payload_name, hex(len(update_payloads[payload_name])), '...')
                     ser.write(update_payloads[payload_name])
 
-            print("updating last flashed version number...")
-            flashed_version_filename = os.path.join(args.app_folder, '_build', FLASHED_VERSION_NAME)
-            os.system('echo {} > {}'.format(manifest['update_version'], flashed_version_filename))
+                print('device should have received', total_size, 'bytes total')
 
-            print("updating last flashed symbol file...")
-            flashed_symbols_filename = os.path.join(args.app_folder, '_build', FLASHED_SYMBOLS_NAME)
+            if not args.no_update_flashed:
 
-            os.system('cp {} {}'.format(
-                os.path.join(update_folder, manifest['update_symbols']),
-                flashed_symbols_filename
-            ))
+                print("updating last flashed version number...")
+                flashed_version_filename = os.path.join(args.app_folder, '_build', FLASHED_VERSION_NAME)
+                os.system('echo {} > {}'.format(manifest['update_version'], flashed_version_filename))
 
-            print("updating last flashed folder...")
-            os.system('rm -rf {}'.format(
-                flashed_folder
-            ))
-            os.system('cp -r {} {}'.format(
-                update_folder,
-                flashed_folder
-            ))
+                print("updating last flashed symbol file...")
+                flashed_symbols_filename = os.path.join(args.app_folder, '_build', FLASHED_SYMBOLS_NAME)
+
+                os.system('cp {} {}'.format(
+                    os.path.join(update_folder, manifest['update_symbols']),
+                    flashed_symbols_filename
+                ))
+
+                print("updating last flashed folder...")
+                os.system('rm -rf {}'.format(
+                    flashed_folder
+                ))
+                os.system('cp -r {} {}'.format(
+                    update_folder,
+                    flashed_folder
+                ))
 
