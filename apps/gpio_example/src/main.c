@@ -14,10 +14,10 @@ struct k_timer gpio_timer;
 void gpio_timer_handler(struct k_timer *t) {
     if (toggled) {
         printk("setting pin %d to %d...\n", PIN, 0);
-	gpio_pin_set(gpio_dev, PIN, 0);
+	    gpio_pin_set(gpio_dev, PIN, 0);
     } else {
         printk("setting pin %d to %d...\n", PIN, 1);
-	gpio_pin_set(gpio_dev, PIN, 1);
+	    gpio_pin_set(gpio_dev, PIN, 1);
     }
     toggled ^= 1;
 }
