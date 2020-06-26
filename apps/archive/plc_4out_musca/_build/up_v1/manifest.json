@@ -1,0 +1,9 @@
+{
+    "valid": true,
+    "update_version": "0.0.0+24",
+    "update_partition": 1,
+    "update_symbols": "update.symbols",
+    "update_ast": "update_ast.txt",
+    "update_elf": "update_ns.elf",
+    "update_hex": "update.hex"
+}

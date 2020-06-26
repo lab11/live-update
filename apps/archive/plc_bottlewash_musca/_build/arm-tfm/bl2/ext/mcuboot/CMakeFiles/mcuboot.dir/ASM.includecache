@@ -1,0 +1,10 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+//vagrant/ext/trusted-firmware-m/platform/ext/target/musca_a/Device/Source/gcc/startup_cmsdk_musca_bl2.S
+

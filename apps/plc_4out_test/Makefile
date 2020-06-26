@@ -15,7 +15,7 @@ APP_SOURCES = $(notdir $(wildcard ./src/*.c))
 NRF_BASE_DIR = ../../ext/nrf52x-base/
 
 # Include board Makefile (if any)
-include ../../boards/buckler_revB/Board.mk
+include $(NRF_BASE_DIR)boards/nrf52dk/Board.mk
 
 # Include main Makefile
 include $(NRF_BASE_DIR)make/AppMakefile.mk

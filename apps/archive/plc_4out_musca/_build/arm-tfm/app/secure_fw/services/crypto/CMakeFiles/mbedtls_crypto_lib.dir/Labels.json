@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/CMakeFiles/mbedtls_crypto_lib"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/CMakeFiles/mbedtls_crypto_lib.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/CMakeFiles/mbedtls_crypto_lib-complete.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-install.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-mkdir.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-download.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-update.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-patch.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-configure.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"mbedtls_crypto_lib"
+		],
+		"name" : "mbedtls_crypto_lib"
+	}
+}

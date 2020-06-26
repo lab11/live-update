@@ -1,0 +1,13 @@
+# Target labels
+ mbedtls_sst_lib
+# Source files and their labels
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/CMakeFiles/mbedtls_sst_lib
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/CMakeFiles/mbedtls_sst_lib.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/CMakeFiles/mbedtls_sst_lib-complete.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-install.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-mkdir.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-download.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-update.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-patch.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-configure.rule
+//vagrant/apps/plc_4out/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-build.rule

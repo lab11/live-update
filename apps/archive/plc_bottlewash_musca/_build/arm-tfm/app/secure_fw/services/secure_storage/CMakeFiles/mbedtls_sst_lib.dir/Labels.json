@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/CMakeFiles/mbedtls_sst_lib"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/CMakeFiles/mbedtls_sst_lib.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/CMakeFiles/mbedtls_sst_lib-complete.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-install.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-mkdir.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-download.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-update.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-patch.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-configure.rule"
+		},
+		{
+			"file" : "//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/secure_storage/mbedtls_sst_lib-prefix/src/mbedtls_sst_lib-stamp/mbedtls_sst_lib-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"mbedtls_sst_lib"
+		],
+		"name" : "mbedtls_sst_lib"
+	}
+}

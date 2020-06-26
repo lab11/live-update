@@ -1,0 +1,13 @@
+# Target labels
+ mbedtls_crypto_lib
+# Source files and their labels
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/CMakeFiles/mbedtls_crypto_lib
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/CMakeFiles/mbedtls_crypto_lib.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/CMakeFiles/mbedtls_crypto_lib-complete.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-install.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-mkdir.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-download.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-update.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-patch.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-configure.rule
+//vagrant/apps/plc_bottlewash/_build/arm-tfm/app/secure_fw/services/crypto/mbedtls_crypto_lib-prefix/src/mbedtls_crypto_lib-stamp/mbedtls_crypto_lib-build.rule
