@@ -43,14 +43,20 @@ force_build:
 #	$(shell source $(ZEPHYR_BASE)/zephyr-env.sh)
 
 CLANG_ANALYSIS_FLAGS = -Xclang -analyze -Xclang -analyzer-checker=core.LiveUpdate -fsyntax-only
-CLANG_COMPILE_FLAGS = -ffreestanding -fno-common -Wall -Wformat -Wformat-security -Wno-format-zero-length -Wno-main -Wno-address-of-packed-member -Wno-pointer-sign -Wpointer-arith -Werror=implicit-int -ffunction-sections -fdata-sections -std=c99
+CLANG_DEFINES = -DKERNEL -DNRF9160_XXAA -DNRF_TRUSTZONE_NONESECURE -DUSE_PARTITION_MANAGER=1 -D_FORTIFY_SOURCE=2 -D__PROGRAM_START -D__ZEPHYR__=1 -D__STATIC_INLINE='static inline' -U__unix
+CLANG_COMPILE_FLAGS = -ffreestanding -fno-common -ffunction-sections -fdata-sections -std=c99 -nostdinc -Wno-void-pointer-to-int-cast
 CLANG_INCLUDE_DIRS = -imacros$(ZEPHYR_BASE)/include/toolchain/zephyr_stdint.h \
 					 -imacros$(ZEPHYR_BUILDDIR)/zephyr/include/generated/autoconf.h \
 					 -I./include \
 					 -I$(ZEPHYR_BASE)/include \
 					 -I$(ZEPHYR_BUILDDIR)/zephyr/include/generated \
-					 -I$(ZEPHYR_BASE)/soc/arm/arm/musca_a \
-					 -I$(ZEPHYR_BASE)/ext/hal/cmsis/Core/Include \
+					 -I$(ZEPHYR_BASE)/soc/arm/nordic_nrf/nrf91 \
+					 -I$(BASE_DIR)/ext/ncs/nrf/include \
+					 -I$(BASE_DIR)/ext/ncs/modules/hal/cmsis/CMSIS/Core/Include \
+					 -I$(BASE_DIR)/ext/ncs/modules/hal/nordic/nrfx \
+					 -I$(BASE_DIR)/ext/ncs/modules/hal/nordic/nrfx/drivers/include \
+					 -I$(BASE_DIR)/ext/ncs/modules/hal/nordic/nrfx/mdk \
+					 -I$(BASE_DIR)/ext/ncs/modules/hal/nordic/. \
 					 -isystem $(ZEPHYR_BASE)/lib/libc/minimal/include \
 					 -isystem /usr/local/gcc-arm-none-eabi-9-2019-q4-major/bin/../lib/gcc/arm-none-eabi/9.2.1/include \
 					 -isystem /usr/local/gcc-arm-none-eabi-9-2019-q4-major/bin/../lib/gcc/arm-none-eabi/9.2.1/include-fixed
@@ -65,7 +71,7 @@ $(UPDATE_DIR): $(BUILDDIR) $(ELF)
 	$(Q)cp $(ELF) $@/update_ns.elf
 	$(Q)cp $(MERGED_HEX) $@/update.hex
 	$(Q)echo "{\"analysis\":[" > $@/analysis.json
-	#$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
+	$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_DEFINES) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
 	$(Q)echo "]}" >> $@/analysis.json
 	$(Q)python3 $(BASE_DIR)/scripts/gen_app_graph.py $@/update.symbols $(ELF) $@/analysis.json $@/update.graph --dump_dot $@/update.graph.dot
 	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json
