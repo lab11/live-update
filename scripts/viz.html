@@ -40,7 +40,12 @@
                             'line-color': '#bcd9ea',
                             'target-arrow-color': '#bcd9ea',
                             'target-arrow-shape': 'triangle',
-                            'curve-style': 'bezier'
+                            'curve-style': 'bezier',
+                            'label': 'data(constraints)',
+                            'text-wrap': 'wrap',
+                            'text-max-width': '600px',
+                            'text-overflow-wrap': ',',
+                            'color': '#ff0000',
                         }
                     }
                 ]
@@ -63,7 +68,7 @@
 
                 dagre_options = {
                     name: 'dagre',
-                    padding: 5,
+                    padding: 15,
                 }
 
                 cy.layout(dagre_options).run();
