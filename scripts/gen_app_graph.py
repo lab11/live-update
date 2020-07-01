@@ -80,6 +80,42 @@ def hide_calls(G):
 
 
 '''
+Links procedure calls across compilation units
+'''
+def link_calls(G):
+
+    newG = deepcopy(G)
+
+    entry_nodes = {}
+    for n in G:
+        if 'currentID' not in to_state(n):
+            entry_nodes[to_state(n)['event']] = n
+    print(entry_nodes.keys())
+
+    call_leaves = {}
+    for k, v in entry_nodes.items():
+        call_leaves[k] = [d for d in nx.descendants(G, v) if len(list(G.successors(d))) == 0]
+
+    for n in G:
+        if 'call' in to_state(n):
+            paren_idx = to_state(n)['call'].find('(')
+            fn_name = to_state(n)['call'][:paren_idx]
+
+            if fn_name in entry_nodes:
+                predecessor = list(newG.predecessors(n))[0]
+                successors = list(newG.successors(n))
+
+                newG.remove_node(n)
+
+                newG.add_edge(predecessor, entry_nodes[fn_name])
+                for l in call_leaves[fn_name]:
+                    for s in successors:
+                        newG.add_edge(l, s)
+
+    return newG
+
+
+'''
 Replaces statement pretty representations with their values, if known
 '''
 def replace_with_value(e, e_str):
@@ -407,7 +443,8 @@ if __name__ == '__main__':
         eventG = hide_calls(eventG)
         print('  hid inline and syscalls')
 
-    print('  TODO link together procedure calls across compilation units')
+    eventG = link_calls(eventG) 
+    print('  linked procedure calls')
 
     with open(args.out_graph_export, 'w') as f:
         export_graph(eventG, f, args.show_constraints)
