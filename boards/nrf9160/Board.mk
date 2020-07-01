@@ -70,10 +70,8 @@ $(UPDATE_DIR): $(BUILDDIR) $(ELF)
 	$(Q)(arm-none-eabi-objdump -D -s -j.app_data $(ELF) > $@/update.data 2> /dev/null || touch $@/update.data)
 	$(Q)cp $(ELF) $@/update_ns.elf
 	$(Q)cp $(MERGED_HEX) $@/update.hex
-	$(Q)echo "{\"analysis\":[" > $@/analysis.json
 	$(Q)clang $(CLANG_ANALYSIS_FLAGS) $(CLANG_DEFINES) $(CLANG_COMPILE_FLAGS) $(CLANG_INCLUDE_DIRS) $(APP_SOURCES) 2>> $@/analysis.json
-	$(Q)echo "]}" >> $@/analysis.json
-	$(Q)python3 $(BASE_DIR)/scripts/gen_app_graph.py $@/update.symbols $(ELF) $@/analysis.json $@/update.graph --dump_dot $@/update.graph.dot
+	python3 $(BASE_DIR)/scripts/gen_app_graph.py $(ELF) $@/analysis.json $@/update.graph $@/update_graph_export.json --show_inline
 	$(Q)python3 $(BASE_DIR)/make/gen_update_manifest.py $@ $(VERSION_FILE) > $@/manifest.json
 
 $(BUILDDIR):

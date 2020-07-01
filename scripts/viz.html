@@ -1,0 +1,120 @@
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body { font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif; font-size: 11px; }
+        #cy { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; }
+    </style>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-popper@1.0.4/cytoscape-popper.min.js"></script>
+    <script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
+    <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
+</head>
+<body>
+    <div id="cy"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var url_string = window.location.href;
+            var url = new URL(url_string);
+            var a = url.searchParams.get('app');
+
+            var cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: [],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#298fca',
+                            'label': 'data(id)',
+                            'text-wrap': 'wrap',
+                            'text-max-width': '600px',
+                            'text-overflow-wrap': ',',
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': '#bcd9ea',
+                            'target-arrow-color': '#bcd9ea',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier'
+                        }
+                    }
+                ]
+            })
+
+            fetch("../apps/"+a+"/_build/update/update_graph_export.json").then(res => res.json()).then(data => {
+                console.log(data);
+                cy.add(data);
+
+                bf_options = {
+                    name: 'breadthfirst',
+                    directed: true,
+                }
+
+                cose_options = {
+                    name: 'cose',
+                    animate: false,
+                    idealEdgeLength: function(edge){return 64;},
+                }
+
+                dagre_options = {
+                    name: 'dagre',
+                    padding: 5,
+                }
+
+                cy.layout(dagre_options).run();
+                cy.fit();
+
+                cy.elements().forEach(function(e) {
+                    let ref = e.popperRef();
+                    e.tippy = tippy(ref, {
+                        content: () => {
+                            let content = document.createElement("div");
+                            if (e.json().group == "nodes") {
+                                content.innerHTML += "<p><b>event</b>: " + e.json().data.raw.event + "</p>";
+                                if ("previousID" in e.json().data.raw) {
+                                    if (e.json().data.raw.event == "bind") {
+                                        content.innerHTML += "<p><b>bindloc_region</b>: " + e.json().data.raw.bindloc_region + "</p>";
+                                        content.innerHTML += "<p><b>bindloc_loc_mem_region_val</b>: " + e.json().data.raw.bindloc_loc_mem_region_val + "</p>";
+                                        if ("bindval_symbolic_expression" in e.json().data.raw) {
+                                            //content.innerHTML += "<p><b>bindval_symbolic_expression</b>: " + JSON.stringify(e.json().data.raw.bindval_symbolic_expression) + "</p>";
+                                        }
+                                        if ("bindval_nonloc_symbol_val" in e.json().data.raw) {
+                                            content.innerHTML += "<p><b>bindval_nonloc_symbol_val</b>: " + e.json().data.raw.bindval_nonloc_symbol_val + "</p>";
+                                        }
+                                        if ("bindval_nonloc_concrete_int" in e.json().data.raw) {
+                                            content.innerHTML += "<p><b>bindval_nonloc_concrete_int</b>: " + e.json().data.raw.bindval_nonloc_concrete_int + "</p>";
+                                        }
+                                    } else {
+                                        content.innerHTML += "<p><b>call</b>: " + e.json().data.raw.call + "</p>";
+                                    }
+                                    content.innerHTML += "<p><b>caller</b>: " + e.json().data.raw.caller + "</p>";
+                                    content.innerHTML += "<p><b>previousID</b>: " + e.json().data.raw.previousID + "</p>";
+                                    content.innerHTML += "<p><b>currentID</b>: " + e.json().data.raw.currentID + "</p>";
+                                    if ("program_state" in e.json().data.raw) {
+                                        content.innerHTML += "<p><b>constraints</b>: " + JSON.stringify(e.json().data.raw.program_state.constraints) + "</p>";
+                                    }
+                                }
+                            } else {
+                                content.innerHTML = e.id();
+                            }
+                            return content;
+                        },
+                        trigger: "manual"
+                    });
+                });
+
+                cy.elements().unbind('mouseover');
+                cy.elements().bind('mouseover', (event) => event.target.tippy.show());
+
+                cy.elements().unbind('mouseout');
+                cy.elements().bind('mouseout', (event) => event.target.tippy.hide());
+            });
+        });
+    </script>
+</body>
+
