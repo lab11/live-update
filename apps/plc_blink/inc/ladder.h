@@ -18,10 +18,13 @@
 #define SWITCH2 9
 
 
-#define USE_LED 1					/* true if the program uses on-board LEDs. false otherwise */
+#define USE_LED 1							/* true if the program uses on-board LEDs. false otherwise */
 
-#define NUM_PINS 0					/* Number of pins to use as outputs */
-static uint8_t output_pins[] = {};	/* List pins to use as outputs as {PIN0, PIN1, ...} */
+#define NUM_PINS 0							/* Number of pins to use as outputs */
+#define NUM_INPUTS 1						/* Number of pins to use as inputs */
+
+static uint8_t output_pins[] = {};			/* List pins to use as outputs as {PIN0, PIN1, ...} */
+static uint8_t input_pins[] = {BUTTON1};	/* List pins to use as inputs as {PIN0, PIN1, ...} */
 
 /************** DO NOT EDIT THESE FUNCTIONS **************/
 

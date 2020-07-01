@@ -30,28 +30,30 @@
 /******************* GLOBALS ********************/
 
 #define BUTTON_SIM 25					// gpio pin that simulates button press
-#define MUSCA_INPUT 24		 			// gpio pin to read input from musca 
+#define PLC_INPUT 24		 			// gpio pin to read input from PLC 
 #define LED1 17							// specify LED pin
 #define TIMER_PERIOD_MS 5431			// desired timer period in milliseconds
 #define NRF_BUTTON 13					// Button 1 on nrf52
+
+#define TEST_PIN1 23
 
 ret_code_t error_code;          		// error checking - variously used 
 nrfx_err_t nrfx_err_code;				// error checking for nrfx libraries
 
 // APP_TIMER_DEF(PUSH_TIMER);				// timer id to call PLC Cycle function at regular intervals
 
-uint32_t tx_time;						// time signal sent to musca
+uint32_t tx_time;						// time signal sent to PLC
 uint32_t rx_time;						// time signal received by nrf
 uint32_t res_time;						// approximate response time
 
-nrfx_gpiote_in_config_t musca_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
+nrfx_gpiote_in_config_t PLC_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
 nrfx_gpiote_in_config_t button_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
 
-nrfx_timer_t button_timer = NRFX_TIMER_INSTANCE(1);					// Timer Instance
+nrfx_timer_t button_timer = NRFX_TIMER_INSTANCE(0);					// Timer Instance
 nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG;		// Default Timer Configuration
 
 static void sim_push_button(void);
-static void musca_input_callback(void);
+static void plc_input_callback(void);
 static void button_input_callback(void);
 static void dummy_callback(nrf_timer_event_t thing1, void* thing2);
 static void release_button(void);
@@ -74,14 +76,16 @@ void gpio_init(void) {
 
 	nrfx_gpiote_init();
 
-	nrfx_gpiote_in_init(MUSCA_INPUT, 
-				&musca_input_config, 
-				(nrfx_gpiote_evt_handler_t) musca_input_callback);
+	nrfx_gpiote_in_init(PLC_INPUT, 
+				&PLC_input_config, 
+				(nrfx_gpiote_evt_handler_t) plc_input_callback);
+
+	button_input_config.pull = NRF_GPIO_PIN_PULLUP;
 	nrfx_gpiote_in_init(NRF_BUTTON,
 				&button_input_config,
 				(nrfx_gpiote_evt_handler_t) button_input_callback);
 
-	nrfx_gpiote_in_event_enable(MUSCA_INPUT, true);
+	nrfx_gpiote_in_event_enable(PLC_INPUT, true);
 	nrfx_gpiote_in_event_enable(NRF_BUTTON, true);
 
 	nrf_gpio_cfg_output(BUTTON_SIM);
@@ -89,6 +93,10 @@ void gpio_init(void) {
 
 	nrf_gpio_pin_set(LED1);
 	nrf_gpio_pin_set(BUTTON_SIM);
+
+	nrf_gpio_cfg_input(TEST_PIN1, NRF_GPIO_PIN_NOPULL);
+
+
 
 	printf("GPIO and GPIOTE initialized!\n");
 }
@@ -105,7 +113,7 @@ void timer_init(void) {
 	error_code = app_timer_init();
 	APP_ERROR_CHECK(error_code);
 
-	error_code = app_timer_create(&BSIM_TIMER, APP_TIMER_MODE_SINGLE_SHOT, release_button);
+	error_code = app_timer_create(&BSIM_TIMER, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t) release_button);
 	APP_ERROR_CHECK(error_code);
 
 	printf("Initializing NRFX 16MHz High Frequency Timer...\n");
@@ -116,14 +124,14 @@ void timer_init(void) {
 					&timer_config, 
 					(nrfx_timer_event_handler_t) dummy_callback);
 
-	uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&button_timer, TIMER_PERIOD_MS);
-	printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+	// uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&button_timer, TIMER_PERIOD_MS);
+	// printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
 
-	nrfx_timer_extended_compare(&button_timer,
-								NRF_TIMER_CC_CHANNEL0,
-								timer_period_ticks,
-								NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-								true);
+	// nrfx_timer_extended_compare(&button_timer,
+	// 							NRF_TIMER_CC_CHANNEL0,
+	// 							timer_period_ticks,
+	// 							NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+	// 							true);
 
 	printf("Timer Initialized!\n"); // Remember to enable the timer in main
 }
@@ -156,7 +164,7 @@ static void release_button(void) {
 	nrf_gpio_pin_set(BUTTON_SIM);
 }
 
-static void musca_input_callback(void) {
+static void plc_input_callback(void) {
 	rx_time = nrfx_timer_capture(&button_timer, 2);
 	res_time = (rx_time < tx_time) ? (rx_time + (1 + ~tx_time)) : (rx_time - tx_time);
 
@@ -167,8 +175,9 @@ static void musca_input_callback(void) {
 }
 
 static void button_input_callback(void) {
-	printf("Simulate Button Press...\n");
-	tx_time = nrfx_timer_capture(&button_timer, 1);
+	printf("Button Press...\n");
+	// tx_time = nrfx_timer_capture(&button_timer, 1);
+	return;
 }
 
 

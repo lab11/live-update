@@ -9,14 +9,29 @@ static gpio_port_pins_t output_mask = 0x00000000;
 
 struct device *gpio_dev;
 
+void enable_pin_inputs(uint8_t* pins, uint8_t num_pins) {
+	if (!num_pins) { return; }
+	printk("Enabling Pin Inputs...\n");
+	gpio_dev = device_get_binding("GPIO_0");
+
+	for (int i = 0; i < num_pins; i++) {
+		printk("Enabling PIN%d...\n", pins[i]);
+		int ret = gpio_pin_configure(gpio_dev, pins[i], (GPIO_INPUT));
+		if (ret) {
+			printk("Could not enable PIN%d with error code %d\n", pins[i], ret);
+		}
+	}
+}
+
 void enable_pin_outputs(uint8_t* pins, uint8_t num_pins) {
+	printk("Enabling Pin Outputs...\n");
 	gpio_dev = device_get_binding("GPIO_0");
 	// uint32_t out = 0;
 	for (uint8_t i = 0; i < num_pins; i++) {
-		// printk("Enabling PIN%d...\n", pins[i]);
+		printk("Enabling PIN%d...\n", pins[i]);
 		int ret = gpio_pin_configure(gpio_dev, pins[i], GPIO_OUTPUT_INACTIVE);
     	if (ret) {
-	    	// printk("gpio_pin_configure failed with error code: %d\n", ret);
+	    	printk("gpio_pin_configure failed with error code: %d\n", ret);
 	    	return;
     	}
 		output_mask |= (1 << pins[i]);
@@ -39,7 +54,7 @@ void read_in_table(void) {
 	if (gpio_port_get_raw(gpio_dev, &gpio_in_table) != 0) {
 		printk("Error! read_in_table() failed!\n");
 	}
-	// printk("%x\n", gpio_in_table);
+	printk("%x\n", gpio_in_table);
 	return;
 }
 
@@ -47,7 +62,7 @@ void write_out_table(void) {
 	if (gpio_port_set_masked_raw(gpio_dev, output_mask, gpio_out_table) != 0) {
 		printk("Error! write_out_table() failed!\n");
 	}
-	// printk("%x\n\n", gpio_out_table);
+	printk("%x\n\n", gpio_out_table);
 	return;
 }
 
@@ -78,12 +93,12 @@ BOOL read_pin(uint8_t pin) {
 }
 
 void LED_on(uint8_t led) {
-	clr_pin(led);
+	set_pin(led);
 	return;
 }
 
 void LED_off(uint8_t led) {
-	set_pin(led);
+	clr_pin(led);
 	return;
 }
 

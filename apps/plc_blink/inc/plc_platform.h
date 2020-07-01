@@ -5,6 +5,7 @@
 typedef signed short SWORD;
 typedef unsigned char BOOL;
 
+void enable_pin_inputs(uint8_t* pins, uint8_t num_pins);
 
 void enable_pin_outputs(uint8_t* pins, uint8_t num_pins);
 

@@ -1,10 +1,7 @@
 #include <sys/printk.h>
 #include <kernel.h>
 
-// #include "tfm_gpio_veneers.h"
 #include "ladder.h"
-
-#define PIN 7
 
 #define PLC_SCAN_TIME 10
 
@@ -13,6 +10,7 @@ struct k_timer scan_timer;
 void main(void) {
     printk("Starting Program...\n\n");
 	init_plc();
+    printk("\n\n\nINIT_PLC FINISHED!!!!!\n\n\n");
     k_timer_init(&scan_timer, plc_callback, NULL);
 
     // gpio veneer tests
