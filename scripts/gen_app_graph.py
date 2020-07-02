@@ -80,42 +80,6 @@ def hide_calls(G):
 
 
 '''
-Links procedure calls across compilation units
-'''
-def link_calls(G):
-
-    newG = deepcopy(G)
-
-    entry_nodes = {}
-    for n in G:
-        if 'currentID' not in to_state(n):
-            entry_nodes[to_state(n)['event']] = n
-    print(entry_nodes.keys())
-
-    call_leaves = {}
-    for k, v in entry_nodes.items():
-        call_leaves[k] = [d for d in nx.descendants(G, v) if len(list(G.successors(d))) == 0]
-
-    for n in G:
-        if 'call' in to_state(n):
-            paren_idx = to_state(n)['call'].find('(')
-            fn_name = to_state(n)['call'][:paren_idx]
-
-            if fn_name in entry_nodes:
-                predecessor = list(newG.predecessors(n))[0]
-                successors = list(newG.successors(n))
-
-                newG.remove_node(n)
-
-                newG.add_edge(predecessor, entry_nodes[fn_name])
-                for l in call_leaves[fn_name]:
-                    for s in successors:
-                        newG.add_edge(l, s)
-
-    return newG
-
-
-'''
 Replaces statement pretty representations with their values, if known
 '''
 def replace_with_value(e, e_str):
@@ -272,7 +236,6 @@ def export_graph(G, out_file, show_constraints):
                     return e
 
             for e1 in events:
-                print(e1['data']['constraints'])
                 e1_constraint_dict = {c['symbol']: c['range'] for c in e1['data']['constraints']}
                 min_constrained = True
                 for e2 in events:
@@ -383,6 +346,31 @@ def load_clang_events(event_file):
 
     return [e for e in events if e['event'] != 'live_symbols']
 
+
+def dump_paths(G, filename):
+
+    with open(filename, 'w') as f:
+        # map of call entry -> graph node, indexed by top-level call name
+        entry_nodes = {}
+        for n in G:
+            if len(list(G.predecessors(n))) == 0 and len(list(G.successors(n))) != 0:
+                entry_nodes[to_state(n)['event']] = n
+
+        print('', file=f)
+        for entry_fn in entry_nodes:
+            print('PATHS STARTING AT', entry_fn, '\n\n', file=f)
+            print(entry_nodes[entry_fn], file=f)
+
+            for n in G:
+                if len(list(G.successors(n))) != 0:
+                    continue
+
+                for i, p in enumerate(nx.all_simple_paths(G, entry_nodes[entry_fn], n)):
+                    print('    PATH', i, ':', file=f)
+                    for e in p:
+                        print('        *', e, file=f)
+                    print('', file=f)
+
     
 if __name__ == '__main__':
 
@@ -392,6 +380,7 @@ if __name__ == '__main__':
     parser.add_argument('out_graph_export', help='Output location for viz export (graph in JSONish format)')
     parser.add_argument('--show_inline', action='store_true', default=False, help='Display inline calls not part of the application')
     parser.add_argument('--show_constraints', action='store_true', default=False, help='Display edge constraints')
+    parser.add_argument('--dump_paths', action='store_true', default=False, help='Dump each path through the generated graph')
     args = parser.parse_args()
 
     # First, load all of the clang analysis events in a useful form
@@ -443,8 +432,8 @@ if __name__ == '__main__':
         eventG = hide_calls(eventG)
         print('  hid inline and syscalls')
 
-    eventG = link_calls(eventG) 
-    print('  linked procedure calls')
+    if args.dump_paths:
+        dump_paths(eventG, 'paths.dump')
 
     with open(args.out_graph_export, 'w') as f:
         export_graph(eventG, f, args.show_constraints)
