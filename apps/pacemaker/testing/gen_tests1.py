@@ -1,5 +1,7 @@
 import random
 
+# Generate normal input trace - 350 cycles (each with one VS and one AS)
+# This should cause the pacemaker to output no pace events
 def gen_normal_heart_test_str():
     TLRI = 1000
     TAVI = 150
@@ -12,8 +14,8 @@ def gen_normal_heart_test_str():
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
         test_file.write("\n")
 
-
-
+# Generate arrhythmia7 trace where missing VS event but on-time AS event
+# This should cause the pacemaker to output ventricle pace events
 def gen_arrhythmia7_heart_test_str():
     TLRI = 1000
     TAVI = 150
@@ -26,6 +28,8 @@ def gen_arrhythmia7_heart_test_str():
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
         test_file.write("\n")
 
+# Generate arrhythmia8 trace where missing AS event but on-time VS event
+# This should cause the pacemaker to output atrial pace events
 def gen_arrhythmia8_heart_test_str():
     TLRI = 1000
     TAVI = 150
@@ -38,6 +42,8 @@ def gen_arrhythmia8_heart_test_str():
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
         test_file.write("\n")
 
+# Generate arrhythmia9 trace where missing both VS and AS events 
+# This should cause the pacemaker to output only pace events
 def gen_arrhythmia9_heart_test_str():
     TLRI = 1000
     TAVI = 150
