@@ -134,10 +134,12 @@ def serialize_predicates(update_data):
         event
         updated_event
         n_inactive_ops
+        n_reset_ops
         n_constraints
         n_state_init
         hw_transfer_size 
         <inactive_ops>
+        <reset_ops>
         { # each constraint
             size
             symbol
@@ -163,8 +165,9 @@ def serialize_predicates(update_data):
     for p in update_data['predicate_transfer']:
         predicate, init_transfers, hw_transfer_calls = p
 
-        predicate_header = struct.pack('III', predicate['event_name'], predicate['new_event_name'], len(predicate['inactive_ops']))
-        predicate_size = 3 * 4
+        predicate_header = struct.pack('IIII',
+                predicate['event_name'], predicate['new_event_name'], len(predicate['inactive_ops']), len(predicate['reset_ops']))
+        predicate_size = 4 * 4
     
         # fill in var length sections
 
@@ -172,6 +175,10 @@ def serialize_predicates(update_data):
 
         for io in predicate['inactive_ops']:
             predicate_bytes += struct.pack('I', io)
+            predicate_size += 1 * 4
+
+        for ro in predicate['reset_ops']:
+            predicate_bytes += struct.pack('I', ro)
             predicate_size += 1 * 4
 
         for c in predicate['constraints']:
