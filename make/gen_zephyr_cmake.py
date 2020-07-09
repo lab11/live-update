@@ -40,7 +40,7 @@ if not args.no_app_relocation:
     for c_src in c_sources:
         contents += "zephyr_code_relocate({} APPFLASH_TEXT_RODATA)\n".format(c_src)
         contents += "zephyr_code_relocate({} APPRAM_DATA_BSS)\n".format(c_src)
-
+'''
 contents += "\n\n"
 contents += """
 get_target_property(SOURCE_LIST app SOURCES)
@@ -55,6 +55,7 @@ zephyr_get_compile_definitions_for_lang_as_string("C" Z_DEFS)
 
 add_custom_command(TARGET app POST_BUILD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND clang -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility ${INCLUDE_LIST} ${Z_INCLUDE_LIST} ${SOURCE_LIST} > _build/ast_dump.txt 2> /dev/null || (exit 0))
 """
+'''
 
 print(contents)
 

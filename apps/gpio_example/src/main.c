@@ -4,7 +4,7 @@
 #include "drivers/gpio.h"
 #include "sys/printk.h"
 
-#define PIN 4
+#define PIN 3
 
 bool toggled = false;
 
@@ -23,13 +23,15 @@ void gpio_timer_handler(struct k_timer *t) {
 }
 
 void main(void) {
+
     gpio_dev = device_get_binding("GPIO_0");
+
     int ret = gpio_pin_configure(gpio_dev, PIN, GPIO_OUTPUT_INACTIVE);
     if (ret) {
 	    printk("gpio_pin_configure failed with error code: %d\n", ret);
 	    return;
     }
-    
+
     k_timer_init(&gpio_timer, gpio_timer_handler, NULL);
     k_timer_start(&gpio_timer, K_SECONDS(1), K_SECONDS(1));
 }

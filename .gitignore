@@ -1,4 +1,5 @@
 cmake_build/
+__pycache__/
 *.swp
 ignore-*/
 lastVerNum.txt
