@@ -254,9 +254,10 @@ def gen_predicate(G, path, split_phase_ops):
                         exit(1)
                     
                 else:
-                    print('Error, constraint symbol could not be parsed')
-                    pprint.pprint(e)
-                    exit(1)
+                    print('Warning: constraint symbol {} could not be parsed'.format(sym))
+                    #pprint.pprint(e)
+                    #exit(1)
+                    continue
 
                 predicate['constraints'].append(constraint)
 

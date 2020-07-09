@@ -19,10 +19,10 @@
 
 // Pins
 #define LED                 2
-#define VENTRICLE_SENSE_PIN 6 //Vget! action
-#define ATRIAL_SENSE_PIN    7 //Aget! action
-#define VENTRICLE_PACE_PIN  8 //VP!
-#define ATRIAL_PACE_PIN     9 //AP!; the shocker
+#define VENTRICLE_SENSE_PIN 10 //Vget! action
+#define ATRIAL_SENSE_PIN    11 //Aget! action
+#define VENTRICLE_PACE_PIN  12 //VP!
+#define ATRIAL_PACE_PIN     13 //AP!; the shocker
 
 typedef enum {
     VENTRICLE=0, 
@@ -207,34 +207,34 @@ void reset_t() {
 
 // GPIO inputs
 void ventricle_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    printk("UVe S\n");
     observe_ventricle_get();
+    printk("UVe S\n");
 }
 
 void atrial_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    printk("UAt S\n");
     observe_atrial_sense();
+    printk("UAt S\n");
 }
 
 // Pacing outputs
 void ventricle_pace() {
-    printk("UVe P\n");
 
     current_pace = VENTRICLE;
     gpio_pin_set(gpio_dev, VENTRICLE_PACE_PIN, 1);
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
     
     observe_ventricle_pace();
+    printk("UVe P\n");
 }
 
 void atrial_pace() {
-    printk("UAt P\n");
 
     current_pace = ATRIAL;
     gpio_pin_set(gpio_dev, ATRIAL_PACE_PIN, 1);
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
 
     observe_atrial_pace();
+    printk("UAt P\n");
 }
 
 void stop_pace_cb(struct k_timer *t) {
@@ -330,6 +330,6 @@ void main(void) {
     k_timer_init(&pacing_timer, stop_pace_cb, NULL);
 
     // Uncomment to force ventricle event when no external inputs available
-    printk("Forcing Ventricle Event\n");
-    observe_ventricle_get();
+    //printk("Forcing Ventricle Event\n");
+    //observe_ventricle_get();
 }

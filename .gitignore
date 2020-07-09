@@ -2,6 +2,7 @@ cmake_build/
 original/
 update/
 __pycache__/
+_build/
 *.swp
 ignore-*/
 lastVerNum.txt

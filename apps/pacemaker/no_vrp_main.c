@@ -19,10 +19,10 @@
 
 // Pins
 #define LED                 2
-#define VENTRICLE_SENSE_PIN 6 //Vget! action
-#define ATRIAL_SENSE_PIN    7 //Aget! action
-#define VENTRICLE_PACE_PIN  8 //VP!
-#define ATRIAL_PACE_PIN     9 //AP!; the shocker
+#define VENTRICLE_SENSE_PIN 10 //Vget! action
+#define ATRIAL_SENSE_PIN    11 //Aget! action
+#define VENTRICLE_PACE_PIN  12 //VP!
+#define ATRIAL_PACE_PIN     13 //AP!; the shocker
 
 typedef enum {
     VENTRICLE=0, 
@@ -175,34 +175,34 @@ void reset_t() {
 
 // GPIO inputs
 void ventricle_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    printk("Ve S\n");
     observe_ventricle_sense();
+    printk("Ve S\n");
 }
 
 void atrial_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    printk("At S\n");
     observe_atrial_sense();
+    printk("At S\n");
 }
 
 // Pacing outputs
 void ventricle_pace() {
-    printk("Ve P\n");
 
     current_pace = VENTRICLE;
     gpio_pin_set(gpio_dev, VENTRICLE_PACE_PIN, 1);
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
     
     observe_ventricle_pace();
+    printk("Ve P\n");
 }
 
 void atrial_pace() {
-    printk("At P\n");
 
     current_pace = ATRIAL;
     gpio_pin_set(gpio_dev, ATRIAL_PACE_PIN, 1);
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
 
     observe_atrial_pace();
+    printk("At P\n");
 }
 
 void stop_pace_cb(struct k_timer *t) {
@@ -260,7 +260,7 @@ void main(void) {
         return;
     }
 
-    ret = gpio_pin_interrupt_configure(gpio_dev, VENTRICLE_SENSE_PIN, GPIO_INT_EDGE_TO_ACTIVE); 
+    ret = gpio_pin_interrupt_configure(gpio_dev, VENTRICLE_SENSE_PIN, GPIO_INT_EDGE_FALLING); 
     if (ret) {
         printk("gpio_pin_interrupt_configure failed on pin %d with code: %d\n", VENTRICLE_SENSE_PIN, ret);
         return;
@@ -275,7 +275,7 @@ void main(void) {
         return;
     }
 
-    ret = gpio_pin_interrupt_configure(gpio_dev, ATRIAL_SENSE_PIN, GPIO_INT_EDGE_TO_ACTIVE); 
+    ret = gpio_pin_interrupt_configure(gpio_dev, ATRIAL_SENSE_PIN, GPIO_INT_EDGE_FALLING); 
     if (ret) {
         printk("gpio_pin_interrupt_configure failed on pin %d with code: %d\n", ATRIAL_SENSE_PIN, ret);
         return;
@@ -292,6 +292,6 @@ void main(void) {
     k_timer_init(&pacing_timer, stop_pace_cb, NULL);
 
     // Uncomment to force ventricle event when no external inputs available
-    printk("Forcing Ventricle Event\n");
-    observe_ventricle_sense();
+    //printk("Forcing Ventricle Event\n");
+    //observe_ventricle_sense();
 }
