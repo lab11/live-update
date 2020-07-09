@@ -7,16 +7,18 @@
 #define PIN1 10
 #define PIN2 11
 
+extern void gpio_nrfx_init_callback(struct gpio_callback *, gpio_callback_handler_t, gpio_port_pins_t);
+
 struct device *gpio_dev;
 struct gpio_callback cb1_data;
 struct gpio_callback cb2_data;
 
 void pin1_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    printk("Got an interrupt on pin %d!\n", pin);
+    printk("Got an interrupt on pin %x!\n", pin);
 }
 
 void pin2_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    printk("Got another interrupt on pin %d!\n", pin);
+    printk("Got another interrupt on pin %x!\n", pin);
 }
 
 void main(void) {
@@ -47,10 +49,10 @@ void main(void) {
         return;
     }
 
-    gpio_init_callback(&cb1_data, pin1_cb, BIT(PIN1));
+    gpio_nrfx_init_callback(&cb1_data, pin1_cb, BIT(PIN1));
     gpio_add_callback(gpio_dev, &cb1_data);
 
-    gpio_init_callback(&cb2_data, pin2_cb, BIT(PIN2));
+    gpio_nrfx_init_callback(&cb2_data, pin2_cb, BIT(PIN2));
     gpio_add_callback(gpio_dev, &cb2_data);
 }
 

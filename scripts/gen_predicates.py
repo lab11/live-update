@@ -54,7 +54,7 @@ def eval_expr(expr):
 INIT_CALLS = [
     'gpio_pin_configure',
     'gpio_pin_interrupt_configure',
-    'gpio_init_callback',
+    'gpio_nrfx_init_callback',
     'gpio_add_callback',
     'k_timer_init',
 ]

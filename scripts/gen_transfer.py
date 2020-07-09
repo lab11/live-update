@@ -107,7 +107,7 @@ def eval_expr(expr):
 INIT_CALLS = [
     'gpio_pin_configure',
     'gpio_pin_interrupt_configure',
-    'gpio_init_callback',
+    'gpio_nrfx_init_callback',
     'gpio_add_callback',
     'k_timer_init',
 ]
@@ -358,6 +358,21 @@ def generate_hw_init_calls(original_predicates_and_init, update_predicates_and_i
             port, pin, flags = args
             init_calls.append(('gpio_nrfx_config', port, pin, flags))
 
+        elif ni['function'] == 'gpio_pin_interrupt_configure':
+            port, pin, flags = args
+            init_calls.append(('z_impl_gpio_pin_interrupt_configure', port, pin, flags))
+
+        elif ni['function'] == 'gpio_nrfx_init_callback':
+            cb = args[0] if args[0][0] != '&' else args[0][1:] # strip the ampersand if there
+            if cb in unmapped_symbols:
+                unmapped_symbols.remove(cb)
+
+            init_calls.append((fn, *args))
+
+        elif ni['function'] == 'gpio_add_callback':
+            port, callback = args
+            init_calls.append(('gpio_nrfx_manage_callback', port, callback))
+
         else:
             print('unrecognized hw init function', ni['function'], 'exiting...')
             exit(1)
@@ -461,7 +476,7 @@ def match_predicates_and_custom_transfer(original_predicates_and_init, update_pr
                 '''
 
                 custom_hw = custom_transfer.custom_hardware_transfer(up)
-                if not custom_hw:
+                if custom_hw == None:
                     print('Error: expected custom hardware transfer not provided (None)')
                     exit(1)
                 predicate_triples.append((op, custom_state, custom_hw))
