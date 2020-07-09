@@ -6,9 +6,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import os
 
-
-dir_path = "./output_traces_new/"
+dir_path = "./output_traces_new1/"
 
 def clean(file_name):
     with open(dir_path+file_name, "r") as input:
@@ -72,7 +72,7 @@ def plot_histogram(trace, type, seen_intervals):
         second = types[1]
         axs.set_title('Measured Intervals Between ' + first + ' and ' + second + ' Events', y=1.05)
     axs.set_ylabel('Count')
-    axs.set_xlabel("Deviation (microseconds)")
+    axs.set_xlabel("Interval (microseconds)")
 
     # errors = np.abs(np.array(seen_intervals) - np.array(exp_intervals))
     errors = np.array(seen_intervals)
@@ -99,28 +99,21 @@ def plot_histogram(trace, type, seen_intervals):
     plt.axvline(np.mean(errors), color='k', linestyle='dashed', linewidth=1)
 
     # plt.show()
-    plt.savefig("./output_graphs/"+type+"_"+trace+".png")
+    if not os.path.exists(dir_path + "output_graphs"):
+        os.makedirs(dir_path + "output_graphs")
+
+    plt.savefig(dir_path + "output_graphs/"+type+"_"+trace+".png")
 
 
    
 def main():
-    traces = ["normal_trace", "arr7_trace", "arr8_trace", "arr9_trace"]
-
+    # traces = ["normal_trace", "arr7_trace", "arr8_trace", "arr9_trace"]
+    traces = ["arr7_trace", "arr8_trace", "arr9_trace"]
 
     for trace in traces:
         filename = trace + ".log"
         clean(filename)
         ventricle_intervals, atrial_intervals, ventricle_atrial_intervals, atrial_ventricle_intervals = compute_event_intervals("clean_"+filename)
-
-        # exp_ventricle_intervals = [1000000 for i in range(len(ventricle_intervals))]
-        # exp_atrial_intervals = [1000000 for i in range(len(atrial_intervals))]
-        # exp_ventricle_atrial_intervals = [150000 for i in range(len(ventricle_atrial_intervals))]
-        # exp_atrial_ventricle_intervals = [850000 for i in range(len(atrial_ventricle_intervals))]
-
-        # plot_histogram(trace, "Ventricle", ventricle_intervals, exp_ventricle_intervals)
-        # plot_histogram(trace, "Atrial", atrial_intervals, exp_atrial_intervals)
-        # plot_histogram(trace, "Ventricle-Atrial", ventricle_atrial_intervals, exp_ventricle_atrial_intervals)
-        # plot_histogram(trace, "Atrial-Ventricle", atrial_ventricle_intervals, exp_atrial_ventricle_intervals)
 
         if trace in ("normal_trace", "arr9_trace"):
             plot_histogram(trace, "Ventricle", ventricle_intervals)
@@ -129,7 +122,6 @@ def main():
             plot_histogram(trace, "Ventricle-Atrial", ventricle_atrial_intervals)
         elif trace in ("arr8_trace"):
             plot_histogram(trace, "Atrial-Ventricle", atrial_ventricle_intervals)
-
 
 
 if __name__ == "__main__":

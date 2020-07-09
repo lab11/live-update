@@ -103,7 +103,7 @@ int main(void) {
     uint32_t elapsed_time;
 
     // Run an input trace
-    char *pChr = strtok (ARR7_HEART_TEST, ",;");
+    char *pChr = strtok (ARR8_HEART_TEST, ",;");
     printf("Initiating input trace... \n");
     while (pChr != NULL) {
         if (isdigit(pChr[0])){
