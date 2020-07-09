@@ -1,4 +1,4 @@
-#include "nrf_gpio.h"
+#include "nrf.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_pwr_mgmt.h"
@@ -6,10 +6,12 @@
 #include "nrf_drv_clock.h"
 #include "nrf_drv_spi.h"
 #include "nrf_sdh.h"
+#include "nrf_gpio.h"
 #include "nrf_gpiote.h"
 #include "nrfx_gpiote.h"
 #include "nrf_delay.h"
 #include "nrfx_timer.h"
+// #include "nrfx_gpiote.h"
 
 #include "app_timer.h"
 // #include "app_gpiote.h"
@@ -46,8 +48,10 @@ uint32_t tx_time;						// time signal sent to PLC
 uint32_t rx_time;						// time signal received by nrf
 uint32_t res_time;						// approximate response time
 
-nrfx_gpiote_in_config_t PLC_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
+nrfx_gpiote_in_config_t PLC_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
 nrfx_gpiote_in_config_t button_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
+// nrfx_gpiote_out_config_t button_sim_config = NRFX_GPIOTE_CONFIG_OUT_SIMPLE(NRF_GPIOTE_INITIAL_VALUE_HIGH);
+// nrfx_gpiote_out_config_t led_config = NRFX_GPIOTE_CONFIG_OUT_SIMPLE(NRF_GPIOTE_INITIAL_VALUE_HIGH);
 
 nrfx_timer_t button_timer = NRFX_TIMER_INSTANCE(0);					// Timer Instance
 nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG;		// Default Timer Configuration
@@ -88,13 +92,19 @@ void gpio_init(void) {
 	nrfx_gpiote_in_event_enable(PLC_INPUT, true);
 	nrfx_gpiote_in_event_enable(NRF_BUTTON, true);
 
+	// nrfx_gpiote_out_init(BUTTON_SIM, &button_sim_config);
+	// nrfx_gpiote_out_init(LED1, &led_config);
+
+	/* nrf_gpio not working for some reason */
 	nrf_gpio_cfg_output(BUTTON_SIM);
 	nrf_gpio_cfg_output(LED1);
 
 	nrf_gpio_pin_set(LED1);
 	nrf_gpio_pin_set(BUTTON_SIM);
 
-	nrf_gpio_cfg_input(TEST_PIN1, NRF_GPIO_PIN_NOPULL);
+	// printf("BUTTON_SIM State: %d\n", nrf_gpio_pin_read(BUTTON_SIM));
+
+	// nrf_gpio_cfg_input(TEST_PIN1, NRF_GPIO_PIN_NOPULL);
 
 
 
@@ -124,14 +134,14 @@ void timer_init(void) {
 					&timer_config, 
 					(nrfx_timer_event_handler_t) dummy_callback);
 
-	// uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&button_timer, TIMER_PERIOD_MS);
-	// printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
+	uint32_t timer_period_ticks = nrfx_timer_ms_to_ticks(&button_timer, TIMER_PERIOD_MS);
+	printf("Timer Period Set for %d ms...\n", TIMER_PERIOD_MS);
 
-	// nrfx_timer_extended_compare(&button_timer,
-	// 							NRF_TIMER_CC_CHANNEL0,
-	// 							timer_period_ticks,
-	// 							NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-	// 							true);
+	nrfx_timer_extended_compare(&button_timer,
+								NRF_TIMER_CC_CHANNEL0,
+								timer_period_ticks,
+								NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+								true);
 
 	printf("Timer Initialized!\n"); // Remember to enable the timer in main
 }
@@ -148,12 +158,13 @@ static void dummy_callback(nrf_timer_event_t thing1, void* thing2) {
 }
 
 static void sim_push_button(void) {
-	printf("Simulate Button Press...\n");
+	printf("Simulating Button Push...\n");
 	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), NULL);
 	APP_ERROR_CHECK(error_code);
 
 	tx_time = nrfx_timer_capture(&button_timer, 1);
-	nrf_gpio_pin_clear(BUTTON_SIM);
+	nrf_gpio_pin_clear(BUTTON_SIM);		// not working for some reason...
+	// nrfx_gpiote_out_clear(BUTTON_SIM);
 
 	// nrf_delay_ms(25);
 
@@ -161,6 +172,7 @@ static void sim_push_button(void) {
 }
 
 static void release_button(void) {
+	// nrfx_gpiote_out_set(BUTTON_SIM);		// not working for some reason...
 	nrf_gpio_pin_set(BUTTON_SIM);
 }
 
@@ -176,7 +188,8 @@ static void plc_input_callback(void) {
 
 static void button_input_callback(void) {
 	printf("Button Press...\n");
-	// tx_time = nrfx_timer_capture(&button_timer, 1);
+	// nrfx_gpiote_out_set(LED1);
+	tx_time = nrfx_timer_capture(&button_timer, 1);
 	return;
 }
 
