@@ -33,7 +33,7 @@
 
 #define BUTTON_SIM 25					// gpio pin that simulates button press
 #define PLC_INPUT 24		 			// gpio pin to read input from PLC 
-#define LED1 17							// specify LED pin
+#define LED1 NRF_GPIO_PIN_MAP(0,17)		// specify LED pin
 #define TIMER_PERIOD_MS 5431			// desired timer period in milliseconds
 #define NRF_BUTTON 13					// Button 1 on nrf52
 
@@ -48,7 +48,7 @@ uint32_t tx_time;						// time signal sent to PLC
 uint32_t rx_time;						// time signal received by nrf
 uint32_t res_time;						// approximate response time
 
-nrfx_gpiote_in_config_t PLC_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(1);
+nrfx_gpiote_in_config_t PLC_input_config = NRFX_GPIOTE_RAW_CONFIG_IN_SENSE_LOTOHI(1);
 nrfx_gpiote_in_config_t button_input_config = NRFX_GPIOTE_CONFIG_IN_SENSE_HITOLO(1);
 // nrfx_gpiote_out_config_t button_sim_config = NRFX_GPIOTE_CONFIG_OUT_SIMPLE(NRF_GPIOTE_INITIAL_VALUE_HIGH);
 // nrfx_gpiote_out_config_t led_config = NRFX_GPIOTE_CONFIG_OUT_SIMPLE(NRF_GPIOTE_INITIAL_VALUE_HIGH);
@@ -80,6 +80,7 @@ void gpio_init(void) {
 
 	nrfx_gpiote_init();
 
+	PLC_input_config.pull = NRF_GPIO_PIN_PULLUP;
 	nrfx_gpiote_in_init(PLC_INPUT, 
 				&PLC_input_config, 
 				(nrfx_gpiote_evt_handler_t) plc_input_callback);
@@ -96,11 +97,11 @@ void gpio_init(void) {
 	// nrfx_gpiote_out_init(LED1, &led_config);
 
 	/* nrf_gpio not working for some reason */
-	nrf_gpio_cfg_output(BUTTON_SIM);
+	// nrf_gpio_cfg_output(BUTTON_SIM);
 	nrf_gpio_cfg_output(LED1);
 
 	nrf_gpio_pin_set(LED1);
-	nrf_gpio_pin_set(BUTTON_SIM);
+	// nrf_gpio_pin_clear(BUTTON_SIM);
 
 	// printf("BUTTON_SIM State: %d\n", nrf_gpio_pin_read(BUTTON_SIM));
 
@@ -159,11 +160,12 @@ static void dummy_callback(nrf_timer_event_t thing1, void* thing2) {
 
 static void sim_push_button(void) {
 	printf("Simulating Button Push...\n");
-	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(50), NULL);
+	error_code = app_timer_start(BSIM_TIMER, APP_TIMER_TICKS(100), NULL);
 	APP_ERROR_CHECK(error_code);
 
 	tx_time = nrfx_timer_capture(&button_timer, 1);
-	nrf_gpio_pin_clear(BUTTON_SIM);		// not working for some reason...
+	// nrf_gpio_pin_set(BUTTON_SIM);		// not working for some reason...
+	nrf_gpio_pin_clear(LED1);
 	// nrfx_gpiote_out_clear(BUTTON_SIM);
 
 	// nrf_delay_ms(25);
@@ -172,8 +174,10 @@ static void sim_push_button(void) {
 }
 
 static void release_button(void) {
+	// printf("Button Release!\n");
 	// nrfx_gpiote_out_set(BUTTON_SIM);		// not working for some reason...
-	nrf_gpio_pin_set(BUTTON_SIM);
+	// nrf_gpio_pin_clear(BUTTON_SIM);
+	nrf_gpio_pin_set(LED1);
 }
 
 static void plc_input_callback(void) {

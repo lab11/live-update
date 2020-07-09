@@ -304,14 +304,13 @@ void PlcCycle(void)
 #define SWITCH1 8
 #define SWITCH2 9
 
-
 #define USE_LED 1                           /* true if the program uses on-board LEDs. false otherwise */
 
 #define NUM_PINS 0                          /* Number of pins to use as outputs */
 #define NUM_INPUTS 1                        /* Number of pins to use as inputs */
 
-static uint8_t output_pins[] = {};          /* List pins to use as outputs as {PIN0, PIN1, ...} */
-static uint8_t input_pins[] = {BUTTON1};    /* List pins to use as inputs as {PIN0, PIN1, ...} */
+static uint8_t output_pins[] = {};          /* List pins to use as outputs as {0, 1, ...} */
+static uint8_t input_pins[] = {11};         /* List pins to use as inputs as {0, 1, ...} */
 
 /* from ladder */
 
@@ -496,7 +495,7 @@ void init_plc(void) {
 /**************** Define Auto-Generated Functions Below ****************/
 
 BOOL Read_U_b_Xbutton(void) {
-    return (BOOL) read_button(BUTTON1);
+    return (BOOL) read_button(11);
 }
 
 BOOL Read_U_b_Yled(void) {

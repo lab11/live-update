@@ -1,10 +1,10 @@
 ## Application Pin Mapping for LED_Blink
 
-Musca - nrf
-PIN3 -> PIN24
-PIN7 -> PIN25
-GND -> GND
-3V3 -> VDD
+nrf9160 -> nrf52
+PIN5    -> PIN24
+PIN11   -> PIN17
+GND     -> GND
+VDD     -> VDD
 
 ***The Ladder Logic Programming Pipeline***
 Assuming you already know how to program in ladder logic, use LDmicro to write your program,
