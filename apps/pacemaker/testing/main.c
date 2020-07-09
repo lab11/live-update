@@ -23,6 +23,8 @@
 
 #include <time.h>
 
+#define INPUT_TRACE NORMAL_HEART_TEST
+
 #define BTN NRF_GPIO_PIN_MAP(0,13)
 
 #define LED1 NRF_GPIO_PIN_MAP(0,17)
@@ -103,7 +105,7 @@ int main(void) {
     uint32_t elapsed_time;
 
     // Run an input trace
-    char *pChr = strtok (ARR7_HEART_TEST, ",;");
+    char *pChr = strtok (INPUT_TRACE, ",;");
     printf("Initiating input trace... \n");
     while (pChr != NULL) {
         if (isdigit(pChr[0])){
@@ -113,6 +115,7 @@ int main(void) {
                 nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
                 nrf_gpio_pin_write(GPIO1, 0);
                 elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
+                nrf_delay_ms(10);
                 printf("VS,%lu \n", elapsed_time/16);
                 nrf_gpio_pin_write(GPIO1, 1);
 
@@ -120,6 +123,7 @@ int main(void) {
                 nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
                 nrf_gpio_pin_write(GPIO2, 0);
                 elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
+                nrf_delay_ms(10);
                 printf("AS,%lu \n", elapsed_time/16);
                 nrf_gpio_pin_write(GPIO2, 1);
             }
