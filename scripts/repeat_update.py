@@ -1,49 +1,43 @@
 import argparse
-import serial
+from copy import deepcopy
+import json
+import networkx as nx
 import os
+import pprint
 import random
 import re
+import serial
 import struct
 import sys
 import time
-import json
-
+from intelhex import IntelHex
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Repeated update test script.')
-    parser.add_argument('app_folder', help='Update folder 1 (first applied)')
-    parser.add_argument('update_folder1', help='Update folder 1 (first applied)')
-    parser.add_argument('update_folder2', help='Update folder 2 (second applied)')
+    parser = argparse.ArgumentParser(description='Repeat live update process.')
+    parser.add_argument('app_folder', help='App folder')
     parser.add_argument('dev', help='Serial port')
+    parser.add_argument('update_folder', help='Specify specific update package folder instead of deriving from app location', default=None)
+    parser.add_argument('flashed_folder', help='Specify specific flashed package folder instead of deriving from app location', default=None)
+    parser.add_argument('--dry_run', help='Does not attempt serial communication', action='store_true', default=False)
+    parser.add_argument('--niter', help='Number of rounds', default=10)
     args = parser.parse_args()
 
-    update_ctr = 0
+    for i in range(int(args.niter)):
+        os.system('nrfjprog -s 960024032 -p')
+        time.sleep(2)
 
-    while True:
-        # wait random amount of time before doing it again
-        delay = random.randint(3, 15)
-        print('waiting ' + str(delay) + ' seconds...', end='', flush=True)
-        time.sleep(delay)
-        print('done.')
-        print()
-        
-        if update_ctr % 2 == 0:
-            update_folder = args.update_folder1   
-        else:
-            update_folder = args.update_folder2
+        os.system('nrfjprog -s 682725125 -r')
+        time.sleep(8 + random.random())
 
-        # update
-        base_folder = os.path.join(args.app_folder, '..', '..')
-        command = 'python3 {} {} {} --update_folder {}'.format(
-            os.path.join(base_folder, 'scripts', 'update.py'),
+        s = 'python3 {} {} {} --update_folder {} --flashed_folder {} --no_update_flashed'.format(
+            args.app_folder + '/../../scripts/update.py', # script
             args.app_folder,
             args.dev,
-            update_folder
-        )
-            
-        print('>> ' + command)
-        os.system(command)
+            args.update_folder,
+            args.flashed_folder)
+        print(s)
+        os.system(s)
 
-        update_ctr += 1
+        time.sleep(6)
 

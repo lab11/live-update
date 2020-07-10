@@ -13,7 +13,7 @@ import time
 
 from intelhex import IntelHex
 
-CURRENT_VERSION = 11
+CURRENT_VERSION = 12
 FLASH_BASE = 0x0
 
 FLASHED_VERSION_NAME = 'lastFlashedNum.txt'
@@ -162,7 +162,9 @@ def serialize_predicates(update_data):
 
     predicate_payload = bytes()
 
-    for p in update_data['predicate_transfer']:
+    predicate_list = update_data['predicate_transfer'] 
+    random.shuffle(predicate_list)
+    for p in predicate_list:
         predicate, init_transfers, hw_transfer_calls = p
 
         predicate_header = struct.pack('IIII',
@@ -186,7 +188,7 @@ def serialize_predicates(update_data):
             constraint_size = 2 * 4
 
             for r in c['range']:
-                constraint_bytes += struct.pack('ii', r[0], r[1])
+                constraint_bytes += struct.pack('II', r[0], r[1])
                 constraint_size += 2 * 4
 
             # prepend total constraint size
@@ -218,7 +220,7 @@ def serialize_predicates(update_data):
     return struct.pack('I', 4 + len(predicate_payload)) + predicate_payload
 
 
-def generate_update_payload(update_folder, flashed_symbols, update_symbols, update_data, force):
+def generate_update_payload(update_folder, flashed_symbols, update_symbols, update_data, force, predicate_only):
 
     header = {}
 
@@ -282,6 +284,8 @@ def generate_update_payload(update_folder, flashed_symbols, update_symbols, upda
         print('Could not locate appram_bss_start or appram_bss_size but did locate the other, exiting...')
         exit(1)
 
+    header['predicate_only'] = 1 if predicate_only else 0
+
     payloads = {}
 
     # look at symbols for appflash_text_rom_start, appflash_rodata_rom_start and sizes for both
@@ -321,6 +325,7 @@ def serialize_header(header):
         main_ptr_addr: {},
         main_addr: {},
         update_flag_addr: {},
+        predicate_only: {},
         appflash_text_start: {},
         appflash_text_size: {},
         appflash_rodata_start: {},
@@ -336,6 +341,7 @@ def serialize_header(header):
         hex(header['main_ptr_addr']),
         hex(header['main_addr'] | 0x1),
         hex(header['update_flag_addr']),
+        hex(header['predicate_only']),
         hex(header['appflash_text_start']),
         hex(header['appflash_text_size']),
         hex(header['appflash_rodata_start']),
@@ -348,11 +354,12 @@ def serialize_header(header):
     )
     print(header_str)
 
-    return struct.pack('I' * 13,
+    return struct.pack('I' * 14,
         CURRENT_VERSION,
         header['main_ptr_addr'],
         header['main_addr'] | 0x1, # make sure main ptr is thumb!
         header['update_flag_addr'],
+        header['predicate_only'],
         header['appflash_text_start'],
         header['appflash_text_size'],
         header['appflash_rodata_start'],
@@ -439,6 +446,7 @@ if __name__ == '__main__':
     parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
     parser.add_argument('--dry_run', help='Does not attempt serial communication', action='store_true', default=False)
     parser.add_argument('--no_update_flashed', help='Does not overwrite currently flashed info', action='store_true', default=False)
+    parser.add_argument('--predicate_only', help='Don\'t update, only check predicates', action='store_true', default=False)
     args = parser.parse_args()
 
     if args.update_folder:
@@ -491,7 +499,8 @@ if __name__ == '__main__':
             flashed_symbols,
             update_symbols,
             update_data,
-            args.force
+            args.force,
+            args.predicate_only,
         )
 
         for p in payloads:
