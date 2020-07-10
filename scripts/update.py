@@ -186,7 +186,7 @@ def serialize_predicates(update_data):
             constraint_size = 2 * 4
 
             for r in c['range']:
-                constraint_bytes += struct.pack('II', r[0], r[1])
+                constraint_bytes += struct.pack('ii', r[0], r[1])
                 constraint_size += 2 * 4
 
             # prepend total constraint size
@@ -393,9 +393,13 @@ def resolve_symbol_addresses(update_data, flashed_symbols, update_symbols):
             io_addrs.append(get_symbol_address(flashed_symbols, '\s{}$'.format(io)))
         predicate['inactive_ops'] = io_addrs
 
+        translated_c = []
         for c in predicate['constraints']:
             c['size'] = get_symbol_size(flashed_symbols, '\s{}$'.format(c['symbol']))
             c['symbol'] = get_symbol_address(flashed_symbols, '\s{}$'.format(c['symbol']))
+            translated_c.append(c)
+
+        predicate['constraints'] = translated_c
 
         # convert each state init entry (symbol, offset, val)
         for init in state_inits:

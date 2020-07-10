@@ -14,6 +14,6 @@ to be applied given a specific predicate or None if we can't handle
 that case.
 '''
 def custom_hardware_transfer(predicate):
-    print(predicate)
+    #print(predicate)
     return []
 
