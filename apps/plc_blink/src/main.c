@@ -4,7 +4,6 @@
 // #include "ladder.h"
 #include "drivers/gpio.h"
 
-
 #define PLC_SCAN_TIME 10
 
 typedef signed short SWORD;     // from platform
@@ -298,7 +297,7 @@ void PlcCycle(void)
 #define LED1 2
 #define LED2 3
 #define LED3 4
-#define LED4 5
+#define LED4 10
 #define BUTTON1 6
 #define BUTTON2 7
 #define SWITCH1 8
@@ -306,16 +305,16 @@ void PlcCycle(void)
 
 #define USE_LED 1                           /* true if the program uses on-board LEDs. false otherwise */
 
-#define NUM_PINS 0                          /* Number of pins to use as outputs */
+#define NUM_PINS 1                          /* Number of pins to use as outputs */
 #define NUM_INPUTS 1                        /* Number of pins to use as inputs */
 
-static uint8_t output_pins[] = {};          /* List pins to use as outputs as {0, 1, ...} */
+static uint8_t output_pins[] = {10};          /* List pins to use as outputs as {0, 1, ...} */
 static uint8_t input_pins[] = {11};         /* List pins to use as inputs as {0, 1, ...} */
 
 /* from ladder */
 
 #define NUM_LED_PINS 3
-static uint8_t LED_pins[] __attribute__((section(".rodata"))) = {2, 3, 4, 5};
+//static uint8_t LED_pins[] __attribute__((section(".rodata"))) = {2, 3, 4, 5};
 // super hacky change this later
 // this is a useful thing to tell the compiler where a variable should be stored
 
@@ -372,7 +371,7 @@ void read_in_table(void) {
     if (gpio_port_get_raw(gpio_dev, &gpio_in_table) != 0) {
         printk("Error! read_in_table() failed!\n");
     }
-    printk("%x\n", gpio_in_table);
+    //printk("%x\n", gpio_in_table);
     return;
 }
 
@@ -380,7 +379,7 @@ void write_out_table(void) {
     if (gpio_port_set_masked_raw(gpio_dev, output_mask, gpio_out_table) != 0) {
         printk("Error! write_out_table() failed!\n");
     }
-    printk("%x\n\n", gpio_out_table);
+    //printk("%x\n\n", gpio_out_table);
     return;
 }
 
