@@ -1,7 +1,7 @@
 ## Application Pin Mapping for LED_Blink
 
 nrf9160 -> nrf52
-PIN5    -> PIN24
+PIN10   -> PIN24
 PIN11   -> PIN17
 GND     -> GND
 VDD     -> VDD
