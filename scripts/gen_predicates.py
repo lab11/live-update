@@ -252,7 +252,9 @@ def gen_predicate(G, path, split_phase_ops):
                         pprint.pprint(c)
                         pprint.pprint(e)
                         exit(1)
-                    
+
+                elif sym.startswith('((derived_') or sym.startswith('conj_$'): # XXX problems
+                    continue 
                 else:
                     print('Warning: constraint symbol {} could not be parsed'.format(sym))
                     #pprint.pprint(e)

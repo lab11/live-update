@@ -138,6 +138,8 @@ def sym_expr_to_str(state, e):
     if e['type'] == 'data':
         if e['subtype'] == 'conjured':
             return replace_with_value(state, e['dump'])
+        if e['subtype'] == 'region':
+            return replace_with_value(state, e['dump'])
         elif e['subtype'] == 'derived':
             return e['region']
         else:
