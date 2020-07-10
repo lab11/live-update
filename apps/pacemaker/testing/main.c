@@ -42,6 +42,8 @@ uint32_t tick_count;
 uint32_t ms;
 char* output_trace;
 
+bool first_vent = true;
+
 uint32_t cycles(void) {
 	return DWT->CYCCNT;
 }
@@ -87,7 +89,7 @@ int main(void) {
     nrf_drv_gpiote_in_event_enable(GPIO4, true);
 
     // 10 Second Setup period
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < 4; i++) {
         printf("%d \n", i);
         nrf_delay_ms(1000);
     }
@@ -113,11 +115,14 @@ int main(void) {
             pChr = strtok (NULL, ",;");
             if (pChr[0] == 'V') {
                 nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);
-                nrf_gpio_pin_write(GPIO1, 0);
+                if (first_vent) nrf_gpio_pin_write(GPIO1, 0);
                 elapsed_time = nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1) - nrf_timer_cc_read(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0);
                 nrf_delay_ms(10);
                 printf("VS,%lu \n", elapsed_time/16);
-                nrf_gpio_pin_write(GPIO1, 1);
+                if (first_vent) {
+                    nrf_gpio_pin_write(GPIO1, 1);
+                    first_vent = false;
+                }
 
             } else if(pChr[0] == 'A') {
                 nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_CAPTURE1);

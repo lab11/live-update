@@ -19,8 +19,8 @@ def gen_arrhythmia7_heart_test_str():
         test_name = "ARR7_HEART_TEST"
         test_trace = "N,0;"
         for _ in range(350):
-            test_trace += "N" + "," + str(TLRI-TAVI) + ";"
-            test_trace += "A" + "," + str(TAVI) + ";"
+            test_trace += "N" + "," + str(TLRI-TAVI-10) + ";"
+            test_trace += "A" + "," + str(TAVI-15) + ";"
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")
         test_file.write("\n")
 
