@@ -80,7 +80,7 @@ void gpio_init(void) {
 
 	nrfx_gpiote_init();
 
-	PLC_input_config.pull = NRF_GPIO_PIN_PULLUP;
+	PLC_input_config.pull = NRF_GPIO_PIN_PULLDOWN;
 	nrfx_gpiote_in_init(PLC_INPUT, 
 				&PLC_input_config, 
 				(nrfx_gpiote_evt_handler_t) plc_input_callback);
