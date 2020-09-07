@@ -6,7 +6,7 @@ def gen_normal_heart_test_str():
     with open('./tests/test_cases1.h', mode='w') as test_file:
         test_name = "NORMAL_HEART_TEST"
         test_trace = "N,0;"
-        for _ in range(350):
+        for _ in range(200):
             test_trace += "V" + "," + str(TLRI-TAVI-10) + ";"
             test_trace += "A" + "," + str(TAVI-15) + ";"
         test_file.write("char " + test_name + "[] = \"" + test_trace + "\";")

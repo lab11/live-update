@@ -6,10 +6,10 @@
 
 #define PLC_SCAN_TIME 10
 
-typedef unsigned short SWORD;     // from platform
+typedef signed short SWORD;     // from platform
 typedef unsigned char BOOL;     // from platform
 
-/********************** ldmicro **********************/
+/* ldmicro */
 
 /* Define EXTERN_EVERYTHING in ladder.h if you want all symbols extern.
    This could be useful to implement `magic variables,' so that for
@@ -104,17 +104,6 @@ STATIC SWORD I_i_scratch2 = 0;
 PROTO(BOOL Read_U_b_Yled(void);)
 PROTO(void Write_U_b_Yled(BOOL v);)
 
-STATIC BOOL I_b_parOut_0004 = 0;
-#define Read_I_b_parOut_0004() I_b_parOut_0004
-#define Write_I_b_parOut_0004(x) I_b_parOut_0004 = x
-STATIC BOOL I_b_parThis_0004 = 0;
-#define Read_I_b_parThis_0004() I_b_parThis_0004
-#define Write_I_b_parThis_0004(x) I_b_parThis_0004 = x
-
-/* You provide these functions. */
-PROTO(BOOL Read_U_b_Yled2(void);)
-PROTO(void Write_U_b_Yled2(BOOL v);)
-
 
 
 /* Call this function once per PLC cycle. You are responsible for calling
@@ -176,7 +165,7 @@ void PlcCycle(void)
     if(Read_I_b_parThis_0000()) {
         if(!Read_I_b_oneShot_0000()) {
             U_i_Cstate++;
-            if(U_i_Cstate < 5) {
+            if(U_i_Cstate < 3) {
             } else {
                 U_i_Cstate = 0;
             }
@@ -301,46 +290,7 @@ void PlcCycle(void)
     Write_U_b_Yled(Read_I_b_rung_top());
     
     /* ] finish series */
-    
-    /* start rung 6 */
-    Write_I_b_rung_top(Read_I_b_mcr());
-    
-    /* start series [ */
-    /* start parallel [ */
-    Write_I_b_parOut_0004(0);
-    Write_I_b_parThis_0004(Read_I_b_rung_top());
-    I_i_scratch2 = 3;
-    if(U_i_Cstate == I_i_scratch2) {
-    } else {
-        Write_I_b_parThis_0004(0);
-    }
-    
-    if(Read_I_b_parThis_0004()) {
-        Write_I_b_parOut_0004(1);
-    }
-    Write_I_b_parThis_0004(Read_I_b_rung_top());
-    /* start series [ */
-    I_i_scratch2 = 4;
-    if(U_i_Cstate == I_i_scratch2) {
-    } else {
-        Write_I_b_parThis_0004(0);
-    }
-    
-    if(!Read_U_b_Rosc()) {
-        Write_I_b_parThis_0004(0);
-    }
-    
-    /* ] finish series */
-    if(Read_I_b_parThis_0004()) {
-        Write_I_b_parOut_0004(1);
-    }
-    Write_I_b_rung_top(Read_I_b_parOut_0004());
-    /* ] finish parallel */
-    Write_U_b_Yled2(Read_I_b_rung_top());
-    
-    /* ] finish series */
 }
-
 
 /********************** Ladder Files Start Here ***********************/
 
@@ -358,8 +308,8 @@ void PlcCycle(void)
 #define NUM_PINS 1                          /* Number of pins to use as outputs */
 #define NUM_INPUTS 1                        /* Number of pins to use as inputs */
 
-//static uint8_t output_pins[] = {10};          /* List pins to use as outputs as {0, 1, ...} */
-//static uint8_t input_pins[] = {11};         /* List pins to use as inputs as {0, 1, ...} */
+static uint8_t output_pins[] = {10};          /* List pins to use as outputs as {0, 1, ...} */
+static uint8_t input_pins[] = {11};         /* List pins to use as inputs as {0, 1, ...} */
 
 /* from ladder */
 
@@ -381,7 +331,7 @@ void enable_pin_inputs(uint8_t* pins, uint8_t num_pins) {
     printk("Enabling Pin Inputs...\n");
     gpio_dev = device_get_binding("GPIO_0");
 
-    for (uint8_t i = 0; i < num_pins; i++) {
+    for (int i = 0; i < num_pins; i++) {
         printk("Enabling PIN%d...\n", pins[i]);
         int ret = gpio_pin_configure(gpio_dev, pins[i], (GPIO_INPUT));
         if (ret) {
@@ -507,23 +457,35 @@ void plc_callback(struct k_timer *t) {
 
 void init_plc(void) {
     printk("Initializing PLC...\n");
-    gpio_dev = device_get_binding("GPIO_0");
 
-    gpio_pin_configure(gpio_dev, 11, (GPIO_INPUT));
+    enable_pin_inputs(input_pins, NUM_INPUTS);
     printk("Inputs Initialized!\n");
 
     read_in_table();
 
-    gpio_pin_configure(gpio_dev, 2, GPIO_OUTPUT_INACTIVE);
-    output_mask |= (1 << 2);
-    gpio_pin_configure(gpio_dev, 3, GPIO_OUTPUT_INACTIVE);
-    output_mask |= (1 << 3);
-    gpio_pin_configure(gpio_dev, 4, GPIO_OUTPUT_INACTIVE);
-    output_mask |= (1 << 4);
-    gpio_pin_configure(gpio_dev, 5, GPIO_OUTPUT_INACTIVE);
-    output_mask |= (1 << 5);
-    gpio_pin_configure(gpio_dev, 10, GPIO_OUTPUT_INACTIVE);
-    output_mask |= (1 << 10);
+    uint8_t num_pins = NUM_PINS;
+
+    // enable_pin_outputs(LED_pins, num_pins);
+
+    if (USE_LED) {
+        printk("LEDs in use...\n");
+        num_pins += 4;
+        uint8_t tmp[num_pins];
+        int i = 0;
+        for (int j = 0; j < NUM_PINS; j++) {
+            tmp[i] = output_pins[j];
+            printk("Adding pin %d...\n", tmp[i]);
+            i++;
+        }
+        for (int k = 0; k < 4; k++) {
+            tmp[i] = k + 2;
+            printk("Adding pin %d...\n", tmp[i]);
+            i++;
+        }
+        enable_pin_outputs(tmp, num_pins);
+    } else {
+        enable_pin_outputs(output_pins, num_pins);
+    }
 
     write_out_table();
     // printk("plc initialized\n");
@@ -544,19 +506,11 @@ void Write_U_b_Yled(BOOL v) {
 }
 
 BOOL Read_U_b_Ytx(void) {
-    return (BOOL) read_pin(10);
+    return (BOOL) read_LED(10);
 }
 
 void Write_U_b_Ytx(BOOL v) {
-    write_pin(10, v);
-}
-
-BOOL Read_U_b_Yled2(void){
-    return (BOOL) read_LED(LED2);
-}
-
-void Write_U_b_Yled2(BOOL v) {
-    write_LED(LED2, v);
+    write_LED(10, v);
 }
 
 /********************** End Ladder Files ***********************/

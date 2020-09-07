@@ -32,7 +32,6 @@ typedef enum {
 extern void gpio_nrfx_init_callback(struct gpio_callback *, gpio_callback_handler_t, gpio_port_pins_t);
 
 void reset_t();
-void observe_ventricle_sense();
 void ventricle_pace();
 void atrial_pace();
 
@@ -53,13 +52,9 @@ void uri_ventricle_sense();
 void uri_ventricle_pace();
 void uri_clk_expire_cb(struct k_timer *t);
 
-// VRP
-void vrp_ventricle_get();
-void vrp_ventricle_pace();
-void vrp_timer_expire_cb(struct k_timer *t);
 
 // Prototypes
-void observe_ventricle_get();
+void observe_ventricle_sense();
 void observe_ventricle_pace();
 void observe_atrial_sense();
 void observe_atrial_pace();
@@ -68,7 +63,6 @@ void observe_atrial_pace();
 struct k_timer lri_timer;
 struct k_timer avi_timer;
 struct k_timer uri_clk;
-struct k_timer vrp_timer;
 struct k_timer pacing_timer;
 
 // GPIO
@@ -107,6 +101,7 @@ void avi_timer_expire_cb(struct k_timer *t) {
     if (s != AVI) return;
     
     if (uri_expired) {
+        //printk("Oaviexp\n");
         ventricle_pace();
         s = Idle;
     } else {
@@ -116,6 +111,7 @@ void avi_timer_expire_cb(struct k_timer *t) {
 
 void avi_clk_expire() {
     if (s == WaitURI) {
+        //printk("Oaviclk\n");
         ventricle_pace();
         s = Idle;
     }
@@ -148,8 +144,7 @@ static bool ASed = false;
 void lri_ventricle();
 
 void lri_ventricle_sense() {
-    // NOTE: assumes reset_t is already called by vrp_ventricle_get()
-    // reset_t();
+    reset_t();
     lri_ventricle();
 }
 
@@ -171,49 +166,24 @@ void lri_timer_expire_cb(struct k_timer *t) {
     atrial_pace();
 }
 
-// -- VRP Component --
-
-static bool vrp = false;
-
-void vrp_ventricle_get() {
-    if (!vrp) {
-        vrp = true;
-        reset_t();
-        observe_ventricle_sense();
-    }
-}
-
-void vrp_ventricle_pace() {
-    if (!vrp) {
-        // NOTE: assumes reset_t is already called by lri_ventricle_pace()
-        // reset_t();
-        vrp = true;
-    }
-}
-
-void vrp_timer_expire_cb(struct k_timer *t) {
-    vrp = false;
-}
-
-// -- Main Component --
+// -- Main component --
 pacing_t current_pace = VENTRICLE;
 
 // Reset timers that make up `t` in the model
 void reset_t() {
     k_timer_start(&lri_timer, K_MSEC(TLRI-TAVI), K_MSEC(0));
     k_timer_start(&avi_timer, K_MSEC(TAVI), K_MSEC(0));
-    k_timer_start(&vrp_timer, K_MSEC(TVRP), K_MSEC(0));
 }
 
 // GPIO inputs
 void ventricle_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
-    observe_ventricle_get();
-    printk("UVe S\n");
+    observe_ventricle_sense();
+    //printk("Ve S\n");
 }
 
 void atrial_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
     observe_atrial_sense();
-    printk("UAt S\n");
+    //printk("At S\n");
 }
 
 // Pacing outputs
@@ -224,7 +194,8 @@ void ventricle_pace() {
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
     
     observe_ventricle_pace();
-    printk("UVe P\n");
+    //printk("Ve P\n");
+    //printk("OobsP\n");
 }
 
 void atrial_pace() {
@@ -234,7 +205,7 @@ void atrial_pace() {
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
 
     observe_atrial_pace();
-    printk("UAt P\n");
+    //printk("At P\n");
 }
 
 void stop_pace_cb(struct k_timer *t) {
@@ -243,10 +214,6 @@ void stop_pace_cb(struct k_timer *t) {
 }
 
 // Observation functions; route to different components
-void observe_ventricle_get() {
-    vrp_ventricle_get();
-}
-
 void observe_ventricle_sense() {
     lri_ventricle_sense();    
     avi_ventricle_sense();    
@@ -256,7 +223,6 @@ void observe_ventricle_sense() {
 void observe_ventricle_pace() {
     lri_ventricle_pace();
     uri_ventricle_pace();
-    vrp_ventricle_pace();
 }
 
 void observe_atrial_sense() {
@@ -297,7 +263,7 @@ void main(void) {
         return;
     }
 
-    ret = gpio_pin_interrupt_configure(gpio_dev, VENTRICLE_SENSE_PIN, GPIO_INT_EDGE_TO_ACTIVE); 
+    ret = gpio_pin_interrupt_configure(gpio_dev, VENTRICLE_SENSE_PIN, GPIO_INT_EDGE_FALLING); 
     if (ret) {
         printk("gpio_pin_interrupt_configure failed on pin %d with code: %d\n", VENTRICLE_SENSE_PIN, ret);
         return;
@@ -312,7 +278,7 @@ void main(void) {
         return;
     }
 
-    ret = gpio_pin_interrupt_configure(gpio_dev, ATRIAL_SENSE_PIN, GPIO_INT_EDGE_TO_ACTIVE); 
+    ret = gpio_pin_interrupt_configure(gpio_dev, ATRIAL_SENSE_PIN, GPIO_INT_EDGE_FALLING); 
     if (ret) {
         printk("gpio_pin_interrupt_configure failed on pin %d with code: %d\n", ATRIAL_SENSE_PIN, ret);
         return;
@@ -325,11 +291,10 @@ void main(void) {
     k_timer_init(&lri_timer, lri_timer_expire_cb, NULL);
     k_timer_init(&avi_timer, avi_timer_expire_cb, NULL);
     k_timer_init(&uri_clk, uri_clk_expire_cb, NULL);
-    k_timer_init(&vrp_timer, vrp_timer_expire_cb, NULL);
 
     k_timer_init(&pacing_timer, stop_pace_cb, NULL);
 
     // Uncomment to force ventricle event when no external inputs available
     //printk("Forcing Ventricle Event\n");
-    //observe_ventricle_get();
+    //observe_ventricle_sense();
 }

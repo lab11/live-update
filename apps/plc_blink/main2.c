@@ -6,10 +6,10 @@
 
 #define PLC_SCAN_TIME 10
 
-typedef unsigned short SWORD;     // from platform
+typedef signed short SWORD;     // from platform
 typedef unsigned char BOOL;     // from platform
 
-/********************** ldmicro **********************/
+/* ldmicro */
 
 /* Define EXTERN_EVERYTHING in ladder.h if you want all symbols extern.
    This could be useful to implement `magic variables,' so that for
@@ -104,17 +104,6 @@ STATIC SWORD I_i_scratch2 = 0;
 PROTO(BOOL Read_U_b_Yled(void);)
 PROTO(void Write_U_b_Yled(BOOL v);)
 
-STATIC BOOL I_b_parOut_0004 = 0;
-#define Read_I_b_parOut_0004() I_b_parOut_0004
-#define Write_I_b_parOut_0004(x) I_b_parOut_0004 = x
-STATIC BOOL I_b_parThis_0004 = 0;
-#define Read_I_b_parThis_0004() I_b_parThis_0004
-#define Write_I_b_parThis_0004(x) I_b_parThis_0004 = x
-
-/* You provide these functions. */
-PROTO(BOOL Read_U_b_Yled2(void);)
-PROTO(void Write_U_b_Yled2(BOOL v);)
-
 
 
 /* Call this function once per PLC cycle. You are responsible for calling
@@ -176,7 +165,7 @@ void PlcCycle(void)
     if(Read_I_b_parThis_0000()) {
         if(!Read_I_b_oneShot_0000()) {
             U_i_Cstate++;
-            if(U_i_Cstate < 5) {
+            if(U_i_Cstate < 3) {
             } else {
                 U_i_Cstate = 0;
             }
@@ -301,46 +290,7 @@ void PlcCycle(void)
     Write_U_b_Yled(Read_I_b_rung_top());
     
     /* ] finish series */
-    
-    /* start rung 6 */
-    Write_I_b_rung_top(Read_I_b_mcr());
-    
-    /* start series [ */
-    /* start parallel [ */
-    Write_I_b_parOut_0004(0);
-    Write_I_b_parThis_0004(Read_I_b_rung_top());
-    I_i_scratch2 = 3;
-    if(U_i_Cstate == I_i_scratch2) {
-    } else {
-        Write_I_b_parThis_0004(0);
-    }
-    
-    if(Read_I_b_parThis_0004()) {
-        Write_I_b_parOut_0004(1);
-    }
-    Write_I_b_parThis_0004(Read_I_b_rung_top());
-    /* start series [ */
-    I_i_scratch2 = 4;
-    if(U_i_Cstate == I_i_scratch2) {
-    } else {
-        Write_I_b_parThis_0004(0);
-    }
-    
-    if(!Read_U_b_Rosc()) {
-        Write_I_b_parThis_0004(0);
-    }
-    
-    /* ] finish series */
-    if(Read_I_b_parThis_0004()) {
-        Write_I_b_parOut_0004(1);
-    }
-    Write_I_b_rung_top(Read_I_b_parOut_0004());
-    /* ] finish parallel */
-    Write_U_b_Yled2(Read_I_b_rung_top());
-    
-    /* ] finish series */
 }
-
 
 /********************** Ladder Files Start Here ***********************/
 
@@ -544,19 +494,11 @@ void Write_U_b_Yled(BOOL v) {
 }
 
 BOOL Read_U_b_Ytx(void) {
-    return (BOOL) read_pin(10);
+    return (BOOL) read_LED(10);
 }
 
 void Write_U_b_Ytx(BOOL v) {
-    write_pin(10, v);
-}
-
-BOOL Read_U_b_Yled2(void){
-    return (BOOL) read_LED(LED2);
-}
-
-void Write_U_b_Yled2(BOOL v) {
-    write_LED(LED2, v);
+    write_LED(10, v);
 }
 
 /********************** End Ladder Files ***********************/

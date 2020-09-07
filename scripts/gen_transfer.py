@@ -298,20 +298,20 @@ def generate_state_transfer_map(original_symbol_f, update_symbol_f):
 
     original_symbols = get_symbols_in_section(original_symbol_f, '.app_data') + \
                        get_symbols_in_section(original_symbol_f, '.app_bss')
-    original_symbols = [o for o in original_symbols if get_symbol_size(original_symbol_f, o+'$') != 0]
+    original_symbols = [o for o in original_symbols if get_symbol_size(original_symbol_f, '\s'+o+'$') != 0]
 
     update_symbols = get_symbols_in_section(update_symbol_f, '.app_data') + \
                      get_symbols_in_section(update_symbol_f, '.app_bss')
-    update_symbols = [u for u in update_symbols if get_symbol_size(update_symbol_f, u+'$') != 0]
+    update_symbols = [u for u in update_symbols if get_symbol_size(update_symbol_f, '\s'+u+'$') != 0]
 
     transfer_map = {}
 
     for o_sym in original_symbols:
         if o_sym in update_symbols:
-            size = get_symbol_size(original_symbol_f, o_sym+'$')
-            if size != get_symbol_size(update_symbol_f, o_sym+'$'):
-                print('error, expected', o_sym, 'to be', size, 'bytes in the update, but got', get_symbol_size(update_symbol_f, o_sym+'$'), 'instead')
-                exit(1)
+            size = get_symbol_size(original_symbol_f, '\s'+o_sym+'$')
+            if size != get_symbol_size(update_symbol_f, '\s'+o_sym+'$'):
+                print('warning, expected', o_sym, 'to be', size, 'bytes in the update, but got', get_symbol_size(update_symbol_f, '\s'+o_sym+'$'), 'instead')
+                size = get_symbol_size(update_symbol_f, '\s'+o_sym+'$')
 
             transfer_map[o_sym] = (o_sym, size)
 
@@ -404,6 +404,8 @@ def matching_constraints(orig_predicate, translated_constraints, updated_predica
     # actually check the constraint ranges now
     for u_sym in update_constraint_map:
         update_ranges = deepcopy(update_constraint_map[u_sym])
+        if u_sym not in orig_constraint_map:
+            continue
         original_ranges = deepcopy(orig_constraint_map[u_sym])
 
         if type(original_ranges[0]) != list:
@@ -457,10 +459,14 @@ def match_predicates_and_custom_transfer(original_predicates_and_init, update_pr
             if not reset:
                 continue
 
-            translated_constraints = [{
-                'symbol': state_transfer_map[oc['symbol']][0],
-                'range': oc['range'],
-            } for oc in op['constraints']]
+            translated_constraints = []
+            for oc in op['constraints']:
+                if oc['symbol'] in state_transfer_map:
+                    translated_constraints.append({
+                        'symbol': state_transfer_map[oc['symbol']][0],
+                        'range': oc['range'],
+                    })
+
 
             matching, custom_state = matching_constraints(op, translated_constraints, up, state_transfer_map, unmapped_symbols)
             if matching:

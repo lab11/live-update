@@ -13,7 +13,7 @@ import time
 
 from intelhex import IntelHex
 
-CURRENT_VERSION = 12
+CURRENT_VERSION = 13
 FLASH_BASE = 0x0
 
 FLASHED_VERSION_NAME = 'lastFlashedNum.txt'
@@ -98,6 +98,7 @@ def serialize_hw_init(update_data):
     
     hw_bytes = bytes()
     for hw in update_data['hw_init']:
+        print(hw)
         hw_bytes += struct.pack('I' + 'I'*len(hw), 1 * 4 + (len(hw) * 4), *hw)
 
     total_hw_size = len(hw_bytes) + 4
@@ -143,6 +144,7 @@ def serialize_predicates(update_data):
         { # each constraint
             size
             symbol
+            bytes
             n_ranges
             { # each range
                 <range lower> <range upper>
@@ -162,8 +164,9 @@ def serialize_predicates(update_data):
 
     predicate_payload = bytes()
 
-    predicate_list = update_data['predicate_transfer'] 
-    random.shuffle(predicate_list)
+    print(len(update_data['predicate_transfer']))
+    predicate_list = update_data['predicate_transfer']
+    #random.shuffle(predicate_list)
     for p in predicate_list:
         predicate, init_transfers, hw_transfer_calls = p
 
@@ -184,11 +187,20 @@ def serialize_predicates(update_data):
             predicate_size += 1 * 4
 
         for c in predicate['constraints']:
-            constraint_bytes = struct.pack('II', c['symbol'], len(c['range']))
-            constraint_size = 2 * 4
+            #continue
+            #print(c)
+            if c['symbol'] == None:
+                continue
+            constraint_bytes = struct.pack('III', c['symbol'], c['size'], len(c['range']))
+            constraint_size = 3 * 4
 
             for r in c['range']:
-                constraint_bytes += struct.pack('II', r[0], r[1])
+                start, end = r[0], r[1]
+                print(predicate)
+                print(start, end)
+                if start < 0:
+                    continue
+                constraint_bytes += struct.pack('II', start, end)
                 constraint_size += 2 * 4
 
             # prepend total constraint size
@@ -208,11 +220,12 @@ def serialize_predicates(update_data):
 
         predicate_header += struct.pack('III',
             len(predicate['constraints']),
+            #0,
             len(init_transfers),
             hw_transfer_size
         )
         predicate_size += 4 * 4
-        print('PREDICATE SIZE', predicate_size)
+        #print('PREDICATE SIZE', predicate_size)
         predicate_header = struct.pack('I', predicate_size) + predicate_header
 
         predicate_payload += predicate_header + predicate_bytes
@@ -220,7 +233,7 @@ def serialize_predicates(update_data):
     return struct.pack('I', 4 + len(predicate_payload)) + predicate_payload
 
 
-def generate_update_payload(update_folder, flashed_symbols, update_symbols, update_data, force, predicate_only):
+def generate_update_payload(update_folder, flashed_symbols, update_symbols, update_data, force, write_only, predicate_only):
 
     header = {}
 
@@ -284,6 +297,7 @@ def generate_update_payload(update_folder, flashed_symbols, update_symbols, upda
         print('Could not locate appram_bss_start or appram_bss_size but did locate the other, exiting...')
         exit(1)
 
+    header['write_only'] = 1 if write_only else 0
     header['predicate_only'] = 1 if predicate_only else 0
 
     payloads = {}
@@ -325,6 +339,7 @@ def serialize_header(header):
         main_ptr_addr: {},
         main_addr: {},
         update_flag_addr: {},
+        write_only: {},
         predicate_only: {},
         appflash_text_start: {},
         appflash_text_size: {},
@@ -341,6 +356,7 @@ def serialize_header(header):
         hex(header['main_ptr_addr']),
         hex(header['main_addr'] | 0x1),
         hex(header['update_flag_addr']),
+        hex(header['write_only']),
         hex(header['predicate_only']),
         hex(header['appflash_text_start']),
         hex(header['appflash_text_size']),
@@ -354,11 +370,12 @@ def serialize_header(header):
     )
     print(header_str)
 
-    return struct.pack('I' * 14,
+    return struct.pack('I' * 15,
         CURRENT_VERSION,
         header['main_ptr_addr'],
         header['main_addr'] | 0x1, # make sure main ptr is thumb!
         header['update_flag_addr'],
+        header['write_only'],
         header['predicate_only'],
         header['appflash_text_start'],
         header['appflash_text_size'],
@@ -446,6 +463,7 @@ if __name__ == '__main__':
     parser.add_argument('--force', help='Override slot warning', action='store_true', default=False)
     parser.add_argument('--dry_run', help='Does not attempt serial communication', action='store_true', default=False)
     parser.add_argument('--no_update_flashed', help='Does not overwrite currently flashed info', action='store_true', default=False)
+    parser.add_argument('--write_only', help='Don\'t update or check predicates, only write update', action='store_true', default=False)
     parser.add_argument('--predicate_only', help='Don\'t update, only check predicates', action='store_true', default=False)
     args = parser.parse_args()
 
@@ -470,7 +488,7 @@ if __name__ == '__main__':
     if manifest['valid'] and flashed_manifest['valid'] and (manifest['update_partition'] != flashed_manifest['update_partition']  or args.force):
 
         TRANSFER_OUT = update_folder + '/update.transfer'
-        os.system('python3 {} {} {} {} {} {} {}'.format(
+        s = 'python3 {} {} {} {} {} {} {}'.format(
             args.app_folder + '/../../scripts/gen_transfer.py', # script
             args.app_folder if not load_transfer_from_update_folder else update_folder, # transfer script folder
             flashed_folder + '/update.predicates', # original predicates
@@ -478,7 +496,9 @@ if __name__ == '__main__':
             update_folder + '/update.predicates', # updated predicates
             update_folder + '/update.symbols', # updated symbols
             TRANSFER_OUT, # output file
-        ))
+        )
+        print(s)
+        os.system(s)
 
         with open(TRANSFER_OUT, 'r') as f:
             update_data = json.load(f)
@@ -500,6 +520,7 @@ if __name__ == '__main__':
             update_symbols,
             update_data,
             args.force,
+            args.write_only,
             args.predicate_only,
         )
 

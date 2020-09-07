@@ -437,9 +437,11 @@ if __name__ == '__main__':
     if args.dump_paths:
         dump_paths(eventG, 'paths.dump')
 
+    '''
     with open(args.out_graph_export, 'w') as f:
         export_graph(eventG, f, args.show_constraints)
     print('  exported visualization graph to ' + args.out_graph_export)
+    '''
 
     nx.write_gpickle(eventG, args.out_graph)
     print('  exported networkx graph (pickled) to ' + args.out_graph)
