@@ -68,7 +68,7 @@ The `flashed_folder` and `update_folder` flags point the updater to the versions
 [Host] Running one update at a time is annoying and time-consuming, so it's normally a lot easier to run updates one after another for evaluation purposes. The script will reset both test and pacemaker boards in the correct order, let the pacemaker run for a couple of seconds, then randomly apply the update and wait a couple more seconds. The entire process is repeated as many times as necessary:
 
 ```
-python3 <project root>/scripts/repeate_update.py --dry_run --niter <number of runs> <project root>/apps/pacemaker /dev/cu.usbmodem0009600...5 ../update ../original
+python3 <project root>/scripts/repeated_update.py --niter <number of runs> <project root>/apps/pacemaker /dev/cu.usbmodem0009600...5 ../update ../original
 ```
 
 Additional flags are available to test different scenarios (e.g. write-only updates, predicate checking only, full update, etc.)
@@ -85,7 +85,7 @@ osascript -e 'tell application "Terminal" to do script "JLinkExe -device NRF5283
 sleep 1
 osascript -e 'tell application "Terminal" to do script "JLinkRTTClient > <output file path>"'
 sleep 1
-python3 <project root>/scripts/repeate_update.py --dry_run --niter <number of runs> <project root>/apps/pacemaker /dev/cu.usbmodem0009600...5 ../update ../original
+python3 <project root>/scripts/repeated_update.py --dry_run --niter <number of runs> <project root>/apps/pacemaker /dev/cu.usbmodem0009600...5 ../update ../original
 ```
 
 ### Generating rough figures
