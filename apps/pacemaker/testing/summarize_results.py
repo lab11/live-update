@@ -97,7 +97,7 @@ if __name__ == '__main__':
         as_vp_response_times = []
         curr_idx = 0
         while (curr_idx < len(normal_lines)):
-            if (normal_lines[curr_idx][0] == 'VP'):
+            if (normal_lines[curr_idx][0] == 'VP' and normal_lines[curr_idx-1][0] != 'AP'):
                 as_vp_response_times.append(int(normal_lines[curr_idx][1]))
             curr_idx += 1
 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         as_vp_response_times = []
         curr_idx = 0
         while (curr_idx < len(write_lines)):
-            if (write_lines[curr_idx][0] == 'VP'):
+            if (write_lines[curr_idx][0] == 'VP' and write_lines[curr_idx-1][0] != 'AP'):
                 as_vp_response_times.append(int(write_lines[curr_idx][1]))
             curr_idx += 1
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
                 record_time = True
             elif (predicate_lines[curr_idx][0] == 'S'):
                 record_time = False 
-            elif (predicate_lines[curr_idx][0] == 'VP'):
+            elif (predicate_lines[curr_idx][0] == 'VP' and predicate_lines[curr_idx-1][0] != 'AP'):
                 as_vp_response_times_all.append(int(predicate_lines[curr_idx][1]))
                 if record_time:
                     as_vp_response_times_after_write.append(int(predicate_lines[curr_idx][1]))
@@ -175,7 +175,7 @@ if __name__ == '__main__':
                 record_time = True
             elif (update_lines[curr_idx][0] == 'S'):
                 record_time = False 
-            elif (update_lines[curr_idx][0] == 'VP'):
+            elif (update_lines[curr_idx][0] == 'VP' and update_lines[curr_idx-1][0] != 'AP'):
                 as_vp_response_times_all.append(int(update_lines[curr_idx][1]))
                 if record_time:
                     as_vp_response_times_after_write.append(int(update_lines[curr_idx][1]))

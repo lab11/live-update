@@ -30,7 +30,8 @@ if __name__ == '__main__':
         os.system('nrfjprog -s 960039321 -p')
         time.sleep(2)
         os.system('nrfjprog -s 682725125 -r')
-        time.sleep(random.randint(2, 5) + random.random())
+        #time.sleep(random.randint(2, 5) + random.random())
+        time.sleep(2)
 
         s = 'python3 {} {} {} --update_folder {} --flashed_folder {} --no_update_flashed'.format(
             args.app_folder + '/../../scripts/update.py', # script
@@ -53,7 +54,8 @@ if __name__ == '__main__':
     os.system('nrfjprog -s 960039321 -p')
     time.sleep(2)
     os.system('nrfjprog -s 682725125 -r')
-    time.sleep(random.randint(2, 5) + random.random())
+    #time.sleep(random.randint(2, 5) + random.random())
+    time.sleep(2)
 
 
 

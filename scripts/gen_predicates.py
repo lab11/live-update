@@ -228,10 +228,11 @@ def gen_predicate(G, path, split_phase_ops):
                                         break
                         
                         if not is_global:
-                            print('Error, constraint symbol is not global')
-                            pprint.pprint(c)
-                            pprint.pprint(e)
-                            exit(1)
+                            print('Warning, constraint symbol ({}) is not global'.format(sym))
+                            #pprint.pprint(c)
+                            #pprint.pprint(e)
+                            #exit(1)
+                            continue
 
                         constraint['symbol'] = pretty_symbol
 
@@ -257,6 +258,7 @@ def gen_predicate(G, path, split_phase_ops):
                     continue 
                 else:
                     print('Warning: constraint symbol {} could not be parsed'.format(sym))
+                    pprint.pprint(c)
                     #pprint.pprint(e)
                     #exit(1)
                     continue

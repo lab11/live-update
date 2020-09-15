@@ -210,12 +210,12 @@ void reset_t() {
 // GPIO inputs
 void ventricle_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
     observe_ventricle_get();
-    //printk("UVe S\n");
+    printk("UVe S\n");
 }
 
 void atrial_sense_cb(struct device *dev, struct gpio_callback *cb, u32_t pin) {
     observe_atrial_sense();
-    //printk("UAt S\n");
+    printk("UAt S\n");
 }
 
 // Pacing outputs
@@ -226,7 +226,7 @@ void ventricle_pace() {
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
     
     observe_ventricle_pace();
-    //printk("UVe P\n");
+    printk("UVe P\n");
     //printk("UobsP\n");
 }
 
@@ -237,7 +237,7 @@ void atrial_pace() {
     k_timer_start(&pacing_timer, K_MSEC(1), K_MSEC(0));
 
     observe_atrial_pace();
-    //printk("UAt P\n");
+    printk("UAt P\n");
 }
 
 void stop_pace_cb(struct k_timer *t) {
