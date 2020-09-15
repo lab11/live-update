@@ -125,7 +125,7 @@ def serialize_transfers(update_data):
     return transfers_payload
 
 
-def serialize_predicates(update_data):
+def serialize_predicates(update_data, use_predicate=None):
 
     ''' (all 4 byte ints/ptrs)
 
@@ -166,7 +166,9 @@ def serialize_predicates(update_data):
 
     print(len(update_data['predicate_transfer']))
     predicate_list = update_data['predicate_transfer']
-    #random.shuffle(predicate_list)
+    if use_predicate:
+        predicate_list = [predicate_list[use_predicate]]
+
     for p in predicate_list:
         predicate, init_transfers, hw_transfer_calls = p
 
@@ -233,7 +235,7 @@ def serialize_predicates(update_data):
     return struct.pack('I', 4 + len(predicate_payload)) + predicate_payload
 
 
-def generate_update_payload(update_folder, flashed_symbols, update_symbols, update_data, force, write_only, predicate_only):
+def generate_update_payload(update_folder, flashed_symbols, update_symbols, update_data, force, write_only, predicate_only, use_predicate):
 
     header = {}
 
@@ -321,7 +323,7 @@ def generate_update_payload(update_folder, flashed_symbols, update_symbols, upda
         print('Error: flashed image and update image both using the same RAM section: {} (flashed) {} (update)'.format(hex(flashed_ram), hex(update_ram)))
         exit(1)
 
-    payloads['predicates'] = serialize_predicates(update_data)
+    payloads['predicates'] = serialize_predicates(update_data, use_predicate)
     payloads['transfers'] = serialize_transfers(update_data)
     payloads['hw_init'] = serialize_hw_init(update_data)
     payloads['mem_init'] = serialize_mem_init(update_data)
@@ -465,6 +467,7 @@ if __name__ == '__main__':
     parser.add_argument('--no_update_flashed', help='Does not overwrite currently flashed info', action='store_true', default=False)
     parser.add_argument('--write_only', help='Don\'t update or check predicates, only write update', action='store_true', default=False)
     parser.add_argument('--predicate_only', help='Don\'t update, only check predicates', action='store_true', default=False)
+    parser.add_argument('--use_predicate', help='Index of predicate to use (will only send 1)', default=None)
     args = parser.parse_args()
 
     if args.update_folder:
@@ -522,6 +525,7 @@ if __name__ == '__main__':
             args.force,
             args.write_only,
             args.predicate_only,
+            args.use_predicate,
         )
 
         for p in payloads:
