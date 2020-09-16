@@ -467,7 +467,7 @@ if __name__ == '__main__':
     parser.add_argument('--no_update_flashed', help='Does not overwrite currently flashed info', action='store_true', default=False)
     parser.add_argument('--write_only', help='Don\'t update or check predicates, only write update', action='store_true', default=False)
     parser.add_argument('--predicate_only', help='Don\'t update, only check predicates', action='store_true', default=False)
-    parser.add_argument('--use_predicate', help='Index of predicate to use (will only send 1)', default=None)
+    parser.add_argument('--use_predicate', type=int, help='Index of predicate to use (will only send 1)', default=None)
     args = parser.parse_args()
 
     if args.update_folder:
