@@ -387,8 +387,8 @@ def generate_hw_init_calls(original_predicates_and_init, update_predicates_and_i
 
 def matching_constraints(orig_predicate, translated_constraints, updated_predicate, state_transfer_map, unmapped_symbols):
 
-    orig_constraint_map = {tc['symbol']: tc['range'] for tc in translated_constraints}
-    update_constraint_map = {uc['symbol']: uc['range'] for uc in updated_predicate['constraints']}
+    orig_constraint_map = {tc['symbol']: tc['range'] for tc in translated_constraints if '}' not in tc['symbol']}
+    update_constraint_map = {uc['symbol']: uc['range'] for uc in updated_predicate['constraints'] if '}' not in uc['symbol']}
 
     # generate constraints on new symbols in the update, using lower bound as the initialization value
     new_inits = []

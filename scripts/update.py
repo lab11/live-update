@@ -169,8 +169,9 @@ def serialize_predicates(update_data, use_predicate=None):
     if use_predicate:
         predicate_list = [predicate_list[use_predicate]]
     else:
-        print('Warning, only sending top 20 predicates')
-        predicate_list = predicate_list[0:20]
+        #print('Warning, only sending top 50 predicates')
+        #predicate_list = predicate_list[50:100]
+        pass
 
     for p in predicate_list:
         predicate, init_transfers, hw_transfer_calls = p
@@ -423,11 +424,16 @@ def resolve_symbol_addresses(update_data, flashed_symbols, update_symbols):
             io_addrs.append(get_symbol_address(flashed_symbols, '\s{}$'.format(io)))
         predicate['inactive_ops'] = io_addrs
 
-        translated_c = []
+        syms = {}
         for c in predicate['constraints']:
-            c['size'] = get_symbol_size(flashed_symbols, '\s{}$'.format(c['symbol']))
-            c['symbol'] = get_symbol_address(flashed_symbols, '\s{}$'.format(c['symbol']))
-            translated_c.append(c)
+            if c['symbol'] not in syms:
+                syms[c['symbol']] = c
+                c['size'] = get_symbol_size(flashed_symbols, '\s{}$'.format(c['symbol']))
+                c['symbol'] = get_symbol_address(flashed_symbols, '\s{}$'.format(c['symbol']))
+            else:
+                syms[c['symbol']]['range'] += c['range']
+
+        translated_c = [v for v in syms.values()]
 
         predicate['constraints'] = translated_c
 

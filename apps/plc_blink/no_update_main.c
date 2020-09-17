@@ -467,7 +467,7 @@ struct k_timer scan_timer;
 
 void main(void) {
     printk("Starting Program...\n\n");
-	init_plc();
+    init_plc();
     printk("\n\n\nINIT_PLC FINISHED!!!!!\n\n\n");
     k_timer_init(&scan_timer, plc_callback, NULL);
 
@@ -481,5 +481,5 @@ void main(void) {
     // u8_t single_pin_data = tfm_gpio_read(2);
     // printk("single PIN 2 value: %x\n", single_pin_data);
 
-	k_timer_start(&scan_timer, K_MSEC(PLC_SCAN_TIME), K_MSEC(PLC_SCAN_TIME));
+    k_timer_start(&scan_timer, K_MSEC(PLC_SCAN_TIME), K_MSEC(PLC_SCAN_TIME));
 }
