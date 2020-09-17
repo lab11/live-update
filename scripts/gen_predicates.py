@@ -57,6 +57,7 @@ INIT_CALLS = [
     'gpio_nrfx_init_callback',
     'gpio_add_callback',
     'k_timer_init',
+    'uarte_nrfx_irq_callback_set',
 ]
 
 def gen_hw_init(G, path):
@@ -228,7 +229,7 @@ def gen_predicate(G, path, split_phase_ops):
                                         break
                         
                         if not is_global:
-                            print('Warning, constraint symbol ({}) is not global'.format(sym))
+                            #print('Warning, constraint symbol ({}) is not global'.format(sym))
                             #pprint.pprint(c)
                             #pprint.pprint(e)
                             #exit(1)
@@ -257,8 +258,8 @@ def gen_predicate(G, path, split_phase_ops):
                 elif sym.startswith('((derived_') or sym.startswith('conj_$'): # XXX problems
                     continue 
                 else:
-                    print('Warning: constraint symbol {} could not be parsed'.format(sym))
-                    pprint.pprint(c)
+                    #print('Warning: constraint symbol {} could not be parsed'.format(sym))
+                    #pprint.pprint(c)
                     #pprint.pprint(e)
                     #exit(1)
                     continue

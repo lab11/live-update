@@ -376,47 +376,6 @@ static gpio_port_pins_t output_mask = 0x00000000;
 
 struct device *gpio_dev;
 
-void enable_pin_inputs(uint8_t* pins, uint8_t num_pins) {
-    if (!num_pins) { return; }
-    printk("Enabling Pin Inputs...\n");
-    gpio_dev = device_get_binding("GPIO_0");
-
-    for (uint8_t i = 0; i < num_pins; i++) {
-        printk("Enabling PIN%d...\n", pins[i]);
-        int ret = gpio_pin_configure(gpio_dev, pins[i], (GPIO_INPUT));
-        if (ret) {
-            printk("Could not enable PIN%d with error code %d\n", pins[i], ret);
-        }
-    }
-}
-
-void enable_pin_outputs(uint8_t* pins, uint8_t num_pins) {
-    printk("Enabling Pin Outputs...\n");
-    gpio_dev = device_get_binding("GPIO_0");
-    // uint32_t out = 0;
-    for (uint8_t i = 0; i < num_pins; i++) {
-        printk("Enabling PIN%d...\n", pins[i]);
-        int ret = gpio_pin_configure(gpio_dev, pins[i], GPIO_OUTPUT_INACTIVE);
-        if (ret) {
-            printk("gpio_pin_configure failed with error code: %d\n", ret);
-            return;
-        }
-        output_mask |= (1 << pins[i]);
-    }
-    // For Musca
-    // tfm_gpio_enable_outputs(out);
-
-    return;
-}
-
-void enable_pin_output(uint8_t pin) {
-    if (gpio_pin_configure(gpio_dev, pin, GPIO_OUTPUT_INACTIVE) != 0) {
-        printk("Error! Could not enable PIN %d!\n", pin);
-    }
-    output_mask |= (1 << pin);
-    return;
-}
-
 void read_in_table(void) {
     if (gpio_port_get_raw(gpio_dev, &gpio_in_table) != 0) {
         printk("Error! read_in_table() failed!\n");
@@ -566,7 +525,7 @@ struct k_timer scan_timer;
 
 void main(void) {
     printk("Starting Program...\n\n");
-	init_plc();
+    init_plc();
     printk("\n\n\nINIT_PLC FINISHED!!!!!\n\n\n");
     k_timer_init(&scan_timer, plc_callback, NULL);
 
@@ -580,5 +539,5 @@ void main(void) {
     // u8_t single_pin_data = tfm_gpio_read(2);
     // printk("single PIN 2 value: %x\n", single_pin_data);
 
-	k_timer_start(&scan_timer, K_MSEC(PLC_SCAN_TIME), K_MSEC(PLC_SCAN_TIME));
+    k_timer_start(&scan_timer, K_MSEC(PLC_SCAN_TIME), K_MSEC(PLC_SCAN_TIME));
 }

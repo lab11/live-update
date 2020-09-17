@@ -168,6 +168,9 @@ def serialize_predicates(update_data, use_predicate=None):
     predicate_list = update_data['predicate_transfer']
     if use_predicate:
         predicate_list = [predicate_list[use_predicate]]
+    else:
+        print('Warning, only sending top 20 predicates')
+        predicate_list = predicate_list[0:20]
 
     for p in predicate_list:
         predicate, init_transfers, hw_transfer_calls = p
@@ -198,8 +201,8 @@ def serialize_predicates(update_data, use_predicate=None):
 
             for r in c['range']:
                 start, end = r[0], r[1]
-                print(predicate)
-                print(start, end)
+                #print(predicate)
+                #print(start, end)
                 if start < 0:
                     continue
                 constraint_bytes += struct.pack('II', start, end)
@@ -396,6 +399,7 @@ def serialize_header(header):
 def resolve_symbol_addresses(update_data, flashed_symbols, update_symbols):
     
     for hw_call in update_data['hw_init']:
+        #print('>>HWCALL', hw_call)
         for i, a in enumerate(hw_call):
             if type(a) == str:
                 a = a[1:] if a[0] == '&' else a

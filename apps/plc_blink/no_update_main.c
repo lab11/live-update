@@ -6,7 +6,7 @@
 
 #define PLC_SCAN_TIME 10
 
-typedef signed short SWORD;     // from platform
+typedef unsigned short SWORD;     // from platform
 typedef unsigned char BOOL;     // from platform
 
 /* ldmicro */
@@ -326,47 +326,6 @@ static gpio_port_pins_t output_mask = 0x00000000;
 
 struct device *gpio_dev;
 
-void enable_pin_inputs(uint8_t* pins, uint8_t num_pins) {
-    if (!num_pins) { return; }
-    printk("Enabling Pin Inputs...\n");
-    gpio_dev = device_get_binding("GPIO_0");
-
-    for (uint8_t i = 0; i < num_pins; i++) {
-        printk("Enabling PIN%d...\n", pins[i]);
-        int ret = gpio_pin_configure(gpio_dev, pins[i], (GPIO_INPUT));
-        if (ret) {
-            printk("Could not enable PIN%d with error code %d\n", pins[i], ret);
-        }
-    }
-}
-
-void enable_pin_outputs(uint8_t* pins, uint8_t num_pins) {
-    printk("Enabling Pin Outputs...\n");
-    gpio_dev = device_get_binding("GPIO_0");
-    // uint32_t out = 0;
-    for (uint8_t i = 0; i < num_pins; i++) {
-        printk("Enabling PIN%d...\n", pins[i]);
-        int ret = gpio_pin_configure(gpio_dev, pins[i], GPIO_OUTPUT_INACTIVE);
-        if (ret) {
-            printk("gpio_pin_configure failed with error code: %d\n", ret);
-            return;
-        }
-        output_mask |= (1 << pins[i]);
-    }
-    // For Musca
-    // tfm_gpio_enable_outputs(out);
-
-    return;
-}
-
-void enable_pin_output(uint8_t pin) {
-    if (gpio_pin_configure(gpio_dev, pin, GPIO_OUTPUT_INACTIVE) != 0) {
-        printk("Error! Could not enable PIN %d!\n", pin);
-    }
-    output_mask |= (1 << pin);
-    return;
-}
-
 void read_in_table(void) {
     if (gpio_port_get_raw(gpio_dev, &gpio_in_table) != 0) {
         printk("Error! read_in_table() failed!\n");
@@ -494,11 +453,11 @@ void Write_U_b_Yled(BOOL v) {
 }
 
 BOOL Read_U_b_Ytx(void) {
-    return (BOOL) read_LED(10);
+    return (BOOL) read_pin(10);
 }
 
 void Write_U_b_Ytx(BOOL v) {
-    write_LED(10, v);
+    write_pin(10, v);
 }
 
 /********************** End Ladder Files ***********************/

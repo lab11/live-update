@@ -110,6 +110,7 @@ INIT_CALLS = [
     'gpio_nrfx_init_callback',
     'gpio_add_callback',
     'k_timer_init',
+    'uarte_nrfx_irq_callback_set',
 ]
 
 def gen_hw_init(G, path):
@@ -373,6 +374,10 @@ def generate_hw_init_calls(original_predicates_and_init, update_predicates_and_i
             port, callback = args
             init_calls.append(('gpio_nrfx_manage_callback', port, callback))
 
+        elif ni['function'] == 'uarte_nrfx_irq_callback_set':
+            dev, callback, _ = args
+            init_calls.append(('uarte_nrfx_irq_callback_set', dev, callback, 0))
+
         else:
             print('unrecognized hw init function', ni['function'], 'exiting...')
             exit(1)
@@ -438,6 +443,9 @@ def match_predicates_and_custom_transfer(original_predicates_and_init, update_pr
 
     predicate_triples = []
 
+    #print('num original predicates', len(original_predicates_and_init['predicates']))
+    #print('num update predicates', len(update_predicates_and_init['predicates']))
+
     # Find a compatible updated predicate for the original predicate. We must be able to transform the original predicate
     # into the updated one by:
     #   - keeping the event name the same
@@ -486,7 +494,16 @@ def match_predicates_and_custom_transfer(original_predicates_and_init, update_pr
                     print('Error: expected custom hardware transfer not provided (None)')
                     exit(1)
                 predicate_triples.append((op, custom_state, custom_hw))
+            else:
+                '''
+                print('ORIGINAL')
+                pprint.pprint(op)
+                print('UPDATED')
+                pprint.pprint(up)
+                '''
+                #input()
 
+    #print('num matching predicates', len(predicate_triples))
     return predicate_triples
 
 
@@ -550,8 +567,7 @@ if __name__ == '__main__':
     state_init_items = \
             generate_state_init_items(original_predicates_and_init, update_predicates_and_init, hw_init_calls)
 
-    out = {
-    }
+    predicate_triples = [json.loads(y) for y in set(json.dumps(x) for x in predicate_triples)]
     
     with open(args.out, 'w') as f:
         json.dump({ 
