@@ -1,8 +1,5 @@
 ## Live Updates
 
-Note: repo under construction
-
-
 #### nRF9160 Setup Instructions
 
 (in Vagrant)
